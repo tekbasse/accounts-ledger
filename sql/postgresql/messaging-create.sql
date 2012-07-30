@@ -1,0 +1,201 @@
+-- following to be moved/integrated with private-messaging,
+--   acs-mail-lite or something that logs messages.. need to verify how..
+ 
+-- 
+-- -- keeps track of automatic emails (based on templates) that are sent out
+-- create table ec_automatic_email_log (
+--         user_identification_id  integer not null references ec_user_identification,
+--         email_template_id       integer not null references ec_email_templates,
+--         order_id                integer references ec_orders,
+--         shipment_id             integer references ec_shipments,
+--         gift_certificate_id     integer references ec_gift_certificates,
+--         date_sent               timestamp
+-- );
+-- 
+-- create index ec_auto_email_by_usr_id_idx on ec_automatic_email_log (user_identification_id);
+-- create index ec_auto_email_by_temp_idx on ec_automatic_email_log (email_template_id);
+-- create index ec_auto_email_by_order_idx on ec_automatic_email_log (order_id);
+-- create index ec_auto_email_by_shipment_idx on ec_automatic_email_log (shipment_id);
+-- create index ec_auto_email_by_gc_idx on ec_automatic_email_log (gift_certificate_id);
+-- 
+-- 
+-- 
+-- 
+-- -- The following templates are predefined ecommerce-defaults.
+-- -- The templates are
+-- -- used in procedures which send out the email, so the template_ids
+-- -- shouldn't be changed, although the text can be edited at
+-- -- [ec_url_concat [ec_url] /admin]/email-templates/
+
+-- -- email_template_id    used for
+-- -- -----------------    ---------
+-- --      1               new order
+-- --      2               order shipped
+-- --      3               delayed credit denied
+-- --      4               new gift certificate order
+-- --      5               gift certificate recipient
+-- --      6               gift certificate order failure
+-- 
+-- -- set scan off
+-- 
+-- insert into ec_email_templates
+-- (email_template_id, title, subject, message, variables, when_sent, issue_type_list, last_modified, last_modifying_user, modified_ip_address)
+-- values
+-- (1, 'New Order', 'Your Order',
+-- 'Thank you for your order.  We received your order' || '\n'
+-- || 'on confirmed_date_here.' || '\n' || '\n'
+-- || 'The following is your order information:' || '\n' || '\n'
+-- || 'item_summary_here' || '\n' || '\n'
+-- || 'Shipping Address:' || '\n'
+-- || 'address_here' || '\n' || '\n'
+-- || 'price_summary_here' || '\n' || '\n'
+-- || 'Thank you.' || '\n' || '\n' 
+-- || 'Sincerely,' || '\n' 
+-- || 'customer_service_signature_here',
+-- 'confirmed_date_here, address_here, item_summary_here, price_here, shipping_here, tax_here, total_here, customer_service_signature_here',
+-- 'This email will automatically be sent out after an order has been authorized.',
+-- '{new order}',
+-- now(),
+--                  (select grantee_id
+--                     from acs_permissions
+--                    where object_id = acs__magic_object_id('security_context_root')
+--                      and privilege = 'admin'
+--                      limit 1), 'none');
+-- 
+-- insert into ec_email_templates
+-- (email_template_id, title, subject, message, variables, when_sent, issue_type_list, last_modified, last_modifying_user, modified_ip_address)
+-- values
+-- (2, 'Order Shipped', 'Your Order Has Shipped',
+-- 'We shipped the following items on shipped_date_here:' || '\n' || '\n' 
+-- || 'item_summary_here' || '\n' || '\n' 
+-- || 'Your items were shipped to:' || '\n' || '\n' 
+-- || 'address_here' || '\n' || '\n' 
+-- || 'sentence_about_whether_this_completes_the_order_here' || '\n' || '\n' 
+-- || 'You can track your package by accessing' || '\n' 
+-- || '"Your Account" at system_url_here' || '\n' || '\n' 
+-- || 'Sincerely,' || '\n' 
+-- || 'customer_service_signature_here',
+-- 'shipped_date_here, item_summary_here, address_here, sentence_about_whether_this_completes_the_order_here, system_url_here, customer_service_signature_here',
+-- 'This email will automatically be sent out after an order or partial order has shipped.',
+-- '{order shipped}',
+-- now(),
+-- (select grantee_id
+--                     from acs_permissions
+--                    where object_id = acs__magic_object_id('security_context_root')
+--                      and privilege = 'admin'
+--                      limit 1),
+-- 'none');
+-- 
+-- 
+-- insert into ec_email_templates
+-- (email_template_id, title, subject, message, variables, when_sent, issue_type_list, last_modified, last_modifying_user, modified_ip_address)
+-- values
+-- (3, 'Delayed Credit Denied', 'Your Order',
+-- 'At this time we are not able to receive' || '\n' 
+-- || 'authorization to charge your account.  We' || '\n' 
+-- || 'have saved your order so that you can come' || '\n' 
+-- || 'back to system_url_here' || '\n' 
+-- || 'and resubmit it.' || '\n' || '\n' 
+-- || 'Please go to your shopping cart and' || '\n' 
+-- || 'click on "Retrieve Saved Cart".' || '\n' || '\n' 
+-- || 'Thank you.' || '\n' || '\n' 
+-- || 'Sincerely,' || '\n' 
+-- || 'customer_service_signature_here',
+-- 'system_url_here, customer_service_signature_here',
+-- 'This email will automatically be sent out after a credit card authorization fails if it didn''t fail at the time the user initially submitted their order.',
+-- 'billing',
+-- now(),
+-- (select grantee_id
+--                     from acs_permissions
+--                    where object_id = acs__magic_object_id('security_context_root')
+--                      and privilege = 'admin'
+--                      limit 1),
+-- 'none');
+-- 
+-- 
+-- insert into ec_email_templates
+-- (email_template_id, title, subject, message, variables, when_sent, issue_type_list, last_modified, last_modifying_user, modified_ip_address)
+-- values
+-- (4, 'New Gift Certificate Order', 'Your Order',
+-- 'Thank you for your gift certificate order at system_name_here!' || '\n' || '\n' 
+-- || 'The gift certificate will be sent to:' || '\n' || '\n' 
+-- || 'recipient_email_here' || '\n' || '\n' 
+-- || 'Your order details:' || '\n' || '\n' 
+-- || 'Gift Certificate   certificate_amount_here' || '\n' 
+-- || 'Shipping           0.00' || '\n' 
+-- || 'Tax                0.00' || '\n' 
+-- || '------------       ------------' || '\n' 
+-- || 'TOTAL              certificate_amount_here' || '\n' || '\n' 
+-- || 'Sincerely,' || '\n' 
+-- || 'customer_service_signature_here',
+-- 'system_name_here, recipient_email_here, certificate_amount_here, customer_service_signature_here',
+-- 'This email will be sent after a customer orders a gift certificate.',
+-- '{gift certificate}',
+-- now(),
+-- (select grantee_id
+--                     from acs_permissions
+--                    where object_id = acs__magic_object_id('security_context_root')
+--                      and privilege = 'admin'
+--                      limit 1),
+-- 'none');
+-- 
+-- 
+-- insert into ec_email_templates
+-- (email_template_id, title, subject, message, variables, when_sent, issue_type_list, last_modified, last_modifying_user, modified_ip_address)
+-- values
+-- (5, 'Gift Certificate Recipient', 'Gift Certificate',
+-- 'It''s our pleasure to inform you that someone' || '\n' 
+-- || 'has purchased a gift certificate for you at' || '\n' 
+-- || 'system_name_here!' || '\n' || '\n' 
+-- || 'Use the claim check below to retrieve your gift' || '\n' 
+-- || 'certificate at system_url_here' || '\n' || '\n' 
+-- || 'amount_and_message_summary_here' || '\n' || '\n' 
+-- || 'Claim Check: claim_check_here' || '\n' || '\n' 
+-- || 'To redeem it, just go to' || '\n' 
+-- || 'system_url_here' || '\n' 
+-- || 'choose the items you wish to purchase,' || '\n' 
+-- || 'and proceed to Checkout.  You''ll then have' || '\n' 
+-- || 'the opportunity to type in your claim code' || '\n' 
+-- || 'and redeem your certificate!  Any remaining' || '\n' 
+-- || 'balance must be paid for by credit card.' || '\n' || '\n' 
+-- || 'Sincerely,' || '\n' 
+-- || 'customer_service_signature_here',
+-- 'system_name_here, system_url_here, amount_and_message_summary_here, claim_check_here, customer_service_signature_here',
+-- 'This is sent to recipients of gift certificates.',
+-- '{gift certificate}',
+-- now(),
+-- (select grantee_id
+--                     from acs_permissions
+--                    where object_id = acs__magic_object_id('security_context_root')
+--                      and privilege = 'admin'
+--                      limit 1),
+-- 'none');
+-- 
+-- insert into ec_email_templates
+-- (email_template_id, title, subject, message, variables, when_sent, issue_type_list, last_modified, last_modifying_user,  modified_ip_address)
+-- values
+-- (6, 'Gift Certificate Order Failure', 'Your Gift Certificate Order',
+-- 'We are sorry to report that the authorization' || '\n' 
+-- || 'for the gift certificate order you placed' || '\n' 
+-- || 'at system_name_here could not be made.' || '\n' 
+-- || 'Your order has been canceled.  Please' || '\n' 
+-- || 'come back and try your order again at:' || '\n' || '\n' 
+-- || 'system_url_here' || '\n' 
+-- || 'For your records, here is the order' || '\n' 
+-- || 'that you attempted to place:' || '\n' || '\n' 
+-- || 'Would have been sent to: recipient_email_here' || '\n' 
+-- || 'amount_and_message_summary_here' || '\n' 
+-- || 'We apologize for the inconvenience.' || '\n' 
+-- || 'Sincerely,' || '\n' 
+-- || 'customer_service_signature_here',
+-- 'system_name_here, system_url_here, recipient_email_here, amount_and_message_summary_here, customer_service_signature_here',
+-- 'This is sent to customers who tried to purchase a gift certificate but got no immediate response from the credit card gateway and we found out later the authorization failed.',
+-- '{gift certificate}', now(),
+--                  (select grantee_id
+--                     from acs_permissions
+--                    where object_id = acs__magic_object_id('security_context_root')
+--                      and privilege = 'admin'
+--                      limit 1),
+-- 'none');
+-- 
+-- 
