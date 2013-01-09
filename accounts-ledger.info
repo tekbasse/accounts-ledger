@@ -15,7 +15,7 @@
         <description format="text/plain">General Ledger provides services to other packages and provides a basic UI for directly managing the ledger and accounts.</description>
         <maturity>0</maturity>
 
-        <provides url="accounts-ledger" version="0.1d"/>
+        <provides url="accounts-ledger" version="0.2d"/>
         <requires url="inventory-control" version="0.1d"/>
         <requires url="contacts" version="0.1d"/>
         <requires url="acs-kernel" version="5.0"/>
@@ -27,6 +27,9 @@
         </callbacks>
         <parameters>
         <!-- No version parameters -->
+            <parameter datatype="string"  min_n_values="1"  max_n_values="1"  name="WeightUnit"  default="Kg" description="the weight unit used for measuring" section_name="units"/>
+            <parameter datatype="string"  min_n_values="1"  max_n_values="1"  name="CurrencyUnit"  default="USD" description="the currency abbreviation, sometimes the symbol represented as text" section_name="units"/>
+            <parameter datatype="string"  min_n_values="1"  max_n_values="1"  name="BusinessNumber"  default="" description="The business reference for tax purposes etc." section_name="entity"/>
         </parameters>
 
     </version>
