@@ -5,7 +5,11 @@
 -- @cvs-id
 
  CREATE TABLE qal_contact (
-        id                 integer default nextval('qal_id'),
+        id                 integer unique not null,
+        package_id         integer not null,
+        -- same as company_summary.parent_company=integer
+        parent_id          integer,
+        label              varchar(40),
         street_address_id  integer,
         mailing_address_id integer,
         billing_address_id integer,
@@ -28,7 +32,8 @@
         contact_id        integer,
         address_type      varchar(20) not null default 'street',   
         -- e.g., billing, shipping
-        name              varchar(64),
+        first_name        varchar(64),
+        last_name         varchar(64),
         address1          varchar(40),
         address2          varchar(40),
         city              varchar(40),
@@ -104,3 +109,9 @@
   vendor_id integer,
   chart_id  integer
  );
+
+-- mainly gets used in packages that depend on accounts-ledger
+CREATE TABLE qal_contact_group (
+  contact_id integer,
+  user_id integer
+);
