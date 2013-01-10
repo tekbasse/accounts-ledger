@@ -4,6 +4,7 @@
 -- @license GNU GENERAL PUBLIC LICENSE, Version 2, June 1991
 -- @cvs-id
 
+ --part of company_dates, company_details
  CREATE TABLE qal_contact (
         id                 integer unique not null,
         package_id         integer not null,
@@ -52,14 +53,18 @@
         bcc               text
  );
 
+ --part of company_dates, company_details
  CREATE TABLE qal_customer (
         id              integer default nextval('qal_id'),
         contact_id      integer,
         discount        numeric,
         tax_included    varchar(1) default 'f',
         credit_limit    numeric default 0,
+        -- terms aka company_licenses.lic_type
         terms           numeric default '0',
         terms_unit      varchar(20) default 'days',
+	-- annual value at rate aka company_licenses.lic_value
+        annual_value    numeric,
         -- terms_unit in tcl interval (days, weeks, month etc)
         customer_number varchar(32),
         pricegroup_id   integer
