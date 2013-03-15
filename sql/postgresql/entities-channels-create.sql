@@ -5,6 +5,9 @@
 -- @cvs-id
 
  --part of company_dates, company_details
+-- This is going to be generalized to enitities and their channels
+-- to fit into the OpenACS parties, groups and permissions paradigm
+
  CREATE TABLE qal_contact (
         id                 integer unique not null,
         package_id         integer not null,
