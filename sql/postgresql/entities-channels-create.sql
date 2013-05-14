@@ -5,9 +5,6 @@
 -- @cvs-id
 
  --part of company_dates, company_details
--- This is going to be generalized to enitities and their channels
--- to fit into the OpenACS parties, groups and permissions paradigm
-
  CREATE TABLE qal_contact (
         id                 integer unique not null,
         package_id         integer not null,
@@ -32,7 +29,7 @@
  );
 
  create table qal_address (
-        id                integer default nexval('qal_id'),
+        id                integer default nextval('qal_id'),
         contact_id        integer,
         address_type      varchar(20) not null default 'street',   
         -- e.g., billing, shipping
@@ -61,7 +58,7 @@
         id              integer default nextval('qal_id'),
         contact_id      integer,
         discount        numeric,
-        tax_included    varchar(1) default 'f',
+        tax_included    varchar(1) default '0',
         credit_limit    numeric default 0,
         -- terms aka company_licenses.lic_type
         terms           numeric default '0',
@@ -78,7 +75,7 @@
         id                     integer default nextval('qal_id'),
         contact_id             integer,
         terms                  integer default 0,
-        tax_included           varchar(1) default 'f',
+        tax_included           varchar(1) default '0',
         vendor_number          varchar(32),
         gifi_accno             varchar(30),
         discount               numeric,

@@ -1,9 +1,10 @@
 -- accounts-ledger-create.sql
 
--- @author Dekka Corp.
+-- @author Benjamin Brink
 -- @ported from sql-ledger and combined with parts from OpenACS ecommerce package
 -- @license GNU GENERAL PUBLIC LICENSE, Version 2, June 1991
 
+-- t/f values are converted to tcl 1/0 for api consistency
 
 CREATE SEQUENCE qal_id start 10000;
 SELECT nextval ('qal_id');
@@ -55,6 +56,12 @@ CREATE TABLE qal_gl (
   department_id integer default 0
 );
 
+create index qal_gl_id_idx on qal_gl (id);
+create index qal_gl_transdate_idx on qal_gl (transdate);
+create index qal_gl_reference_idx on qal_gl (reference);
+create index qal_gl_description_idx on qal_gl (lower(description));
+create index qal_gl_employee_id_idx on qal_gl (employee_id);
+
 
 CREATE TABLE qal_chart (
   id          integer DEFAULT nextval ( 'qal_id' ),
@@ -63,9 +70,16 @@ CREATE TABLE qal_chart (
   gifi_accno  text,
   category    char(1),
   link        text,
-  accno       text NOT NULL,
-  contra      varchar(1) DEFAULT 'f'
+  accno       text NOT NULL UNIQUE,
+  contra      varchar(1) DEFAULT '0'
 );
+
+create index qal_chart_id_idx on qal_chart (id);
+create index qal_chart_accno_idx on qal_chart (accno);
+create index qal_chart_category_idx on qal_chart (category);
+create index qal_chart_link_idx on qal_chart (link);
+create index qal_chart_gifi_accno_idx on qal_chart (gifi_accno);
+
 
 CREATE TABLE qal_defaults (
   inventory_accno_id integer,
@@ -77,7 +91,7 @@ CREATE TABLE qal_defaults (
   sonumber           varchar(80),
   yearend            varchar(5),
   closedto           date,
-  revtrans           varchar(1) DEFAULT 'f',
+  revtrans           varchar(1) DEFAULT '0',
   ponumber           varchar(80),
   sqnumber           varchar(80),
   rfqnumber          varchar(80),
@@ -95,12 +109,17 @@ CREATE TABLE qal_acc_trans (
   chart_id        integer,
   amount          numeric,
   transdate       date DEFAULT current_date,
-  source          text,
-  cleared         varchar(1) DEFAULT 'f',
-  fx_transaction  varchar(1) DEFAULT 'f',
+  source          varchar(300),
+  cleared         varchar(1) DEFAULT '0',
+  fx_transaction  varchar(1) DEFAULT '0',
   project_id      integer,
   memo            text
 );
+
+create index qal_acc_trans_trans_id_idx on qal_acc_trans (trans_id);
+create index qal_acc_trans_chart_id_idx on qal_acc_trans (chart_id);
+create index qal_acc_trans_transdate_idx on qal_acc_trans (transdate);
+create index qal_acc_trans_source_idx on qal_acc_trans (lower(source));
 
  
 CREATE TABLE qal_tax (
@@ -117,16 +136,19 @@ CREATE TABLE qal_exchangerate (
   sell       numeric
 );
 
-
+create index qal_exchangerate_ct_idx on qal_exchangerate (currency);
 
 CREATE TABLE qal_status (
   trans_id  integer,
   formname  text,
-  printed   varchar(1) default 'f',
-  emailed   varchar(1) default 'f',
+  printed   varchar(1) default '0',
+  emailed   varchar(1) default '0',
   spoolfile text,
   chart_id  integer
 );
+
+create index qal_status_trans_id_idx on qal_status (trans_id);
+
 
 CREATE TABLE qal_department (
   id          integer default nextval('qal_id'),
@@ -134,14 +156,16 @@ CREATE TABLE qal_department (
   role        varchar(1) default 'P'
 );
 
+create index qal_department_id_idx on qal_department (id);
+
  -- department transaction table
 CREATE TABLE qal_dept_trans_map (
   trans_id      integer,
   department_id integer
 );
 
- -- business table
-CREATE TABLE qal_business (
+ -- business table ; really about discounts. renamed.
+CREATE TABLE qal_discounts (
   id          integer default nextval('qal_id'),
   description text,
   discount    numeric
@@ -154,10 +178,14 @@ CREATE TABLE qal_yearend (
 );
 
 
+-- language? currency?
 CREATE TABLE qal_language (
-  code        varchar(6),
+  code        varchar(6) UNIQUE,
   description text
 );
+
+create index qal_language_code_idx on qal_language (code);
+
 
 CREATE TABLE qal_translation (
   trans_id      integer,
@@ -165,36 +193,7 @@ CREATE TABLE qal_translation (
   description   text
 );
 
+create index qal_translation_trans_id_idx on qal_translation (trans_id);
 
-create index qal_acc_trans_trans_id_key on qal_acc_trans (trans_id);
-create index qal_acc_trans_chart_id_key on qal_acc_trans (chart_id);
-create index qal_acc_trans_transdate_key on qal_acc_trans (transdate);
-create index qal_acc_trans_source_key on qal_acc_trans (lower(source));
-
-
-create index qal_chart_id_key on qal_chart (id);
-create unique index qal_chart_accno_key on qal_chart (accno);
-create index qal_chart_category_key on qal_chart (category);
-create index qal_chart_link_key on qal_chart (link);
-create index qal_chart_gifi_accno_key on qal_chart (gifi_accno);
-
-create index qal_exchangerate_ct_key on qal_exchangerate (curr, transdate);
-
-create index qal_gl_id_key on qal_gl (id);
-create index qal_gl_transdate_key on qal_gl (transdate);
-create index qal_gl_reference_key on qal_gl (reference);
-create index qal_gl_description_key on qal_gl (lower(description));
-create index qal_gl_employee_id_key on qal_gl (employee_id);
-
-
-create index qal_status_trans_id_key on qal_status (trans_id);
-
-create index qal_department_id_key on qal_department (id);
-
-
-
-create index qal_translation_trans_id_key on qal_translation (trans_id);
-
-create unique index qal_language_code_key on qal_language (code);
 
 
