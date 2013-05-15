@@ -7,6 +7,7 @@
 
 CREATE TABLE qal_project (
   id            integer default nextval('qal_id'),
+  instance_id   integer,
   customer_id   integer,
   projectnumber varchar(200),
   description   text,

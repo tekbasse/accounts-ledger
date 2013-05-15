@@ -7,7 +7,7 @@
  --part of company_dates, company_details
  CREATE TABLE qal_contact (
         id                 integer unique not null,
-        package_id         integer not null,
+        instance_id        integer not null,
         -- same as company_summary.parent_company=integer
         parent_id          integer,
         label              varchar(40),
@@ -30,6 +30,7 @@
 
  create table qal_address (
         id                integer default nextval('qal_id'),
+        instance_id       integer,
         contact_id        integer,
         address_type      varchar(20) not null default 'street',   
         -- e.g., billing, shipping
@@ -56,6 +57,7 @@
  --part of company_dates, company_details
  CREATE TABLE qal_customer (
         id              integer default nextval('qal_id'),
+        instance_id     integer,
         contact_id      integer,
         discount        numeric,
         tax_included    varchar(1) default '0',
@@ -73,6 +75,7 @@
 
  CREATE TABLE qal_vendor (
         id                     integer default nextval('qal_id'),
+	instance_id	       integer,
         contact_id             integer,
         terms                  integer default 0,
         tax_included           varchar(1) default '0',
@@ -105,18 +108,21 @@
  );
 
  CREATE TABLE qal_customer_tax (
+ instance_id  integer,
   customer_id integer,
   chart_id    integer      
  );
 
 
  CREATE TABLE qal_vendor_tax (
+  instance_id integer,
   vendor_id integer,
   chart_id  integer
  );
 
 -- mainly gets used in packages that depend on accounts-ledger
 CREATE TABLE qal_contact_group (
+  instance_id integer,
   contact_id integer,
   user_id integer
 );

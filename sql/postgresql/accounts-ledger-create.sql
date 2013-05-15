@@ -39,6 +39,7 @@ CREATE TABLE qal_template_defaults (
 
  -- gets imported to qal_tax
 CREATE TABLE qal_template_taxes (
+    instance_id integer,
     chart_code varchar(30),
     accno      varchar(100),
     taxnumber  text,
@@ -47,6 +48,7 @@ CREATE TABLE qal_template_taxes (
 
 
 CREATE TABLE qal_gl (
+  instance_id integer,
   id            integer DEFAULT nextval ( 'qal_id' ),
   reference     text,
   description   text,
@@ -64,6 +66,7 @@ create index qal_gl_employee_id_idx on qal_gl (employee_id);
 
 
 CREATE TABLE qal_chart (
+  instance_id integer,
   id          integer DEFAULT nextval ( 'qal_id' ),
   description text,
   charttype   char(1) DEFAULT 'A',
@@ -82,6 +85,7 @@ create index qal_chart_gifi_accno_idx on qal_chart (gifi_accno);
 
 
 CREATE TABLE qal_defaults (
+  instance_id        integer,
   inventory_accno_id integer,
   income_accno_id    integer,
   expense_accno_id   integer,
@@ -105,6 +109,7 @@ CREATE TABLE qal_defaults (
 
 
 CREATE TABLE qal_acc_trans (
+  instance_id     integer,
   trans_id        integer,
   chart_id        integer,
   amount          numeric,
@@ -123,6 +128,7 @@ create index qal_acc_trans_source_idx on qal_acc_trans (lower(source));
 
  
 CREATE TABLE qal_tax (
+  instance_id integer,
   chart_id   integer,
   rate       numeric,
   tax_number text
@@ -139,6 +145,7 @@ CREATE TABLE qal_exchangerate (
 create index qal_exchangerate_ct_idx on qal_exchangerate (currency);
 
 CREATE TABLE qal_status (
+  instance_id integer,
   trans_id  integer,
   formname  text,
   printed   varchar(1) default '0',
@@ -151,6 +158,7 @@ create index qal_status_trans_id_idx on qal_status (trans_id);
 
 
 CREATE TABLE qal_department (
+  instance_id integer,
   id          integer default nextval('qal_id'),
   description text,
   role        varchar(1) default 'P'
@@ -160,12 +168,14 @@ create index qal_department_id_idx on qal_department (id);
 
  -- department transaction table
 CREATE TABLE qal_dept_trans_map (
+  instance_id   integer,
   trans_id      integer,
   department_id integer
 );
 
  -- business table ; really about discounts. renamed.
 CREATE TABLE qal_discounts (
+  instance_id integer,
   id          integer default nextval('qal_id'),
   description text,
   discount    numeric
@@ -173,12 +183,13 @@ CREATE TABLE qal_discounts (
 
 
 CREATE TABLE qal_yearend (
+  instance_id integer,
   trans_id integer,
   transdate date
 );
 
 
--- language? currency?
+-- language? currency? does this vary by instance_id?
 CREATE TABLE qal_language (
   code        varchar(6) UNIQUE,
   description text
@@ -188,6 +199,7 @@ create index qal_language_code_idx on qal_language (code);
 
 
 CREATE TABLE qal_translation (
+  instance_id   integer,
   trans_id      integer,
   language_code varchar(6),
   description   text
