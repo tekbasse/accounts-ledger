@@ -25,10 +25,17 @@ ad_library {
     # rc.pl
     # rp.pl
 
-    @ported by Torben Brosten
-    @creation-date 2005-11-13
-    @cvs-id $Id:
 
+    @creation-date 2005-11-13
+
+
+}
+
+ad_proc qal_instance_id {
+} {
+    Uses subsite_id unless parameter instanceinteger is an integer greater than 10
+} {
+    
 }
 
 ad_proc qal_post_transaction {
