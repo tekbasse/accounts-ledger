@@ -12,12 +12,14 @@ ad_proc qal_pretty_bytes_iec {
 } {
     Returns a pretty number with IEC units in n digits, where first 3 are assumed to be integer.
 } {
+
     # http://en.wikipedia.org/wiki/Orders_of_magnitude_%28data%29
     set abbrev_list [list B KiB MiB GiB TiB PiB EiB ZiB YiB]
     # convert to units of one
     set unit_index [lsearch -exact $abbrev_list $unit]
+    set number [expr { wide( $number ) } ]
     if { $unit_index > 0 } {
-        set number [expr { wide( $number ) * pow(1000,$unit_index) } ]
+        set number [expr { $number * pow(1000,$unit_index) } ]
         set unit "B"
     }
 #    set units_list \[list bytes kibibyte mebibyte gibibyte tebibyte pebibyte exbibyte zebibyte yobibyte\]
@@ -30,6 +32,7 @@ ad_proc qal_pretty_bytes_iec {
         }
     }
     set base_bytes [expr { $number / ( $base_nbr * 1. ) } ]
+    ns_log Notice "qal_pretty_bytes_iec(35): number $number base_nbr $base_nbr base_exp $base_exp base_bytes $base_bytes"
     if { $significand > 3 } {
         set extra_significand [expr { $significand - 3 } ]
         set bytes [format "%3.${extra_significand}f" $base_bytes]
@@ -50,8 +53,9 @@ ad_proc qal_pretty_bytes_dec {
     set abbrev_list [list B kB MB GB TB PB EB ZB YB]
     # convert to units of one
     set unit_index [lsearch -exact $abbrev_list $unit]
+    set number [expr { wide( $number ) } ]
     if { $unit_index > 0 } {
-        set number [expr { wide( $number ) * pow(1000,$unit_index) } ]
+        set number [expr { $number * pow(1000,$unit_index) } ]
         set unit "B"
     }
 #    set units_list \[list bytes kilobyte megabyte gigabyte terabyte petabyte exabyte zettabyte yottabyte\]
@@ -64,6 +68,7 @@ ad_proc qal_pretty_bytes_dec {
         }
     }
     set base_bytes [expr { $number / ( $base_nbr * 1. ) } ]
+    ns_log Notice "qal_pretty_bytes_dec(71): number $number base_nbr $base_nbr base_exp $base_exp base_bytes $base_bytes"
     if { $significand > 3 } {
         set extra_significand [expr { $significand - 3 } ]
         set bytes [format "%3.${extra_significand}f" $base_bytes]
@@ -81,9 +86,8 @@ ad_proc qal_pretty_metric {
     {ignore_units ""}
 } {
     Returns a pretty, compact Metric number with units in n digits.
-} {
-
-       
+} {    
+    set number [expr { wide( $number ) } ]
     set abbrev_list [list y z a f p n "&mu;" m c d "" da h k M G T P E Z Y]
     set ab_pow_list [list -24 -21 -18 -15 -12 -9 -6 -3 -2 -1 0 1 2 3 6 9 12 15 18 21 24]
     # sometimes &mu; is replaced with mcg..
