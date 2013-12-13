@@ -23,16 +23,17 @@ ad_proc qal_pretty_bytes_iec {
         set unit "B"
     }
 #    set units_list \[list bytes kibibyte mebibyte gibibyte tebibyte pebibyte exbibyte zebibyte yobibyte\]
+    set test_base_nbr 1
     set base_nbr 1
-    set base_exp 0
     foreach abbrev $abbrev_list {
-        if { $number > $base_nbr } {
-            set base_nbr [expr { $base_nbr * 1024 } ]
+        if { $number > $test_base_nbr } {
+            set base_nbr $test_base_nbr
             set unit $abbrev
-        }
+            set test_base_nbr [expr { $test_base_nbr * 1024 } ] 
+        } 
     }
     set base_bytes [expr { $number / ( $base_nbr * 1. ) } ]
-    ns_log Notice "qal_pretty_bytes_iec(35): number $number base_nbr $base_nbr base_exp $base_exp base_bytes $base_bytes"
+    ns_log Notice "qal_pretty_bytes_iec(35): number $number base_nbr $base_nbr base_bytes $base_bytes"
     if { $significand > 3 } {
         set extra_significand [expr { $significand - 3 } ]
         set bytes [format "%3.${extra_significand}f" $base_bytes]
@@ -59,16 +60,17 @@ ad_proc qal_pretty_bytes_dec {
         set unit "B"
     }
 #    set units_list \[list bytes kilobyte megabyte gigabyte terabyte petabyte exabyte zettabyte yottabyte\]
+    set test_base_nbr 1
     set base_nbr 1
-    set base_exp 0
     foreach abbrev $abbrev_list {
-        if { $number > $base_nbr } {
-            set base_nbr [expr { $base_nbr * 1000 } ]
+        if { $number > $test_base_nbr } {
+            set base_nbr $test_base_nbr
             set unit $abbrev
-        }
+            set test_base_nbr [expr { $test_base_nbr * 1000 } ] 
+        } 
     }
     set base_bytes [expr { $number / ( $base_nbr * 1. ) } ]
-    ns_log Notice "qal_pretty_bytes_dec(71): number $number base_nbr $base_nbr base_exp $base_exp base_bytes $base_bytes"
+    ns_log Notice "qal_pretty_bytes_dec(71): number $number base_nbr $base_nbr base_bytes $base_bytes"
     if { $significand > 3 } {
         set extra_significand [expr { $significand - 3 } ]
         set bytes [format "%3.${extra_significand}f" $base_bytes]
@@ -109,13 +111,14 @@ ad_proc qal_pretty_metric {
         set unit ""
     }
     #    set units_list \[list pico nano micro milli centi deci "" deca hecto kilo mega giga tera \]
+    set test_base_nbr 1
     set base_nbr 1
-    set base_exp 0
     foreach abbrev $abbrev_list {
-        if { $number > $base_nbr } {
-            set base_nbr [expr { $base_nbr * 1000 } ]
+        if { $number > $test_base_nbr } {
+            set base_nbr $test_base_nbr
             set unit $abbrev
-        }
+            set test_base_nbr [expr { $test_base_nbr * 1000 } ] 
+        } 
     }
     set base_metric [expr { $number / ( $base_nbr * 1. ) } ]
     if { $significand > 3 } {
