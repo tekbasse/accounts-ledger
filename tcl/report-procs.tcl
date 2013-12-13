@@ -6,11 +6,11 @@ ad_library {
 }
 
 ad_proc qal_pretty_bytes_iec {
-    Returns a pretty number with IEC units in n digits, where first 3 are assumed to be integer.
-} {
     number
     {unit "B"}
     {significand "3"}
+} {
+    Returns a pretty number with IEC units in n digits, where first 3 are assumed to be integer.
 } {
     # http://en.wikipedia.org/wiki/Orders_of_magnitude_%28data%29
     set abbrev_list [list B KiB MiB GiB TiB PiB EiB ZiB YiB]
@@ -24,12 +24,12 @@ ad_proc qal_pretty_bytes_iec {
     set base_nbr 1
     set base_exp 0
     foreach abbrev $abbrev_list {
-        if { $number > $base } {
-            set base [expr { $base * 1024 } ]
+        if { $number > $base_nbr } {
+            set base_nbr [expr { $base_nbr * 1024 } ]
             set unit $abbrev
         }
     }
-    set base_bytes [expr { $number / ( $base * 1. ) } ]
+    set base_bytes [expr { $number / ( $base_nbr * 1. ) } ]
     if { $significand > 3 } {
         set extra_significand [expr { $significand - 3 } ]
         set bytes [format "%3.${extra_significand}f" $base_bytes]
@@ -41,11 +41,11 @@ ad_proc qal_pretty_bytes_iec {
 }
  
 ad_proc qal_pretty_bytes_dec {
-    Returns a pretty Metric number with byte units in n digits.
-} {
     number
     {unit "B"}
     {significand "3"}
+} {
+    Returns a pretty Metric number with byte units in n digits.
 } {
     set abbrev_list [list B kB MB GB TB PB EB ZB YB]
     # convert to units of one
@@ -58,12 +58,12 @@ ad_proc qal_pretty_bytes_dec {
     set base_nbr 1
     set base_exp 0
     foreach abbrev $abbrev_list {
-        if { $number > $base } {
-            set base [expr { $base * 1000 } ]
+        if { $number > $base_nbr } {
+            set base_nbr [expr { $base_nbr * 1000 } ]
             set unit $abbrev
         }
     }
-    set base_bytes [expr { $number / ( $base * 1. ) } ]
+    set base_bytes [expr { $number / ( $base_nbr * 1. ) } ]
     if { $significand > 3 } {
         set extra_significand [expr { $significand - 3 } ]
         set bytes [format "%3.${extra_significand}f" $base_bytes]
@@ -75,12 +75,12 @@ ad_proc qal_pretty_bytes_dec {
 }
 
 ad_proc qal_pretty_metric {
-    Returns a pretty, compact Metric number with units in n digits.
-} {
     number
     {unit ""}
     {significand "3"}
     {ignore_units ""}
+} {
+    Returns a pretty, compact Metric number with units in n digits.
 } {
 
        
@@ -108,12 +108,12 @@ ad_proc qal_pretty_metric {
     set base_nbr 1
     set base_exp 0
     foreach abbrev $abbrev_list {
-        if { $number > $base } {
-            set base [expr { $base * 1000 } ]
+        if { $number > $base_nbr } {
+            set base_nbr [expr { $base_nbr * 1000 } ]
             set unit $abbrev
         }
     }
-    set base_metric [expr { $number / ( $base * 1. ) } ]
+    set base_metric [expr { $number / ( $base_nbr * 1. ) } ]
     if { $significand > 3 } {
         set extra_significand [expr { $significand - 3 } ]
         set metric [format "%3.${extra_significand}f" $base_metric]
