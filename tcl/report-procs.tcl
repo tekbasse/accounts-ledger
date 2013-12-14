@@ -33,7 +33,7 @@ ad_proc qal_pretty_bytes_iec {
         } 
     }
     set base_bytes [expr { $number / ( $base_nbr * 1. ) } ]
-    ns_log Notice "qal_pretty_bytes_iec(35): number $number base_nbr $base_nbr base_bytes $base_bytes"
+#    ns_log Notice "qal_pretty_bytes_iec(35): number $number base_nbr $base_nbr base_bytes $base_bytes"
     if { $significand > 3 } {
         set extra_significand [expr { $significand - 3 } ]
         set bytes [format "%3.${extra_significand}f" $base_bytes]
@@ -70,7 +70,7 @@ ad_proc qal_pretty_bytes_dec {
         } 
     }
     set base_bytes [expr { $number / ( $base_nbr * 1. ) } ]
-    ns_log Notice "qal_pretty_bytes_dec(71): number $number base_nbr $base_nbr base_bytes $base_bytes"
+#    ns_log Notice "qal_pretty_bytes_dec(71): number $number base_nbr $base_nbr base_bytes $base_bytes"
     if { $significand > 3 } {
         set extra_significand [expr { $significand - 3 } ]
         set bytes [format "%3.${extra_significand}f" $base_bytes]
