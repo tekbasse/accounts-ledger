@@ -87,13 +87,15 @@ ad_proc qal_pretty_metric {
     {significand "3"}
     {ignore_units ""}
 } {
-    Returns a pretty, compact Metric number with units in n digits.
+    Returns a pretty, compact Metric number with units in up to n digits. N must be greater than 3 to trigger floating point.
 } {    
-    set number [expr { wide( $number ) } ]
+    if { $number > 1 } {
+        set number [expr { wide( $number ) } ]
+    }
     set abbrev_list [list y z a f p n "&mu;" m c d "" da h k M G T P E Z Y]
     set ab_pow_list [list -24 -21 -18 -15 -12 -9 -6 -3 -2 -1 0 1 2 3 6 9 12 15 18 21 24]
-    # sometimes &mu; is replaced with mcg..
-    # remove units to ignore
+    # sometimes &mu; is replaced with mcg.. 
+    # remove units to ignore 
     if { [string length $ignore_units] > 0 } {
         set ignore_list [split $ignore_units ", "]
         foreach i $ignore_list {
@@ -103,22 +105,24 @@ ad_proc qal_pretty_metric {
                 set ab_pow_list [lreplace $ab_pow_list $i $i]
             }
         }
-    } 
-    # convert to units of one
+    }
+    # convert number to base of one unit (if unit is other than one).
     set unit_index [lsearch -exact $abbrev_list $unit]
-    if { $unit_index > 0 } {
-        set number [expr { wide( $number ) * pow(10,[lindex $ab_pow_list $unit_index]) } ]
+    if { $unit_index > -1 } {
+        set number [expr { $number * pow(10,[lindex $ab_pow_list $unit_index]) } ]
         set unit ""
     }
     #    set units_list \[list pico nano micro milli centi deci "" deca hecto kilo mega giga tera \]
-    set test_base_nbr 1
-    set base_nbr 1
+    set test_base_nbr 1e-24
+    set i 0
     foreach abbrev $abbrev_list {
         if { $number > $test_base_nbr } {
             set base_nbr $test_base_nbr
             set unit $abbrev
-            set test_base_nbr [expr { $test_base_nbr * 1000 } ] 
-        } 
+            incr i
+            set test_base_nbr [expr { pow(10,[lindex $ab_pow_list $i]) } ]
+        }
+
     }
     set base_metric [expr { $number / ( $base_nbr * 1. ) } ]
     if { $significand > 3 } {
