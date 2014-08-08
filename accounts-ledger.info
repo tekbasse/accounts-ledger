@@ -7,20 +7,19 @@
     <initial-install-p>f</initial-install-p>
     <singleton-p>f</singleton-p>
     
-    <version name="0.1d" url="http://openacs.org/repository/download/apm/accounts-ledger-0.1d.apm">
-        <owner url="mailto:torben@dekka.com">Torben Brosten</owner>
+    <version name="0.018" url="http://openacs.org/repository/download/apm/accounts-ledger-0.018.apm">
+        <owner url="mailto:tekbasse@yahoo.com">Benjamin Brink</owner>
         <owner url="http://openacs.org">OpenACS community</owner>
         <summary>General Ledger provides services to other packages.</summary>
-        <vendor url="http://github.com/openacs-">Dekka Corp of Oregon</vendor>
         <description format="text/plain">General Ledger provides services to other packages and provides a basic UI for directly managing the ledger and accounts, and includes an extendable contact UI.</description>
         <maturity>0</maturity>
 
-        <provides url="accounts-ledger" version="0.2d"/>
-        <requires url="inventory-control" version="0.1d"/>
+        <provides url="accounts-ledger" version="0.001"/>
+        <requires url="inventory-control" version="0.001"/>
         <requires url="acs-kernel" version="5.0"/>
         <requires url="acs-datetime" version="4.0"/>
-        <requires url="ref-countries" version="0.1d"/>
-        <requires url="ref-language" version="0.1d"/>
+        <requires url="ref-countries" version="0.001"/>
+        <requires url="ref-language" version="0.001"/>
 
         <callbacks>
         </callbacks>
