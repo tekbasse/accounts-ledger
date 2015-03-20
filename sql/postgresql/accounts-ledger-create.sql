@@ -15,6 +15,7 @@ SELECT nextval ('qal_id');
 -- debit column data is represented by positive values
 -- credit column data is represented as negative values
 CREATE TABLE qal_template_accounts (
+    instance_id integer,
     chart_code  varchar(30),
     description text,
     charttype   varchar(5),
@@ -25,6 +26,7 @@ CREATE TABLE qal_template_accounts (
 );
 
 CREATE TABLE qal_chart_templates (
+    instance_id integer,
     chart_code varchar(30),
     comments   text,
     title      varchar(200)
@@ -32,6 +34,7 @@ CREATE TABLE qal_chart_templates (
 
  -- gets imported to qal_defaults
 CREATE TABLE qal_template_defaults (
+    instance_id integer,
     chart_code  varchar(100),
     field_value text,
     field_name  varchar(200)
