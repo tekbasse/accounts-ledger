@@ -15,7 +15,6 @@
         <maturity>0</maturity>
 
         <provides url="accounts-ledger" version="0.001"/>
-        <requires url="inventory-control" version="0.001"/>
         <requires url="acs-kernel" version="5.0"/>
         <requires url="acs-datetime" version="4.0"/>
         <requires url="ref-countries" version="0.001"/>
