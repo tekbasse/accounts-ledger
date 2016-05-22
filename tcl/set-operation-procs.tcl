@@ -8,8 +8,8 @@ ad_library {
     #@cvs-id $Id: set-operation-procs.tcl,v 1.3.8.2 2014/09/09 13:34:49 gustafn Exp $
 }
 
-ad_proc -public set_member? { s v } {
-    Tests whether or not $v is a member of set $s.
+ad_proc -public set_member_q { s v } {
+    Tests whether or not $v is a member of set $s. s is a list.
 } {
     if {$v ni $s} {
         return 0
@@ -20,13 +20,13 @@ ad_proc -public set_member? { s v } {
 
 
 
-ad_proc -public set_append! { s-name v } {
-    Adds the element v to the set named s-name in the calling
+ad_proc -public set_append! { s_name v } {
+    Adds the element v to the set named s_name in the calling
     environment, if it isn't already there.
 } {
-    upvar $s-name s
+    upvar $s_name s
     
-    if { ![set_member? $s $v] } {
+    if { ![set_member_q $s $v] } {
         lappend s $v
     }
 }
@@ -39,7 +39,7 @@ ad_proc -public set_union { u v } {
     set result $u
 
     foreach ve $v {
-        if { ![set_member? $result $ve] } {
+        if { ![set_member_q $result $ve] } {
             lappend result $ve
         }
     }
@@ -47,16 +47,16 @@ ad_proc -public set_union { u v } {
     return $result
 }
 
-ad_proc -public set_union! { u-name v } {
+ad_proc -public set_union_named { u_name v } {
     Computes the union of the set stored in the variable
-    named $u-name in the calling environment and the set v,
-    sets the variable named $u-name in the calling environment
+    named $u_name in the calling environment and the set v,
+    sets the variable named $u_name in the calling environment
     to that union, and also returns that union.
 } {
-    upvar $u-name u
+    upvar $u_name u
 
     foreach ve $v {
-        if { ![set_member? $u $ve] } {
+        if { ![set_member_q $u $ve] } {
             lappend u $ve
         }
     }
@@ -73,7 +73,7 @@ ad_proc -public set_intersection { u v } {
     set result [list]
     
     foreach ue $u {
-        if { [set_member? $v $ue] } {
+        if { [set_member_q $v $ue] } {
             lappend result $ue
         }
     }
@@ -81,17 +81,17 @@ ad_proc -public set_intersection { u v } {
     return $result
 }
 
-ad_proc -public set_intersection! { u-name v } {
+ad_proc -public set_intersection_named { u_name v } {
     Computes the intersection of the set stored in the variable
-    named $u-name in the calling environment and the set v,
-    sets the variable named $u-name in the calling environment
+    named $u_name in the calling environment and the set v,
+    sets the variable named $u_name in the calling environment
     to that intersection, and also returns that intersection.
 } {
-    upvar $u-name u
+    upvar $u_name u
     set result [list]
     
     foreach ue $u {
-        if { [set_member? $v $ue] } {
+        if { [set_member_q $v $ue] } {
             lappend result $ue
         }
     }
@@ -111,7 +111,7 @@ ad_proc -public set_difference { u v } {
     set result [list]
 
     foreach ue $u {
-        if { ![set_member? $v $ue] } {
+        if { ![set_member_q $v $ue] } {
             lappend result $ue
         }
     }
@@ -119,17 +119,17 @@ ad_proc -public set_difference { u v } {
     return $result    
 }
 
-ad_proc -public set_difference! { u-name v } {
+ad_proc -public set_difference_named { u_name v } {
     Computes the difference of the set stored in the variable
-    named $u-name in the calling environment and the set v,
-    sets the variable named $u-name in the calling environment
+    named $u_name in the calling environment and the set v,
+    sets the variable named $u_name in the calling environment
     to that difference, and also returns that difference.
 } {
-    upvar $u-name u
+    upvar $u_name u
     set result [list]
 
     foreach ue $u {
-        if { ![set_member? $v $ue] } {
+        if { ![set_member_q $v $ue] } {
             lappend result $ue
         }
     }
