@@ -6,9 +6,10 @@ ad_library {
     @author Eric Lorenzo (elorenzo@arsdigita.com)
     # Recovered from deprecation at Openacs 5.8 package acs-tcl/tcl/set-operations-procs.tcl
     #@cvs-id $Id: set-operation-procs.tcl,v 1.3.8.2 2014/09/09 13:34:49 gustafn Exp $
+    # Subsequently renamed procs to avoid name collision. --Benjamin Brink
 }
 
-ad_proc -public set_member_q { s v } {
+ad_proc -public set_v_member_of_s_q { s v } {
     Tests whether or not $v is a member of set $s. s is a list.
 } {
     if {$v ni $s} {
@@ -19,8 +20,7 @@ ad_proc -public set_member_q { s v } {
 }
 
 
-
-ad_proc -public set_append! { s_name v } {
+ad_proc -public set_s_name_add_v { s_name v } {
     Adds the element v to the set named s_name in the calling
     environment, if it isn't already there.
 } {
@@ -34,7 +34,7 @@ ad_proc -public set_append! { s_name v } {
 
 
 ad_proc -public set_union { u v } {
-    Returns the union of sets $u and $v.
+    Returns the union of sets $u and $v. Both u and v are lists.
 } {
     set result $u
 
@@ -43,13 +43,13 @@ ad_proc -public set_union { u v } {
             lappend result $ve
         }
     }
-
     return $result
 }
 
-ad_proc -public set_union_named { u_name v } {
+
+ad_proc -public set_s_named_union_v { u_name v } {
     Computes the union of the set stored in the variable
-    named $u_name in the calling environment and the set v,
+    named $u_name in the calling environment and the set v (list),
     sets the variable named $u_name in the calling environment
     to that union, and also returns that union.
 } {
@@ -60,15 +60,12 @@ ad_proc -public set_union_named { u_name v } {
             lappend u $ve
         }
     }
-
     return $u
 }
 
 
-
-
 ad_proc -public set_intersection { u v } {
-    Returns the intersection of sets $u and $v.
+    Returns the intersection of sets $u and $v. Both u and v are lists.
 } {
     set result [list]
     
@@ -77,13 +74,12 @@ ad_proc -public set_intersection { u v } {
             lappend result $ue
         }
     }
-
     return $result
 }
 
-ad_proc -public set_intersection_named { u_name v } {
+ad_proc -public set_intersection_named_v { u_name v } {
     Computes the intersection of the set stored in the variable
-    named $u_name in the calling environment and the set v,
+    named $u_name in the calling environment and the set v (list),
     sets the variable named $u_name in the calling environment
     to that intersection, and also returns that intersection.
 } {
@@ -95,18 +91,13 @@ ad_proc -public set_intersection_named { u_name v } {
             lappend result $ue
         }
     }
-
     set u $result
     return $result
 }
 
-
-
-
-
 ad_proc -public set_difference { u v } {
-    Returns the difference of sets $u and $v.  (i.e. The set of all
-                                                   members of u that aren't also members of $v.)
+    Returns the difference of sets $u and $v.  
+    i.e. The set of all members of u that aren't also members of $v.
 } {
     set result [list]
 
@@ -115,12 +106,11 @@ ad_proc -public set_difference { u v } {
             lappend result $ue
         }
     }
-
     return $result    
 }
 
-ad_proc -public set_difference_named { u_name v } {
-    Computes the difference of the set stored in the variable
+ad_proc -public set_difference_named_v { u_name v } {
+    Computes the difference of the set stored in the variable (list)
     named $u_name in the calling environment and the set v,
     sets the variable named $u_name in the calling environment
     to that difference, and also returns that difference.
@@ -133,7 +123,6 @@ ad_proc -public set_difference_named { u_name v } {
             lappend result $ue
         }
     }
-
     set u $result
     return $result
 }
