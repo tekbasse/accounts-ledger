@@ -26,7 +26,7 @@ ad_proc -public set_s_name_add_v { s_name v } {
 } {
     upvar $s_name s
     
-    if { ![set_member_q $s $v] } {
+    if { ![set_v_member_of_s_q $s $v] } {
         lappend s $v
     }
 }
@@ -39,7 +39,7 @@ ad_proc -public set_union { u v } {
     set result $u
 
     foreach ve $v {
-        if { ![set_member_q $result $ve] } {
+        if { ![set_v_member_of_s_q $result $ve] } {
             lappend result $ve
         }
     }
@@ -56,7 +56,7 @@ ad_proc -public set_s_named_union_v { u_name v } {
     upvar $u_name u
 
     foreach ve $v {
-        if { ![set_member_q $u $ve] } {
+        if { ![set_v_member_of_s_q $u $ve] } {
             lappend u $ve
         }
     }
@@ -70,7 +70,7 @@ ad_proc -public set_intersection { u v } {
     set result [list]
     
     foreach ue $u {
-        if { [set_member_q $v $ue] } {
+        if { [set_v_member_of_s_q $v $ue] } {
             lappend result $ue
         }
     }
@@ -87,7 +87,7 @@ ad_proc -public set_intersection_named_v { u_name v } {
     set result [list]
     
     foreach ue $u {
-        if { [set_member_q $v $ue] } {
+        if { [set_v_member_of_s_q $v $ue] } {
             lappend result $ue
         }
     }
@@ -102,7 +102,7 @@ ad_proc -public set_difference { u v } {
     set result [list]
 
     foreach ue $u {
-        if { ![set_member_q $v $ue] } {
+        if { ![set_v_member_of_s_q $v $ue] } {
             lappend result $ue
         }
     }
@@ -119,7 +119,7 @@ ad_proc -public set_difference_named_v { u_name v } {
     set result [list]
 
     foreach ue $u {
-        if { ![set_member_q $v $ue] } {
+        if { ![set_v_member_of_s_q $v $ue] } {
             lappend result $ue
         }
     }
