@@ -264,7 +264,9 @@ ad_proc -private qal_namelur {
                 }
             }
             default {
-                ns_log Notice "qal_namelur.237: rejecting entry '${entry}'"
+                if { $entry ne "" } {
+                    ns_log Notice "qal_namelur.237: rejecting entry '${entry}'"
+                }
             }
         }
     }
