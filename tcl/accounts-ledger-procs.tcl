@@ -33,10 +33,17 @@ ad_library {
 
 ad_proc qal_instance_id {
 } {
-    Uses subsite_id unless parameter instanceinteger is an integer greater than 10
+    Sets instance_id in calling environment. 
+
+    @return instance_id in calling enviornment
 } {
-    
+    upvar 1 instance_id instance_id
+    # By using this proc, instances can be configured by
+    # package parameter, package_id, subsite package_id etc 
+    # without requiring changes throughout code.
+    set instance_id [ad_conn package_id]
 }
+
 
 ad_proc qal_post_transaction {
     parameter
