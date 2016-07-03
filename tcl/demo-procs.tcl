@@ -221,7 +221,7 @@ ad_proc -private qal_namelur {
                 set x [string range $entry 1 end]
                 #ns_log Notice "qal_namelur.201. entry '${entry}' v x ${x}"
             }
-            ^[A-Za-z\ \.]+$ {
+            ^[A-Za-z\ \.\@\!\?\_]+$ {
                 set y_prev $y
                 set y_arr(${y}) $entry
                 incr y
@@ -267,7 +267,11 @@ ad_proc -private qal_namelur {
             }
             default {
                 if { $entry ne "" } {
-                    ns_log Notice "qal_namelur.237: rejecting entry '${entry}'"
+                    #ns_log Notice "qal_namelur.237: rejecting entry '${entry}'"
+                    # Adding entry. For some reason \- breaks the switch..
+                    set y_prev $y
+                    set y_arr(${y}) $entry
+                    incr y
                 }
             }
         }
