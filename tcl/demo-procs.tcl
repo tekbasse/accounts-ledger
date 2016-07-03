@@ -204,6 +204,7 @@ ad_proc -private qal_namelur {
     lappend ev_lists $header
 
     set y 0
+    set y_prev 0
     set bc_counter 0
     set bv_counter 0
     set ec_counter 0
@@ -221,12 +222,13 @@ ad_proc -private qal_namelur {
                 #ns_log Notice "qal_namelur.201. entry '${entry}' v x ${x}"
             }
             ^[A-Za-z\ \.]+$ {
-                incr y
+                set y_prev $y
                 set y_arr(${y}) $entry
+                incr y
                 #ns_log Notice "qal_namelur.206. entry '${entry}' y_arr(${y}) '${entry}'"
             }
             ^[0-9]+$ {
-                set row [list $x $y]
+                set row [list $x $y_prev]
                 #ns_log Notice "qal_namelur.209. entry '${entry}' row '${row}'"
                 if { [expr { $entry & 4 } ] == 4 } {
                     # can be in middle
@@ -277,7 +279,7 @@ ad_proc -private qal_namelur {
     set ev_fraction [expr { $ev_counter / ( $ev_counter + $ec_counter + 1 ) } ]
     for {set j 0} {$j < $n} {incr j} {
         set chars_list [list ]
-        if { [random] > $bv_fraction } {
+        if { [random] < $bv_fraction } {
             set y1 [qaf_y_of_x_dist_curve [random] $bc_lists]
             set y1 [expr { round($y1) } ]
             lappend chars_list $y_arr(${y1})
@@ -300,7 +302,7 @@ ad_proc -private qal_namelur {
         lappend chars_list $y_arr(${yec})
         if { [random] < $ev_fraction } {
             set yev [qaf_y_of_x_dist_curve [random] $ev_lists]
-        set yev [expr { round($yev) } ]
+            set yev [expr { round($yev) } ]
             lappend chars_list $y_arr(${yev})
         }
         lappend names_list [join $chars_list ""]
