@@ -144,3 +144,18 @@ ad_proc qal_pretty_metric {
     return $pretty_metric
 }
 
+ad_proc qal_first_nonempty_in_list {
+    some_list
+} {
+    Returns the value of the first nonempty element in list, or an empty string if none found.
+} {
+    set some_list_len [llength $some_list]
+    set i 0
+    set some_val [lindex $some_list $i]
+    incr i
+    while { $i < $some_list_len && $some_val eq "" } {
+        set some_val [lindex $some_list $i]
+        incr i
+    }
+    return $some_val
+}
