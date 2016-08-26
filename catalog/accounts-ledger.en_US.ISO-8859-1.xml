@@ -1270,6 +1270,7 @@
 <msg key="User_deleted_">User deleted!</msg>
 <msg key="User_saved_">User saved!</msg>
 <msg key="Valid_until">Valid until</msg>
+<msg key="Value_is_not_boolean.">Value is not boolean.</msg>
 <msg key="Vendor">Vendor</msg>
 <msg key="Vendor_History">Vendor History</msg>
 <msg key="Vendor_Invoice">Vendor Invoice</msg>
