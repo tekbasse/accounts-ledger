@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <message_catalog package_key="accounts-ledger" package_version="0.1d" locale="en_US" charset="ISO-8859-1">
-
 <msg key="0">Zero</msg>
 <msg key="1">One</msg>
 <msg key="10">Ten</msg>
@@ -595,6 +594,7 @@
 <msg key="Marked_entries_printed_">Marked entries printed!</msg>
 <msg key="Markup">Markup</msg>
 <msg key="Maximum">Maximum</msg>
+<msg key="Maximum_length_is_">Maximum length is:</msg>
 <msg key="May">May</msg>
 <msg key="May_">May </msg>
 <msg key="Memo">Memo</msg>
@@ -602,6 +602,7 @@
 <msg key="Message">Message</msg>
 <msg key="Method">Method</msg>
 <msg key="Microfiche">Microfiche</msg>
+<msg key="Minimum_length_is_">Minimum length is:</msg>
 <msg key="Mobile">Mobile</msg>
 <msg key="Model">Model</msg>
 <msg key="Monday">Monday</msg>
@@ -936,6 +937,7 @@
 <msg key="Terms">Terms</msg>
 <msg key="Text">Text</msg>
 <msg key="Text_Templates">Text Templates</msg>
+<msg key="Text_has_too_many_characters">Text has too many characters.</msg>
 <msg key="The_following_Datasets_are_not_in_use_and_can_be_deleted">The following Datasets are not in use and can be deleted</msg>
 <msg key="The_following_Datasets_need_to_be_updated">The following Datasets need to be updated</msg>
 <msg key="This_is_a_preliminary_check_for_existing_sources__Nothing_will_be_created_or_deleted_at_this_stage_">This is a preliminary check for existing sources. Nothing will be created or deleted at this stage!</msg>
@@ -1270,7 +1272,11 @@
 <msg key="User_deleted_">User deleted!</msg>
 <msg key="User_saved_">User saved!</msg>
 <msg key="Valid_until">Valid until</msg>
-<msg key="Value_is_not_boolean.">Value is not boolean.</msg>
+<msg key="Value_is_not_a_decimal_number">Value is not a decimal number.</msg>
+<msg key="Value_is_not_a_natural_number">Value is not a natural number.</msg>
+<msg key="Value_is_not_an_integer_number">Value is not an integer number.</msg>
+<msg key="Value_is_not_boolean">Value is not boolean.</msg>
+<msg key="Value_is_not_valid_number">Invalid numeric value</msg>
 <msg key="Vendor">Vendor</msg>
 <msg key="Vendor_History">Vendor History</msg>
 <msg key="Vendor_Invoice">Vendor Invoice</msg>
@@ -1369,7 +1375,6 @@
 <msg key="new">New</msg>
 <msg key="new_page">New Page</msg>
 <msg key="notifications">Benachrichtigungen</msg>
-<msg key="numeric-validate_numeric">Invalid numeric value</msg>
 <msg key="partsgroup">partsgroup</msg>
 <msg key="posted_">posted!</msg>
 <msg key="revisions">revisions</msg>
