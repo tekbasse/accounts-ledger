@@ -937,7 +937,8 @@
 <msg key="Terms">Terms</msg>
 <msg key="Text">Text</msg>
 <msg key="Text_Templates">Text Templates</msg>
-<msg key="Text_has_too_many_characters">Text has too many characters.</msg>
+<msg key="Text_has_too_many_characters">Text is too long. It has too many characters.</msg>
+<msg key="Text_has_too_many_characters">Text is too short. It has too few characters.</msg>
 <msg key="The_following_Datasets_are_not_in_use_and_can_be_deleted">The following Datasets are not in use and can be deleted</msg>
 <msg key="The_following_Datasets_need_to_be_updated">The following Datasets need to be updated</msg>
 <msg key="This_is_a_preliminary_check_for_existing_sources__Nothing_will_be_created_or_deleted_at_this_stage_">This is a preliminary check for existing sources. Nothing will be created or deleted at this stage!</msg>
