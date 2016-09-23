@@ -1,0 +1,11 @@
+#accounts-ledger/www/index.vuh
+
+#notes
+# if user is not logged-in, ad_redirect_register
+
+# if user has access to multiple contact_ids
+# internal-redirect to www/conctacts-choose  (choose customer)
+
+# if user has a contact_id, or one is passed, redirect www/contact (edit,add info)
+
+
