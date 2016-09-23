@@ -7,14 +7,14 @@
     <initial-install-p>f</initial-install-p>
     <singleton-p>f</singleton-p>
     
-    <version name="0.018" url="http://openacs.org/repository/download/apm/accounts-ledger-0.018.apm">
+    <version name="0.036" url="http://openacs.org/repository/download/apm/accounts-ledger-0.036.apm">
         <owner url="mailto:tekbasse@yahoo.com">Benjamin Brink</owner>
         <owner url="http://openacs.org">OpenACS community</owner>
         <summary>General Ledger provides services to other packages.</summary>
         <description format="text/plain">General Ledger provides services to other packages and provides a basic UI for directly managing the ledger and accounts, and includes an extendable contact UI.</description>
         <maturity>0</maturity>
 
-        <provides url="accounts-ledger" version="0.001"/>
+        <provides url="accounts-ledger" version="0.036"/>
         <requires url="acs-kernel" version="5.0"/>
         <requires url="acs-datetime" version="4.0"/>
         <requires url="ref-countries" version="0.001"/>
@@ -27,6 +27,7 @@
             <parameter datatype="string"  min_n_values="1"  max_n_values="1"  name="WeightUnit"  default="Kg" description="the weight unit used for measuring" section_name="units"/>
             <parameter datatype="string"  min_n_values="1"  max_n_values="1"  name="CurrencyUnit"  default="USD" description="the currency abbreviation, sometimes the symbol represented as text" section_name="units"/>
             <parameter datatype="string"  min_n_values="1"  max_n_values="1"  name="BusinessNumber"  default="" description="The business reference for tax purposes etc." section_name="entity"/>
+            <parameter datatype="string"  min_n_values="1"  max_n_values="1"  name="instanceIdOverride"  default="" description="Override the package_id for this instance. Usually leave blank.. or maybe set to subsite_id." section_name="site-admin"/>
         </parameters>
 
     </version>
