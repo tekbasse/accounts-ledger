@@ -5,25 +5,25 @@ ad_library {
 }
 #
 ad_proc qal_customer_ids_of_user_id {
-    arr_name
+    user_id
 } {
 
 } {
     upvar 1 instance_id instance_id
-    upvar 1 $arr_name c_arr
+    set customer_id_list ""
 
-
+    return $customer_id_list
 }
 
 ad_proc qal_user_ids_of_customer_id {
-    arr_name
+    customer_id
 } {
 
 } {
     upvar 1 instance_id instance_id
-    upvar 1 $arr_name c_arr
+    set user_id_list ""
 
-
+    return $user_id_list
 }
 
 
