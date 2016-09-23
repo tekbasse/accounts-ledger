@@ -41,7 +41,7 @@ Table of "critical path" package dependencies
 <tr>
 <th>package-key</th><th>depends on</th>
 </tr><tr>
-<td>accounts-ledger </td><td>contacts, inventory-control</td>
+<td>accounts-ledger </td><td></td>
 </tr><tr>
 <td>accounts-payables      </td><td>accounts-ledger</td>
 </tr><tr>
@@ -53,13 +53,13 @@ Table of "critical path" package dependencies
 </tr><tr>
 <td>ref-unspsc            </td><td>none, integrates with categories</td>
 </tr><tr>
-<td>accounts-payroll      </td><td>accounts-ledger</td>
+<td>accounts-payroll      </td><td>accounts-ledger, accounts-payables</td>
 </tr><tr>
-<td>inventory-control     </td><td>none</td>
+<td>inventory-control     </td><td>accounts-ledger</td>
 </tr><tr>
-<td>online-catalog        </td><td>none</td>
+<td>online-catalog        </td><td>accounts-ledger, accounts-receivables</td>
 </tr><tr>
-<td>shipping-tracking</td><td>accounts-ledger</td>
+<td>shipping-tracking</td><td>accounts-ledger, accounts-receivables</td>
 </tr></table>
 <p>(see <a href="http://openacs.org/xowiki/pages/en/ecommerce-g2">ecommerce G2</a>)
 </p>
