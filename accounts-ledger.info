@@ -19,6 +19,7 @@
         <requires url="acs-datetime" version="4.0"/>
         <requires url="ref-countries" version="0.001"/>
         <requires url="ref-language" version="0.001"/>
+        <requires url="q-control" version="0.001"/>
 
         <callbacks>
         </callbacks>
@@ -27,7 +28,7 @@
             <parameter datatype="string"  min_n_values="1"  max_n_values="1"  name="WeightUnit"  default="Kg" description="the weight unit used for measuring" section_name="units"/>
             <parameter datatype="string"  min_n_values="1"  max_n_values="1"  name="CurrencyUnit"  default="USD" description="the currency abbreviation, sometimes the symbol represented as text" section_name="units"/>
             <parameter datatype="string"  min_n_values="1"  max_n_values="1"  name="BusinessNumber"  default="" description="The business reference for tax purposes etc." section_name="entity"/>
-            <parameter datatype="string"  min_n_values="1"  max_n_values="1"  name="instanceIdOverride"  default="" description="Override the package_id for this instance. Usually leave blank.. or maybe set to subsite_id." section_name="site-admin"/>
+          <parameter datatype="string"  min_n_values="1"  max_n_values="1"  name="instanceIdOverride"  default="" description="Override the package_id for this instance. Usually leave blank.. or maybe set to subsite_id or a specific package_id number. See qs_set_instance_id for implementation details." section_name="site-admin"/>
         </parameters>
 
     </version>
