@@ -1,5 +1,5 @@
 ad_library {
-    Library for accounts ledger contacts
+    business logic for accounts ledger contacts
     @creation-date 2016-06-28
 
 }
