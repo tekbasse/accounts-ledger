@@ -11,6 +11,7 @@
         -- same as company_summary.parent_company=integer
         parent_id          integer,
         label              varchar(40),
+        name               varchar(80),
         street_address_id  integer,
         mailing_address_id integer,
         billing_address_id integer,
@@ -23,15 +24,31 @@
         currency           varchar(3),
         time_start         timestamptz,
         time_end           timestamptz,
-        user_id            integer,
         url                varchar(200),
         notes              text
  );
 
+ CREATE TABLE qal_contact_address_map (
+        instance_id       integer,
+        contact_id        integer,
+        address_id        integer,
+        trashed_p         integer
+);
+
+CREATE TABLE qal_contact_use_map (
+       instance_id        integer,
+       contact_id         integer,
+       user_id            integer,
+       created            timestamptz not null DEFAULT now(),
+       created_by         integer,
+       trashed_p          integer,
+       trashed_by         integer,
+       trashed_ts         timestamptz
+);
+       
  create table qal_address (
         id                integer default nextval('qal_id'),
         instance_id       integer,
-        contact_id        integer,
         address_type      varchar(20) not null default 'street',   
         -- e.g., billing, shipping
         first_name        varchar(64),
