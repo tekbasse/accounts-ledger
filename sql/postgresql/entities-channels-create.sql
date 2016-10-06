@@ -8,8 +8,6 @@
  CREATE TABLE qal_contact (
         id                 integer unique not null,
         instance_id        integer not null,
-        -- same as company_summary.parent_company=integer
-        parent_id          integer,
         label              varchar(40),
         name               varchar(80),
         street_address_id  integer,
@@ -26,16 +24,41 @@
         time_end           timestamptz,
         url                varchar(200),
         notes              text
- );
+);
+create index qal_contact_id_idx on qal_contact (id);
+create index qal_contact_instance_id_idx on qal_contact (instance_id);
 
- CREATE TABLE qal_contact_address_map (
+CREATE TABLE qal_contact_map (
+        -- was company_summary.parent_company=integer
+        -- here, id is qal_contact.id of parent company, sub_id is qal_contact.id
+       id          integer,
+       instance_id integer,
+       sub_id      integer
+);
+
+create index qal_contact_map_id_idx on qal_contact_map (id);
+create index qal_contact_map_instance_id_idx on qal_contact_map (instance_id);
+create index qal_contact_map_sub_id_idx on qal_contact_map (sub_id);
+
+CREATE TABLE qal_contact_address_map (
         instance_id       integer,
         contact_id        integer,
         address_id        integer,
-        trashed_p         integer
+       created            timestamptz not null DEFAULT now(),
+       created_by         integer,
+       trashed_p          integer,
+       trashed_by         integer,
+       trashed_ts         timestamptz
 );
 
-CREATE TABLE qal_contact_use_map (
+create index qal_contact_address_map_instance_id_idx on qal_contact_address_map (instance_id);
+create index qal_contact_address_map_contact_id_idx on qal_contact_address_map (contact_id);
+create index qal_contact_address_map_address_id_idx on qal_contact_address_map (address_id);
+
+
+-- was qal_contact_group ( or contact_group in SL)
+-- mainly gets used in packages that depend on accounts-ledger
+CREATE TABLE qal_contact_user_map (
        instance_id        integer,
        contact_id         integer,
        user_id            integer,
@@ -45,54 +68,67 @@ CREATE TABLE qal_contact_use_map (
        trashed_by         integer,
        trashed_ts         timestamptz
 );
+
+create index qal_contact_user_map_instance_id_idx on qal_contact_user_map (instance_id);
+create index qal_contact_user_map_contact_id_idx on qal_contact_user_map (contact_id);
+create index qal_contact_user_map_user_id_idx on qal_contact_user_map (user_id);
+
        
- create table qal_address (
+create table qal_address (
         id                integer default nextval('qal_id'),
         instance_id       integer,
-        address_type      varchar(20) not null default 'street',   
         -- e.g., billing, shipping
-        first_name        varchar(64),
-        last_name         varchar(64),
+        address_type      varchar(20) not null default 'street',  
+        address0          varchar(40),
         address1          varchar(40),
         address2          varchar(40),
         city              varchar(40),
         state             varchar(32),
-        postalcode        varchar(20),
-        country_code      varchar(3),
+        postal_code        varchar(20),
         -- references countries(iso)
+        country_code      varchar(3),
         attn              varchar(64),
         phone             varchar(30),
         phone_time        varchar(10),
         fax               varchar(30),
-        user_id           integer,
         -- text type allows multiple entries
         email             text,
         cc                text,
         bcc               text
  );
 
+create index qal_address_instance_id_idx on qal_address (instance_id);
+create index qal_address_id_idx on qal_address (id);
+create index qal_address_address_type_idx on qal_address (address_type);
+
+
  --part of company_dates, company_details
- CREATE TABLE qal_customer (
+CREATE TABLE qal_customer (
         id              integer default nextval('qal_id'),
         instance_id     integer,
         contact_id      integer,
         discount        numeric,
         tax_included    varchar(1) default '0',
-        credit_limit    numeric default 0,
+        credit_limit    numeric default '0',
         -- terms aka company_licenses.lic_type
         terms           numeric default '0',
         terms_unit      varchar(20) default 'days',
-	-- annual value at rate aka company_licenses.lic_value
+        -- annual value at rate aka company_licenses.lic_value
         annual_value    numeric,
         -- terms_unit in tcl interval (days, weeks, month etc)
         customer_number varchar(32),
         pricegroup_id   integer
- );
+);
+
+create index qal_customer_instance_id_idx on qal_customer (instance_id);
+create index qal_customer_contact_id_idx on qal_customer (contact_id);
+create index qal_customer_id_idx on qal_customer (id);
+create index qal_customer_customer_number_idx on qal_customer (customer_number);
 
 
- CREATE TABLE qal_vendor (
+CREATE TABLE qal_vendor (
         id                     integer default nextval('qal_id'),
-	instance_id	       integer,
+        instance_id            integer,
         contact_id             integer,
         terms                  integer default 0,
         tax_included           varchar(1) default '0',
@@ -101,16 +137,21 @@ CREATE TABLE qal_contact_use_map (
         discount               numeric,
         credit_limit           numeric default 0,
         pricegroup_id          integer,
-        area_market            varchar(30),
-        -- area_market can be address, city, state, country, worldwide
+        -- area_market can be address, city, state, country, worldwide, set of postal codes etc
         -- useful when marketing vendor goods indirectly
-        purchase_policy        text,
+        area_market            text,
         -- policies help with buy decisions.
+        purchase_policy        text,
         return_policy          text,
         price_guarantee_policy text,
         delivery_policy        text,
         installation_policy    text
- );
+);
+
+create index qal_vendor_instance_id_idx on qal_vendor (instance_id);
+create index qal_vendor_contact_id_idx on qal_vendor (contact_id);
+create index qal_vendor_id_idx on qal_vendor (id);
+create index qal_vendor_vendor_number_idx on qal_vendor (vendor_number);
 
 -- -- SIC, NAICS codes
 -- -- code has been extended to allow use of UNSPC (and other) categorizations
@@ -118,28 +159,26 @@ CREATE TABLE qal_contact_use_map (
 -- --  NAICS codes http://www.census.gov/epcd/naics/naicscod.txt
 -- --  SIC crossreferences  http://www.census.gov/pub/epcd/www/naicstab.htm
 -- --  ISIC and others  http://unstats.un.org/unsd/cr/
- CREATE TABLE qal_sic (
+CREATE TABLE qal_sic (
         code        varchar(50),
-        sic_type    varchar(9),
+        sic_type    varchar(30),
         description text
- );
-
- CREATE TABLE qal_customer_tax (
- instance_id  integer,
-  customer_id integer,
-  chart_id    integer      
- );
-
-
- CREATE TABLE qal_vendor_tax (
-  instance_id integer,
-  vendor_id integer,
-  chart_id  integer
- );
-
--- mainly gets used in packages that depend on accounts-ledger
-CREATE TABLE qal_contact_group (
-  instance_id integer,
-  contact_id integer,
-  user_id integer
 );
+
+CREATE TABLE qal_customer_tax (
+       instance_id  integer,
+       customer_id integer,
+       chart_id    integer      
+);
+
+create index qal_customer_tax_instance_id_idx on qal_customer_tax (instance_id);
+create index qal_customer_tax_customer_id_idx on qal_customer_tax (customer_id);
+
+
+CREATE TABLE qal_vendor_tax (
+       instance_id integer,
+       vendor_id integer,
+       chart_id  integer
+);
+create index qal_vendor_tax_instance_id_idx on qal_vendor_tax (instance_id);
+create index qal_vendor_tax_vendor_id_idx on qal_vendor_tax (vendor_id);

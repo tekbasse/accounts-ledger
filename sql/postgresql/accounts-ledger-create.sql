@@ -51,7 +51,7 @@ CREATE TABLE qal_template_taxes (
 
 
 CREATE TABLE qal_gl (
-  instance_id integer,
+  instance_id   integer,
   id            integer DEFAULT nextval ( 'qal_id' ),
   reference     text,
   description   text,
