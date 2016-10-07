@@ -4,20 +4,33 @@
 -- @license GNU GENERAL PUBLIC LICENSE, Version 2, June 1991
 -- @cvs-id
 
+-- data model summary:
+-- contact is the base organization or entity.
+-- A user may have multiple entities, 1 or more of their own, and maybe some roles of others
+-- Every vendor requires a contact record
+-- Every customer requires a contact record
+-- A contact can have multiple addresses
+-- A user is mapped to their own personal contact record, and maybe others
+
 --part of company_dates, company_details
 CREATE TABLE qal_contact (
        id                  integer unique not null,
        -- revision_id. Updates create new record and trash old
        -- same id, new rev_id 
-       rev_id              integer,
+       rev_id              integer default nextval('qal_id'),
        instance_id         integer not null,
        parent_id           integer,
        label               varchar(40),
        name                varchar(80),
+       -- preferred qal_other_address_map.addrs_id
+       -- is based on sort_order
+       -- lowest number first.
        street_addrs_id     integer,
        mailing_addrs_id    integer,
        billing_addrs_id    integer,
-       business_id         integer,
+       -- business_id is qal_vendor.vendor_id
+       vendor_id           integer,
+       customer_id         integer,
        taxnumber           varchar(32),
        sic_code            varchar(15),
        iban                varchar(34),
@@ -59,12 +72,40 @@ create index qal_contact_user_map_instance_id_idx on qal_contact_user_map (insta
 create index qal_contact_user_map_contact_id_idx on qal_contact_user_map (contact_id);
 create index qal_contact_user_map_user_id_idx on qal_contact_user_map (user_id);
 create index qal_contact_user_map_trashed_p_idx on qal_contact_user_map (trashed_p);
-       
+
+-- Plenty of caes do not fit traditional norms. Allow for more cases with this model.
+CREATE TABLE qal_other_address_map {
+       contact_id          integer,
+       instance_id         integer,
+       addrs_id            integer,
+       -- address, other..
+       record_type         varchar(30),
+       -- If this is an address, reference qal_address.id
+       -- otherwise this is a contact method (skype,aim,yim,jabber etc)
+       address_id          integer,
+       sort_order          integer,
+       created             timestamptz not null DEFAULT now(),
+       created_by          integer,
+       trashed_p           integer,
+       trashed_by          integer,
+       trashed_ts          timestamptz,
+       -- if other --
+       -- YIM username etc. or maybe runner..
+       -- text allows for anything
+       account_name        text,
+       notes               text
+)
+
+create index qal_other_address_map_contact_id_idx on qal_other_address_map (contact_id);
+create index qal_other_address_map_instance_id_idx on qal_other_address_map (instance_id);
+create index qal_other_address_map_record_type_idx on qal_other_address_map (record_type);
+create index qal_other_address_map_address_id_idx on qal_other_address_map (address_id);
+create index qal_other_address_map_trashed_p_idx on qal_other_address_map (trashed_p);
+
 CREATE TABLE qal_address (
         id                 integer default nextval('qal_id'),
         instance_id        integer,
-        rev_id             integer,
-        sort_order         integer,
+        rev_id             integer default nextval('qal_id'),
         -- e.g., billing, shipping
         address_type       varchar(20) not null default 'street',  
         address0           varchar(40),
@@ -83,11 +124,6 @@ CREATE TABLE qal_address (
         email              text,
         cc                 text,
         bcc                text,
-        created            timestamptz not null DEFAULT now(),
-        created_by         integer,
-        trashed_p          integer,
-        trashed_by         integer,
-        trashed_ts         timestamptz
  );
 
 create index qal_address_instance_id_idx on qal_address (instance_id);
@@ -95,11 +131,18 @@ create index qal_address_id_idx on qal_address (id);
 create index qal_address_address_type_idx on qal_address (address_type);
 create index qal_trashed_p_idx on qal_address (trashed_p);
 
+ -- a contact manager style should have an additional table and map for
+ -- multiple with:
+ -- contact_id 
+ -- contact_method (skype etc)
+ -- userid
+ -- notes 
+
  --part of company_dates, company_details
 CREATE TABLE qal_customer (
        id                  integer default nextval('qal_id'),
        instance_id         integer,
-       rev_id              integer,
+       rev_id              integer default nextval('qal_id'),
        contact_id          integer,
        discount            numeric,
        tax_included        varchar(1) default '0',
@@ -128,7 +171,7 @@ create index qal_customer_trashed_p_idx on qal_customer (trashed_p);
 CREATE TABLE qal_vendor (
        id                  integer default nextval('qal_id'),
        instance_id         integer,
-       rev_id              integer,
+       rev_id              integer default nextval('qal_id'),
        contact_id          integer,
        terms               integer default 0,
        tax_included        varchar(1) default '0',

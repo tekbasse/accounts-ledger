@@ -38,6 +38,15 @@ drop index qal_customer_instance_id_idx
 
 DROP TABLE qal_customer
 
+drop index qal_other_address_map_trashed_p_idx
+drop index qal_other_address_map_address_id_idx
+drop index qal_other_address_map_record_type_idx
+drop index qal_other_address_map_instance_id_idx
+drop index qal_other_address_map_contact_id_idx
+
+DROP TABLE qal_other_address_map
+
+
 drop index qal_trashed_p_idx
 drop index qal_address_address_type_idx
 drop index qal_address_id_idx
