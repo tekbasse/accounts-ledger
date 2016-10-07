@@ -41,16 +41,48 @@ ad_proc qal_contact_write {
 }
 
 ad_proc qal_contact_delete {
-    arr_name
+    contact_id_list
 } {
-    Delete a contact record
+    Deletes records.
+    contact_id_list may be a one or a list.
+    User must be a package admin.
 } {
-    upvar 1 instance_id instance_id
-    upvar 1 $arr_name a_arr
-
-
+    set success_p 1
+    if { $contact_id_list ne "" } {
+        set user_id [ad_conn user_id]
+        set instance_id [qc_set_instance_id]
+        set admin_p [permission::permission_p -party_id $user_id \
+                         -object_id [ad_conn package_id] -privilege admin]
+        set success_p $admin_p
+        if { $admin_p } {
+            if { [llength $contact_id_list] > 0 } {
+                set validated_p [hf_list_filter_by_natural_number $contact_id_list]
+                set ip_list $contact_id_list
+            } else {
+                set contact_id [lindex $contact_id_list 0]
+                set validated_p [hf_is_natural_number $contact_id]
+                set ip_list [list $contact_id]
+            }
+            if { $validated_p } {
+                db_transaction {
+                    db_dml hf_contact_ids_delete {
+                        delete from hf_ip_addresses \
+                            where instance_id=:instance_id and contact_id in \
+                            ([template::util::tcl_to_sql_list $ip_list]) }
+                    db_dml hf_ip_attr_map_del {
+                        delete from hf_sub_asset_map \
+                            where instance_id=:instance_id and sub_f_id in \
+                            ([template::util::tcl_to_sql_list $ip_list]) }
+                } on_error {
+                    set success_p 0
+                }
+            } else {
+                set success_p 0
+            }
+        }
+    }
+    return $success_p
 }
-
 
 ad_proc qal_contact_trash {
     arr_name
@@ -81,14 +113,47 @@ ad_proc qal_customer_write {
 }
 
 ad_proc qal_customer_delete {
-    arr_name
+    customer_id_list
 } {
-    Delete a customer record
+    Deletes records.
+    customer_id_list may be a one or a list.
+    User must be a package admin.
 } {
-    upvar 1 instance_id instance_id
-    upvar 1 $arr_name a_arr
-
-
+    set success_p 1
+    if { $customer_id_list ne "" } {
+        set user_id [ad_conn user_id]
+        set instance_id [qc_set_instance_id]
+        set admin_p [permission::permission_p -party_id $user_id \
+                         -object_id [ad_conn package_id] -privilege admin]
+        set success_p $admin_p
+        if { $admin_p } {
+            if { [llength $customer_id_list] > 0 } {
+                set validated_p [hf_list_filter_by_natural_number $customer_id_list]
+                set ip_list $customer_id_list
+            } else {
+                set customer_id [lindex $customer_id_list 0]
+                set validated_p [hf_is_natural_number $customer_id]
+                set ip_list [list $customer_id]
+            }
+            if { $validated_p } {
+                db_transaction {
+                    db_dml hf_customer_ids_delete {
+                        delete from hf_ip_addresses \
+                            where instance_id=:instance_id and customer_id in \
+                            ([template::util::tcl_to_sql_list $ip_list]) }
+                    db_dml hf_ip_attr_map_del {
+                        delete from hf_sub_asset_map \
+                            where instance_id=:instance_id and sub_f_id in \
+                            ([template::util::tcl_to_sql_list $ip_list]) }
+                } on_error {
+                    set success_p 0
+                }
+            } else {
+                set success_p 0
+            }
+        }
+    }
+    return $success_p
 }
 
 
@@ -121,14 +186,47 @@ ad_proc qal_vendor_write {
 }
 
 ad_proc qal_vendor_delete {
-    arr_name
+    vendor_id_list
 } {
-    Delete a vendor record
+    Deletes records.
+    vendor_id_list may be a one or a list.
+    User must be a package admin.
 } {
-    upvar 1 instance_id instance_id
-    upvar 1 $arr_name a_arr
-
-
+    set success_p 1
+    if { $vendor_id_list ne "" } {
+        set user_id [ad_conn user_id]
+        set instance_id [qc_set_instance_id]
+        set admin_p [permission::permission_p -party_id $user_id \
+                         -object_id [ad_conn package_id] -privilege admin]
+        set success_p $admin_p
+        if { $admin_p } {
+            if { [llength $vendor_id_list] > 0 } {
+                set validated_p [hf_list_filter_by_natural_number $vendor_id_list]
+                set ip_list $vendor_id_list
+            } else {
+                set vendor_id [lindex $vendor_id_list 0]
+                set validated_p [hf_is_natural_number $vendor_id]
+                set ip_list [list $vendor_id]
+            }
+            if { $validated_p } {
+                db_transaction {
+                    db_dml hf_vendor_ids_delete {
+                        delete from hf_ip_addresses \
+                            where instance_id=:instance_id and vendor_id in \
+                            ([template::util::tcl_to_sql_list $ip_list]) }
+                    db_dml hf_ip_attr_map_del {
+                        delete from hf_sub_asset_map \
+                            where instance_id=:instance_id and sub_f_id in \
+                            ([template::util::tcl_to_sql_list $ip_list]) }
+                } on_error {
+                    set success_p 0
+                }
+            } else {
+                set success_p 0
+            }
+        }
+    }
+    return $success_p
 }
 
 
