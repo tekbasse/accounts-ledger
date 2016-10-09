@@ -36,7 +36,7 @@ ad_proc qal_contact_defaults {
                     url "" \
                     user_id "" \
                     created $nowts \
-                    created_by $user_id \
+                    created_by "" \
                     trashed_p "0" \
                     trashed_by "" \
                     trashed_ts "" \
@@ -55,6 +55,72 @@ It is out of sync with qal_contact_keys"
     return 1
 }
 
+ad_proc qal_contact_user_map_defaults {
+    arr_name
+} {
+    Sets defaults for a contact record into array_name 
+    if element does not yet exist in array.
+} {
+    upvar 1 instance_id instance_id
+    upvar 1 $arr_name c_arr
+    set nowts [dt_systime -gmt 1]
+    set c_list [list \
+                    instance_id $instance_id \
+                    contact_id "" \
+                    user_id "" \
+                    created $nowts \
+                    created_by "" \
+                    trashed_p "0" \
+                    trashed_by "" \
+                    trashed_ts "" ]
+    set c2_list [list ]
+    foreach {key value} $c_list {
+        lappend c2_list $key
+        if { ![exists_and_not_null c_arr(${key}) ] } {
+            set c_arr(${key}) $value
+        }
+    }
+    if { [llength [set_difference_named_v c2_list [qal_contact_user_map_keys]]] > 0 } {
+        ns_log Warning "qal_contact_user_map_defaults: Update this proc. \
+It is out of sync with qal_contact_user_map_keys"
+    }
+    return 1
+}
+
+
+ad_proc qal_other_address_map_defaults {
+    arr_name
+} {
+    Sets defaults for a contact record into array_name 
+    if element does not yet exist in array.
+} {
+    upvar 1 instance_id instance_id
+    upvar 1 $arr_name c_arr
+    set nowts [dt_systime -gmt 1]
+    set c_list [list \
+                    instance_id $instance_id \
+                    contact_id "" \
+                    addrs_id "" \
+                    record_type "" \
+
+                    created $nowts \
+                    created_by "" \
+                    trashed_p "0" \
+                    trashed_by "" \
+                    trashed_ts "" ]
+    set c2_list [list ]
+    foreach {key value} $c_list {
+        lappend c2_list $key
+        if { ![exists_and_not_null c_arr(${key}) ] } {
+            set c_arr(${key}) $value
+        }
+    }
+    if { [llength [set_difference_named_v c2_list [qal_other_address_map_keys]]] > 0 } {
+        ns_log Warning "qal_other_address_map_defaults: Update this proc. \
+It is out of sync with qal_other_address_map_keys"
+    }
+    return 1
+}
 
 ad_proc qal_customer_defaults {
     arr_name
@@ -65,7 +131,8 @@ ad_proc qal_customer_defaults {
     upvar 1 instance_id instance_id
     upvar 1 $arr_name c_arr
     set nowts [dt_systime -gmt 1]
-    set c_list [list instance_id $instance_id \
+    set c_list [list \
+                    instance_id $instance_id \
                    ns_id "" \
                    active_p "0" \
                    name_record "" \
