@@ -79,6 +79,7 @@ CREATE TABLE qal_other_address_map {
        instance_id         integer,
        addrs_id            integer,
        -- address, other..
+       -- if record_type is not address, it may be YIM,AIM etc --
        record_type         varchar(30),
        -- If this is an address, reference qal_address.id
        -- otherwise this is a contact method (skype,aim,yim,jabber etc)
@@ -89,7 +90,7 @@ CREATE TABLE qal_other_address_map {
        trashed_p           integer,
        trashed_by          integer,
        trashed_ts          timestamptz,
-       -- if other --
+       -- if record_type is not address, refer to account_name
        -- YIM username etc. or maybe runner..
        -- text allows for anything
        account_name        text,

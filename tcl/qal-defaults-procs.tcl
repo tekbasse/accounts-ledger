@@ -13,12 +13,34 @@ ad_proc qal_contact_defaults {
     upvar 1 instance_id instance_id
     upvar 1 $arr_name c_arr
     set nowts [dt_systime -gmt 1]
-    set c_list [list instance_id $instance_id \
-                   ns_id "" \
-                   active_p "0" \
-                   name_record "" \
-                   time_trashed "" \
-                   time_created $nowts]
+    set c_list [list \
+                    id "" \
+                    rev_id "" \
+                    instance_id $instance_id \
+                    parent_id "" \
+                    label "" \
+                    name "" \
+                    street_addrs_id "" \
+                    mailing_addrs_id "" \
+                    billing_addrs_id "" \
+                    vendor_id "" \
+                    customer_id "" \
+                    taxnumber "" \
+                    sic_code "" \
+                    iban "" \
+                    bic "" \
+                    language_code "" \
+                    currency "" \
+                    time_start "" \
+                    time_end "" \
+                    url "" \
+                    user_id "" \
+                    created $nowts \
+                    created_by $user_id \
+                    trashed_p "0" \
+                    trashed_by "" \
+                    trashed_ts "" \
+                    notes "" ]
     set c2_list [list ]
     foreach {key value} $c_list {
         lappend c2_list $key
