@@ -37,5 +37,3 @@ ad_proc qal_contact_keys {
     set keys [qal_keys_by $keys_list $separator]
      return $keys
 }
-
-
