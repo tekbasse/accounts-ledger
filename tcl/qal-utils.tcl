@@ -5,7 +5,7 @@ ad_library {
 }
 
 
-ad_proc -private qc_keys_by {
+ad_proc -public qal_keys_by {
     keys_list
     {separator ""}
 } {
