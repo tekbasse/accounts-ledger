@@ -10,7 +10,7 @@ ad_library {
     @email: tekbasse@yahoo.com
 }
 
-ad_proc -private qal_namelur { 
+ad_proc -public qal_namelur { 
     {n "3"}
     {m "5"}
     {dot "."}
