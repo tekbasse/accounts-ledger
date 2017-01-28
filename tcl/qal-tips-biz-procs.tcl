@@ -4,6 +4,21 @@ ad_library {
 
 }
 
+ad_proc qal_contact_create {
+    arr_name
+} {
+    Creates a new qal_contact record
+    # validations etc
+    ##code
+
+    # at a minimum, object_id needs to be used to prevent id collision with other packges:
+    # set id \[db_nextval acs_object_id_seq\]
+    set id [application_group::new -package_id $instance_id -group_name $label]
+    # insert into db
+
+    return $id
+}
+
 ad_proc qal_contact_write {
     arr_name
 } {

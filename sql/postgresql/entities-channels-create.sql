@@ -14,6 +14,11 @@
 
 --part of company_dates, company_details
 CREATE TABLE qal_contact (
+       -- party_id ie object_id. This is to avoid id collision with inter-package use cases,
+       -- such as with customer-service package and this one.
+       -- In general, it is a good idea to link an object_id to each contact anyway,
+       -- in case conventional openacs group permissions are used.
+       -- set id  application_group::new -package_id $instance_id -group_name $label
        id                  integer unique not null,
        -- revision_id. Updates create new record and trash old
        -- same id, new rev_id 
