@@ -4,6 +4,13 @@ ad_library {
 
 }
 
+    ##code 
+    # if contact.id == "" see if id exists in qal_contact_read, otherwise create an id via qal_contact_create?
+    # No. This feature should be a separate function, only create after a qualified user accepts it.
+    # Add to a UBL feature in accounts-ledger, such as when accepting a quotation request etc.
+    # This will mean there needs to be a stack for incoming documents with related info..
+    # as a part of UBL..
+
 ad_proc qal_contact_create {
     arr_name
 } {
