@@ -42,6 +42,8 @@ CREATE TABLE qal_contact (
        bic                 varchar(11),
        language_code       varchar(6),
        currency            varchar(3),
+       -- default is from user_preferences.timezone
+       timezone            varchar(100),
        time_start          timestamptz,
        time_end            timestamptz,
        url                 varchar(200),
