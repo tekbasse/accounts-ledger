@@ -5,13 +5,23 @@ ad_library {
 }
 
 ad_proc qal_contact_id_from_customer_id {
-    customer_id
+    customer_id_list
 } {
-    Returns contact_id of customer_id
+    Returns contact_id(s) of customer_id(s)
 } {
-    # used in customer-service
+    # used in contact-support, expects parameter to be a list
 
 }
+
+ad_proc qal_contact_id_from_vendor_id {
+    vendor_id_list
+} {
+    Returns contact_id(s) of vendor_id(s)
+} {
+    # used in contact-support, expects parameter to be a list
+
+}
+
 
 ad_proc qal_contact_id_read {
     contact_id
@@ -41,7 +51,7 @@ ad_proc qal_user_ids_of_contact_id {
 } {
     Returns user_ids of contact_id, if all_p is "0", just returns primary (default first user_id).
 } {
-    # used in customer-service to determine timezone
+    # used in contact-support to determine timezone
     upvar 1 instance_id instance_id
     set user_id_list ""
     
