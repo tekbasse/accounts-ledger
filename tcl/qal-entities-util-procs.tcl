@@ -37,13 +37,39 @@ ad_proc qal_contact_id_read {
 ad_proc qal_contact_ids_of_user_id {
     user_id
 } {
-
+    
 } {
     upvar 1 instance_id instance_id
     set contact_id_list ""
 
     return $contact_id_list
 }
+
+
+ad_proc qal_customer_ids_of_user_id {
+    user_id
+} {
+    
+} {
+    upvar 1 instance_id instance_id
+    set customer_id_list ""
+
+    return $customer_id_list
+}
+
+
+
+ad_proc qal_vendor_ids_of_user_id {
+    user_id
+} {
+    
+} {
+    upvar 1 instance_id instance_id
+    set vendor_id_list ""
+
+    return $vendor_id_list
+}
+
 
 ad_proc qal_user_ids_of_contact_id {
     contact_id
