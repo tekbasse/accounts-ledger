@@ -25,11 +25,12 @@ ad_proc qal_contact_id_from_vendor_id {
 
 ad_proc qal_contact_id_read {
     contact_id
-    {names ""}
+    names_list
 } {
-    Returns a record in a name value list. names are fields from table.
-} {    # select data from one contact_id, customer_id, or vendor_id
-    # if customer_id or vendor_id, also makes available contact_id info
+    Returns a record in a name value list. names are fields from qal_contact table.
+} {   
+    # used in contact-support pkg
+    # select data from one contact_id
     
     
 }
