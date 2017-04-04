@@ -33,8 +33,13 @@ if { $i > -1 } {
 } else {
     set domain [hf_domain_example]
 }
+# create a contact for each user.
+set users_list [db_list_of_lists cc_users_read_all {select user_id, email_verified_p, first_names, last_name, email, username, screen_name, member_state from cc_users} ]
+foreach user $users_list {
+    ##code
 
 
+}
 
 
 ns_log Notice "demo install end, based on: accounts-ledger-test-api-procs.tcl assets_sys_build_api_check"
