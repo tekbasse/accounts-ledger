@@ -14,14 +14,14 @@ ad_library {
 ad_proc qal_contact_create {
     arr_name
 } {
-    Creates a new qal_contact record
-    # validations etc
-    ##code
+    # Creates a new qal_contact record
+
+    upvar 1 instance_id instance_id
 
     # at a minimum, object_id needs to be used to prevent id collision with other packges:
     # set id \[db_nextval acs_object_id_seq\]
-    set id [application_group::new -package_id $instance_id -group_name $label]
-    # insert into db
+    set arr_name(id) ""
+    qal_contact_write arr_name
 
     return $id
 }
@@ -39,21 +39,26 @@ ad_proc qal_contact_write {
     upvar 1 instance_id instance_id
     upvar 1 $arr_name a_arr
     qal_contact_defaults arr_name
-    hf_sub_asset_map_defaults arr_name
     qf_array_to_vars arr_name [qal_contact_keys]
-    qf_array_to_vars arr_name [hf_sub_asset_map_keys]
-    qf_array_to_vars arr_name [list asset_type_id label]
-    if { $type_id eq "" } {
-        set type_id $asset_type_id
+    # validations etc
+    if { [string length $name] > 79 } {
+        set name [qf_abbreviate $name 79 ]
     }
-    set sub_type_id "ns"
-    hf_sub_label_define_empty
-    set attribute_p [qf_is_true $attribute_p 1]
-    set sub_f_id $ns_id
-    set ns_id_new [hf_sub_asset_map_update $f_id $type_id $sub_label $sub_f_id $sub_type_id $attribute_p]
-    if { $ns_id_new ne "" } {
+    
+    if { $label eq "" } { 
+        set label [qf_abbreviate $name 39 "-"]
+    } elseif { [string length $label ] > 39 } {
+        set label [qf_abbreviate $label 39 "-"]
+    }
+      
+    ##code
+
+
+
+    # insert into db
+    if { $id eq "" } {
         # record revision/new
-        set ns_id $ns_id_new
+        set id [application_group::new -package_id $instance_id -group_name $label]
         db_dml ns_asset_create "insert into qal_contact \
  ([qal_contact_keys ","]) values ([qal_contact_keys ",:"])"
     } else {
