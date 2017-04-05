@@ -97,8 +97,35 @@ ad_proc qal_contact_keys {
 } {
     Returns an ordered list of keys for qal_contact
 } {
-
-    set keys_list [list instance_id id label name street_address_id mailing_address_id billing_address_id business_id taxnumber sic_code iban bic language_code currency time_start time_end url notes]
+    set keys_list [list \
+                       id \
+                       rev_id \
+                       instance_id \
+                       parent_id \
+                       label \
+                       name \
+                       street_addrs_id \
+                       mailing_addrs_id \
+                       billing_addrs_id \
+                       vendor_id \
+                       customer_id \
+                       taxnumber \
+                       sic_code \
+                       iban \
+                       bic \
+                       language_code \
+                       currency \
+                       timezone \
+                       time_start \
+                       time_end \
+                       url \
+                       user_id \
+                       created \
+                       created_by \
+                       trashed_p \
+                       trashed_by \
+                       trashed_ts \
+                       notes ]
     set keys [qal_keys_by $keys_list $separator]
-     return $keys
+    return $keys
 }

@@ -31,6 +31,7 @@ ad_proc qal_contact_defaults {
                     bic "" \
                     language_code "" \
                     currency "" \
+                    timezone "" \
                     time_start "" \
                     time_end "" \
                     url "" \
