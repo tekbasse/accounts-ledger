@@ -38,8 +38,19 @@ CREATE TABLE qal_contact (
        customer_id         integer,
        taxnumber           varchar(32),
        sic_code            varchar(15),
+       -- country code using ISO 3166-1 alpha-2 - char(2)
+       -- check digits - char(2)
+       -- account number varchar(30)
+       -- no spaces
+       -- yet expressed in groups of four characters separated by a space
        iban                varchar(34),
-       bic                 varchar(11),
+       -- business identifier code aka swift etc
+       -- institution code char(4)
+       -- iso 3166-1 alpha-2 country code char(2)
+       -- location code char(2)
+       -- branch code char(3), optional.
+       -- logical terminal code char(1) not part of formal bic. 
+       bic                 varchar(12),
        language_code       varchar(6),
        currency            varchar(3),
        -- default is from user_preferences.timezone
