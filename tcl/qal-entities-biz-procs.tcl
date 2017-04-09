@@ -100,6 +100,24 @@ ad_proc qal_contact_write {
         set timezone [string range $timezone 0 99]
     }
     # skip time_start , time_end checks for now
+    set time_start_s [qf_clock_scan $time_start]
+    if { $time_start_s eq "" } {
+        set time_start_s [clock seconds]
+    }
+    set time_start [qf_clock_format $time_start_s ]
+    set time_end_s [qf_clock_scan $time_end]
+    if { $time_end_s ne "" } {
+        set time_end [qf_clock_format $time_end_s ]
+    }
+
+    if { [hf_are_safe_and_printable_characters_q $url] } {
+        if  { ![util_url_valid_p $url ] } {
+            set url2 "http://"
+        }
+        append url2 $url
+    } else {
+       ## check recent discussion with gustafn and others about nsencode etc
+    }
     ##code
     if { ![qf_natural_number $user_id] } {
         if { [ns_conn isconnected] } {
