@@ -124,7 +124,8 @@ ad_proc qal_contact_write {
             set user_id [ad_conn user_id]
         } else {
             set user_id $instance_id
-
+        }
+    }
 
     # insert into db
     if { ![qf_is_natural_number $id] } {

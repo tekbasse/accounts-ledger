@@ -45,13 +45,18 @@ ad_proc -public qal_timestamp_to_tz {
     {timestamp_format "%Y-%m-%d %H:%M:%S%z"}
 } {
     Converts a timestamp to specified timezone. 
-    If timezone (tz) is empty string, converts to system's default timezone.
+    If timezone (tz) is empty string, converts to connected users's timezone otherwise system's default.
     If timestamp_format is empty string, uses clock scan's default interpretation.
 } {
-    set ts_s [qf_clock_scan $timestamp_any_tz $timestamp_format]
-    if { $tz eq "" } {
-        set tz_offset [clock format $ts_s -format "%z"]
+    if { $timestamp_format eq "" } {
+        # let clock scan do a best guess
+        set cs_s [clock scan $timestamp_any_tz]
+    } else {
+        set cs_s [clock scan $timestamp_any_tz -format $timestamp_format]
     }
-    set ts_new_tz [clock format $ts_s -format $timestamp_format]
-    return $ts_new_tz
+    set yyyymmdd_hhmmss_utc [clock format $cs_s -gmt true]
+    #redundant:
+    # if $tz eq "", set tz \lang::system::timezone 
+    set timestamp_ltz [lc_time_utc_to_local $yyyymmdd_hhmmss_utc $tz]
+    return $timestamp_ltz
 }
