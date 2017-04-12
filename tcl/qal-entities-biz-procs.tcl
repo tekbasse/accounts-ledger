@@ -99,7 +99,7 @@ ad_proc qal_contact_write {
         regsub -all -- {[^a-z_A-Z0-9]} $timezone {} timezone
         set timezone [string range $timezone 0 99]
     }
-    # skip time_start , time_end checks for now
+   
     set time_start_s [qf_clock_scan $time_start]
     if { $time_start_s eq "" } {
         set time_start_s [clock seconds]
@@ -115,10 +115,12 @@ ad_proc qal_contact_write {
             set url2 "http://"
         }
         append url2 $url
+        set url2 [ad_urlencode_url $url2]
     } else {
-       ## check recent discussion with gustafn and others about nsencode etc
+        set url2 [ad_urlencode_url $url2]
     }
-    ##code
+    set url [string range $url2 0 198]
+
     if { ![qf_natural_number $user_id] } {
         if { [ns_conn isconnected] } {
             set user_id [ad_conn user_id]
@@ -127,6 +129,11 @@ ad_proc qal_contact_write {
         }
     }
 
+    set created_s [qf_clock_scan $created]
+    if { $created_s eq "" } {
+        set created_s [clock seconds]
+    }
+    set created [qf_clock_format $created_s ]
     # insert into db
     if { ![qf_is_natural_number $id] } {
         # record revision/new
@@ -138,11 +145,14 @@ ad_proc qal_contact_write {
         ns_log Warning "qal_contact_write: rejected '[array get arr_name]'"
     } else {
 
-
-
         set rev_id [db_nextval qal_id]
         set created [clock format [clock seconds] -format "%Y%m%d %H%M%S"]
-        set created_by $user_id
+        if { [ns_conn isconnected] } {
+            set created_by [ad_conn user_id]
+        } else {
+            set created_by $user_id
+        } 
+
         set trashed_p 0
         set trashed_by ""
         set trashed_ts ""
