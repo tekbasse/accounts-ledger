@@ -180,24 +180,22 @@ ad_proc qal_contact_delete {
                          -object_id [ad_conn package_id] -privilege admin]
         set success_p $admin_p
         if { $admin_p } {
-            if { [llength $contact_id_list] > 0 } {
-                set validated_p [hf_list_filter_by_natural_number $contact_id_list]
-                set ip_list $contact_id_list
+            set contact_id_list_len [llength $contact_id_list]
+            if { $contact_id_list_len > 0 } {
+                set validated_p [hf_natural_number_list_validate $contact_id_list]
             } else {
-                set contact_id [lindex $contact_id_list 0]
-                set validated_p [hf_is_natural_number $contact_id]
-                set ip_list [list $contact_id]
+                set validated_p 0
             }
             if { $validated_p } {
                 db_transaction {
                     db_dml hf_contact_ids_delete {
                         delete from hf_ip_addresses \
                             where instance_id=:instance_id and contact_id in \
-                            ([template::util::tcl_to_sql_list $ip_list]) }
+                            ([template::util::tcl_to_sql_list $contact_id_list]) }
                     db_dml hf_ip_attr_map_del {
                         delete from hf_sub_asset_map \
                             where instance_id=:instance_id and sub_f_id in \
-                            ([template::util::tcl_to_sql_list $ip_list]) }
+                            ([template::util::tcl_to_sql_list $contact_id_list]) }
                 } on_error {
                     set success_p 0
                 }
@@ -210,14 +208,54 @@ ad_proc qal_contact_delete {
 }
 
 ad_proc qal_contact_trash {
-    arr_name
+    contact_id_list
 } {
-    Trash a contact record
+    Trash a contact record.
+    May be one or a list
+    Must have write permission for instance or contact_id (via q-control package).
 } {
-    upvar 1 instance_id instance_id
-    upvar 1 $arr_name a_arr
-
-
+    set success_p 0
+    if { $contact_id_list ne "" } {
+        set user_id [ad_conn user_id]
+        set instance_id [qc_set_instance_id]
+        set contact_id_list_len [llength $contact_id_list]
+        if { $contact_id_list_len > 0 } {
+            set validated_p [hf_natural_number_list_validate $contact_id_list]
+        } else {
+            set validated_p 0
+        }
+        if { $validated_p } {
+            set instance_write_p [qc_permission_p $user_id $instance_id non_assets write $instance_id]
+            if { $instance_write_p } {
+                set filtered_contact_id_list $contact_id_list
+            } else {
+                set filtered_contact_id_list [list ]
+                set at_least_one_write_p 0
+                foreach contact_id $contact_id_list {
+                    if { [qc_permission_p $user_id $contact_id non_assets write $instance_id] } {
+                        set at_least_one_write_p 1
+                        lappend filtered_contact_id_list $contact_id
+                    }
+                }
+            } 
+            if { $instance_write_p || $at_least_one_write_p } {
+                set success_p 1
+                db_transaction {
+                    db_dml hf_contact_ids_delete {
+                        delete from hf_ip_addresses \
+                            where instance_id=:instance_id and contact_id in \
+                            ([template::util::tcl_to_sql_list $filtered_contact_id_list]) }
+                    db_dml hf_ip_attr_map_del {
+                        delete from hf_sub_asset_map \
+                            where instance_id=:instance_id and sub_f_id in \
+                            ([template::util::tcl_to_sql_list $filtered_contact_id_list]) }
+                } on_error {
+                    set success_p 0
+                }
+            }
+        }
+    }
+    return $success_p
 }
 
 
@@ -253,23 +291,20 @@ ad_proc qal_customer_delete {
         set success_p $admin_p
         if { $admin_p } {
             if { [llength $customer_id_list] > 0 } {
-                set validated_p [hf_list_filter_by_natural_number $customer_id_list]
-                set ip_list $customer_id_list
+                set validated_p [hf_natural_number_list_validate $customer_id_list]
             } else {
-                set customer_id [lindex $customer_id_list 0]
-                set validated_p [hf_is_natural_number $customer_id]
-                set ip_list [list $customer_id]
+                set validated_p 0
             }
             if { $validated_p } {
                 db_transaction {
                     db_dml hf_customer_ids_delete {
                         delete from hf_ip_addresses \
                             where instance_id=:instance_id and customer_id in \
-                            ([template::util::tcl_to_sql_list $ip_list]) }
+                            ([template::util::tcl_to_sql_list $customer_id_list]) }
                     db_dml hf_ip_attr_map_del {
                         delete from hf_sub_asset_map \
                             where instance_id=:instance_id and sub_f_id in \
-                            ([template::util::tcl_to_sql_list $ip_list]) }
+                            ([template::util::tcl_to_sql_list $customer_id_list]) }
                 } on_error {
                     set success_p 0
                 }
@@ -326,23 +361,20 @@ ad_proc qal_vendor_delete {
         set success_p $admin_p
         if { $admin_p } {
             if { [llength $vendor_id_list] > 0 } {
-                set validated_p [hf_list_filter_by_natural_number $vendor_id_list]
-                set ip_list $vendor_id_list
+                set validated_p [hf_natural_number_list_validate $vendor_id_list]
             } else {
-                set vendor_id [lindex $vendor_id_list 0]
-                set validated_p [hf_is_natural_number $vendor_id]
-                set ip_list [list $vendor_id]
+                set validated_p 0
             }
             if { $validated_p } {
                 db_transaction {
                     db_dml hf_vendor_ids_delete {
                         delete from hf_ip_addresses \
                             where instance_id=:instance_id and vendor_id in \
-                            ([template::util::tcl_to_sql_list $ip_list]) }
+                            ([template::util::tcl_to_sql_list $vendor_id_list]) }
                     db_dml hf_ip_attr_map_del {
                         delete from hf_sub_asset_map \
                             where instance_id=:instance_id and sub_f_id in \
-                            ([template::util::tcl_to_sql_list $ip_list]) }
+                            ([template::util::tcl_to_sql_list $vendor_id_list]) }
                 } on_error {
                     set success_p 0
                 }
