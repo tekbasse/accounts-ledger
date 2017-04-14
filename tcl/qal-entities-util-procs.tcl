@@ -129,3 +129,30 @@ ad_proc qal_contact_keys {
     set keys [qal_keys_by $keys_list $separator]
     return $keys
 }
+
+ad_proc qal_customer_keys {
+    {separator ""}
+} {
+    Returns an ordered list of keys for qal_customer
+} {
+    set keys_list [list \
+                       id \
+                       instance_id \
+                       rev_id \
+                       contact_id \
+                       discount \
+                       tax_included \
+                       credit_limit \
+                       terms \
+                       terms_unit \
+                       annual_value \
+                       customer_number \
+                       pricegroup_id \
+                       created \
+                       created_by \
+                       trashed_p \
+                       trashed_by \
+                       trashed_ts ]
+    set keys [qal_keys_by $keys_list $separator]
+    return $keys
+}
