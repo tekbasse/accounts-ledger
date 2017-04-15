@@ -27,6 +27,7 @@ CREATE TABLE qal_contact (
        -- for some aggregate reporting, a parent_id may be useful. 
        -- However, each contact is considered a separate entity for permissions etc.
        parent_id           integer,
+       -- label is expected to be unique to an instance_id
        label               varchar(40),
        name                varchar(80),
        -- preferred qal_other_address_map.addrs_id

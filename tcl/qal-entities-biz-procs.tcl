@@ -23,18 +23,28 @@ ad_proc qal_contact_id_exists_q {
 }
 
 
+ad_proc qal_contact_label_exists_q {
+    contact_label
+} {
+    Returns 1 if contact_label exists, otherwise returns 0
+} {
+    upvar 1 instance_id instance_id
+    db_0or1row qal_contact_label_exists_q {select id from qal_contact where instance_id=:instance_id and label=:contact_label and trashed_p!='1'}
+    return [info exists id]
+}
+
+
 ad_proc qal_contact_create {
     arr_name
 } {
     # Creates a new qal_contact record
 
     upvar 1 instance_id instance_id
-
+    upvar 1 $arr_name arr_name
     # at a minimum, object_id needs to be used to prevent id collision with other packges:
     # set id \[db_nextval acs_object_id_seq\]
     set arr_name(id) ""
-    qal_contact_write arr_name
-
+    set id [qal_contact_write arr_name]
     return $id
 }
 
@@ -151,8 +161,11 @@ ad_proc qal_contact_write {
         # record revision/new
         set id [application_group::new -package_id $instance_id -group_name $label]
         #  now_yyyymmdd_hhmmss
+        set create_p 1
         set time_start [clock format [clock seconds] -format "%Y%m%d %H%M%S"]
-    } 
+    } else {
+        set create_p 0
+    }
     if { $error_p } {
         ns_log Warning "qal_contact_write: rejected '[array get arr_name]'"
     } else {
@@ -169,7 +182,19 @@ ad_proc qal_contact_write {
         set trashed_by ""
         set trashed_ts ""
         db_transaction {
-            ##code if old id exists with untrashed rev_id, trash it
+            if { !$create_p } {
+                db_dml qal_contact_trash { update qal_contact set trashed_p='1',trashed_by=:user_id,trashed_ts=now() where id=:id
+                }
+                # Make sure label is unique
+                set i 1
+                set label_orig $label
+                while { [qal_contact_label_exists_q $label] && $i < 1000 } {
+                    incr i
+                    set chars_max [expr { 38 - [string length $i] } ]
+                    set label [string range $label_orig 0 $chars_max]
+                    append label "-" $i
+                }
+            }
             db_dml qal_contact_create_1 "insert into qal_contact \
  ([qal_contact_keys ","]) values ([qal_contact_keys ",:"])"
         }
