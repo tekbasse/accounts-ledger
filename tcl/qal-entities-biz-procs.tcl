@@ -11,6 +11,18 @@ ad_library {
     # This will mean there needs to be a stack for incoming documents with related info..
     # as a part of UBL..
 
+
+ad_proc qal_contact_id_exists_q {
+    contact_id
+} {
+    Returns 1 if contact_id exists, otherwise returns 0
+} {
+    upvar 1 instance_id instance_id
+    db_0or1row qal_contact_exists_q {select id from qal_contact where instance_id=:instance_id and id=:contact_id and trashed_p!='1'}
+    return [info exists id]
+}
+
+
 ad_proc qal_contact_create {
     arr_name
 } {
@@ -188,14 +200,10 @@ ad_proc qal_contact_delete {
             }
             if { $validated_p } {
                 db_transaction {
-                    db_dml hf_contact_ids_delete {
-                        delete from hf_ip_addresses \
+                    db_dml qal_contact_ids_delete "
+                        delete from qal_contact \
                             where instance_id=:instance_id and contact_id in \
-                            ([template::util::tcl_to_sql_list $contact_id_list]) }
-                    db_dml hf_ip_attr_map_del {
-                        delete from hf_sub_asset_map \
-                            where instance_id=:instance_id and sub_f_id in \
-                            ([template::util::tcl_to_sql_list $contact_id_list]) }
+                            ([template::util::tcl_to_sql_list $contact_id_list]) "
                 } on_error {
                     set success_p 0
                 }
@@ -241,14 +249,9 @@ ad_proc qal_contact_trash {
             if { $instance_write_p || $at_least_one_write_p } {
                 set success_p 1
                 db_transaction {
-                    db_dml hf_contact_ids_delete {
-                        delete from hf_ip_addresses \
+                    db_dml qal_contact_ids_delete "delete from qal_contact \
                             where instance_id=:instance_id and contact_id in \
-                            ([template::util::tcl_to_sql_list $filtered_contact_id_list]) }
-                    db_dml hf_ip_attr_map_del {
-                        delete from hf_sub_asset_map \
-                            where instance_id=:instance_id and sub_f_id in \
-                            ([template::util::tcl_to_sql_list $filtered_contact_id_list]) }
+                            ([template::util::tcl_to_sql_list $filtered_contact_id_list])"
                 } on_error {
                     set success_p 0
                 }
@@ -391,14 +394,9 @@ ad_proc qal_customer_delete {
             }
             if { $validated_p } {
                 db_transaction {
-                    db_dml hf_customer_ids_delete {
-                        delete from hf_ip_addresses \
+                    db_dml qal_customer_ids_delete "delete from qal_customer \
                             where instance_id=:instance_id and customer_id in \
-                            ([template::util::tcl_to_sql_list $customer_id_list]) }
-                    db_dml hf_ip_attr_map_del {
-                        delete from hf_sub_asset_map \
-                            where instance_id=:instance_id and sub_f_id in \
-                            ([template::util::tcl_to_sql_list $customer_id_list]) }
+                            ([template::util::tcl_to_sql_list $customer_id_list]) "
                 } on_error {
                     set success_p 0
                 }
@@ -461,14 +459,9 @@ ad_proc qal_vendor_delete {
             }
             if { $validated_p } {
                 db_transaction {
-                    db_dml hf_vendor_ids_delete {
-                        delete from hf_ip_addresses \
+                    db_dml qal_vendor_ids_delete "delete from qal_vendor \
                             where instance_id=:instance_id and vendor_id in \
-                            ([template::util::tcl_to_sql_list $vendor_id_list]) }
-                    db_dml hf_ip_attr_map_del {
-                        delete from hf_sub_asset_map \
-                            where instance_id=:instance_id and sub_f_id in \
-                            ([template::util::tcl_to_sql_list $vendor_id_list]) }
+                            ([template::util::tcl_to_sql_list $vendor_id_list])"
                 } on_error {
                     set success_p 0
                 }
