@@ -24,6 +24,8 @@ CREATE TABLE qal_contact (
        -- same id, new rev_id 
        rev_id              integer default nextval('qal_id'),
        instance_id         integer not null,
+       -- for some aggregate reporting, a parent_id may be useful. 
+       -- However, each contact is considered a separate entity for permissions etc.
        parent_id           integer,
        label               varchar(40),
        name                varchar(80),
