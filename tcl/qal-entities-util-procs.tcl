@@ -4,6 +4,29 @@ ad_library {
 
 }
 
+ad_proc qal_contact_id_exists_q {
+    contact_id
+} {
+    Returns 1 if contact_id exists, otherwise returns 0
+} {
+    upvar 1 instance_id instance_id
+    db_0or1row qal_contact_exists_q {select id from qal_contact where instance_id=:instance_id and id=:contact_id and trashed_p!='1'}
+    return [info exists id]
+}
+
+
+ad_proc qal_contact_id_from_label {
+    contact_label
+} {
+    Returns id if contact_label exists, otherwise returns ""
+} {
+    upvar 1 instance_id instance_id
+    set id ""
+    db_0or1row qal_contact_label_exists_q {select id from qal_contact where instance_id=:instance_id and label=:contact_label and trashed_p!='1'}
+    return $id
+}
+
+
 ad_proc qal_contact_id_from_customer_id {
     customer_id_list
 } {

@@ -12,26 +12,6 @@ ad_library {
     # as a part of UBL..
 
 
-ad_proc qal_contact_id_exists_q {
-    contact_id
-} {
-    Returns 1 if contact_id exists, otherwise returns 0
-} {
-    upvar 1 instance_id instance_id
-    db_0or1row qal_contact_exists_q {select id from qal_contact where instance_id=:instance_id and id=:contact_id and trashed_p!='1'}
-    return [info exists id]
-}
-
-
-ad_proc qal_contact_label_exists_q {
-    contact_label
-} {
-    Returns 1 if contact_label exists, otherwise returns 0
-} {
-    upvar 1 instance_id instance_id
-    db_0or1row qal_contact_label_exists_q {select id from qal_contact where instance_id=:instance_id and label=:contact_label and trashed_p!='1'}
-    return [info exists id]
-}
 
 
 ad_proc qal_contact_create {
@@ -188,7 +168,7 @@ ad_proc qal_contact_write {
                 # Make sure label is unique
                 set i 1
                 set label_orig $label
-                while { [qal_contact_label_exists_q $label] && $i < 1000 } {
+                while { [qal_contact_id_from_label $label] ne "" && $i < 1000 } {
                     incr i
                     set chars_max [expr { 38 - [string length $i] } ]
                     set label [string range $label_orig 0 $chars_max]
