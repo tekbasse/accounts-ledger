@@ -15,6 +15,17 @@ ad_proc qal_contact_read {
 
 }
 
+ad_proc qal_contacts_read {
+    arr_name
+} {
+
+} {
+    upvar 1 instance_id instance_id
+    upvar 1 $arr_name c_arr
+
+
+}
+
 ad_proc qal_customer_read {
     arr_name
 } {
@@ -26,9 +37,31 @@ ad_proc qal_customer_read {
 
 }
 
+ad_proc qal_customers_read {
+    arr_name
+} {
+
+} {
+    upvar 1 instance_id instance_id
+    upvar 1 $arr_name c_arr
+
+
+}
 
 
 ad_proc qal_vendor_read {
+    arr_name
+} {
+
+} {
+    upvar 1 instance_id instance_id
+    upvar 1 $arr_name v_arr
+
+
+}
+
+
+ad_proc qal_vendors_read {
     arr_name
 } {
 

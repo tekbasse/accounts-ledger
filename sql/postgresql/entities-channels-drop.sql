@@ -23,7 +23,7 @@ drop index qal_sic_code_idx
 DROP TABLE qal_sic
 
 drop index qal_vendor_trashed_p_idx
-drop index qal_vendor_vendor_number_idx
+drop index qal_vendor_vendor_code_idx
 drop index qal_vendor_id_idx
 drop index qal_vendor_contact_id_idx
 drop index qal_vendor_instance_id_idx

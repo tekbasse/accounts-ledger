@@ -27,6 +27,53 @@ ad_proc qal_contact_id_from_label {
 }
 
 
+ad_proc qal_customer_id_exists_q {
+    customer_id
+} {
+    Returns 1 if customer_id exists, otherwise returns 0
+} {
+    upvar 1 instance_id instance_id
+    db_0or1row qal_customer_exists_q {select id from qal_customer where instance_id=:instance_id and id=:customer_id and trashed_p!='1'}
+    return [info exists id]
+}
+
+
+ad_proc qal_customer_id_from_code {
+    customer_code
+} {
+    Returns id if customer_code exists, otherwise returns ""
+} {
+    upvar 1 instance_id instance_id
+    set id ""
+    db_0or1row qal_customer_code_exists_q {select id from qal_customer where instance_id=:instance_id and customer_code=:customer_code and trashed_p!='1'}
+    return $id
+}
+
+
+ad_proc qal_vendor_id_exists_q {
+    vendor_id
+} {
+    Returns 1 if vendor_id exists, otherwise returns 0
+} {
+    upvar 1 instance_id instance_id
+    db_0or1row qal_vendor_exists_q {select id from qal_vendor where instance_id=:instance_id and id=:vendor_id and trashed_p!='1'}
+    return [info exists id]
+}
+
+
+ad_proc qal_vendor_id_from_code {
+    vendor_code
+} {
+    Returns id if vendor_code exists, otherwise returns ""
+} {
+    upvar 1 instance_id instance_id
+    set id ""
+    db_0or1row qal_vendor_code_exists_q {select id from qal_vendor where instance_id=:instance_id and vendor_code=:vendor_code and trashed_p!='1'}
+    return $id
+}
+
+
+
 ad_proc qal_contact_id_from_customer_id {
     customer_id_list
 } {

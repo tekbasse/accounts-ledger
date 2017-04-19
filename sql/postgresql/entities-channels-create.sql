@@ -171,11 +171,12 @@ CREATE TABLE qal_customer (
        credit_limit        numeric default '0',
        -- terms aka company_licenses.lic_type
        terms               numeric default '0',
-       terms_unit          varchar(20) default 'days',
        -- annual value at rate aka company_licenses.lic_value
-       annual_value        numeric,
+       terms_unit          varchar(20) default 'days',
        -- terms_unit in tcl interval (days, weeks, month etc)
-       customer_number     varchar(32),
+       annual_value        numeric,
+       --was customer_number
+       customer_code     varchar(32),
        pricegroup_id       integer,
        created             timestamptz not null DEFAULT now(),
        created_by          integer,
@@ -197,7 +198,8 @@ CREATE TABLE qal_vendor (
        contact_id          integer,
        terms               integer default 0,
        tax_included        varchar(1) default '0',
-       vendor_number       varchar(32),
+       -- was vendor_number
+       vendor_code         varchar(32),
        gifi_accno          varchar(30),
        discount            numeric,
        credit_limit        numeric default 0,
@@ -222,7 +224,7 @@ CREATE TABLE qal_vendor (
 create index qal_vendor_instance_id_idx on qal_vendor (instance_id);
 create index qal_vendor_contact_id_idx on qal_vendor (contact_id);
 create index qal_vendor_id_idx on qal_vendor (id);
-create index qal_vendor_vendor_number_idx on qal_vendor (vendor_number);
+create index qal_vendor_vendor_code_idx on qal_vendor (vendor_code);
 create index qal_vendor_trashed_p_idx on qal_vendor (trashed_p);
 
 -- -- SIC, NAICS codes
