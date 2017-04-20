@@ -334,7 +334,7 @@ ad_proc qal_customer_write {
         set time_start [clock format [clock seconds] -format "%Y%m%d %H%M%S"]
     } 
     if { $error_p } {
-        ns_log Warning "qal_contact_write: rejected '[array get arr_name]'"
+        ns_log Warning "qal_customer_write: rejected '[array get arr_name]'"
     } else {
 
         set rev_id [db_nextval qal_id]
@@ -467,8 +467,90 @@ ad_proc qal_vendor_write {
 } {
     upvar 1 instance_id instance_id
     upvar 1 $arr_name a_arr
-    ##code
+    set error_p 0
+    qal_vendor_defaults arr_name
+    qf_array_to_vars arr_name [qal_contact_keys]
 
+    # validations etc
+    if { ![qf_is_natural_number $id] } {
+        set id ""
+    }
+    if { ![qf_is_natural_number $contact_id] } {
+        set contact_id ""
+    }
+    if { ![qf_is_decimal $discount] } {
+        set discount ""
+    }
+    
+    if { [qf_is_true $tax_included] } {
+        set tax_included 1
+    } else {
+        set tax_included 0
+    }
+    if { ![qf_is_decimal $credit_limit] } {
+        set credit_limit ""
+    }
+    if { ![qf_is_decimal $terms] } {
+        set terms ""
+    }
+
+    set terms_unit [string range $terms_unit 0 19]
+    set gifi_accno [string range $gifi_accno 0 29]
+
+    set vendor_code [string range $vendor_code 0 31]
+
+    if { ![qf_is_natural_number $pricegroup_id] } {
+        set pricegroup_id ""
+    }
+
+    set created_s [qf_clock_scan $created]
+    if { $created_s eq "" } {
+        set created_s [clock seconds]
+    }
+    set created [qf_clock_format $created_s ]
+    # insert into db
+    if { ![qf_is_natural_number $id] } {
+        # record revision/new
+        set id [application_group::new -package_id $instance_id -group_name "vendor_num_for_contact_${contact_id}"]
+        #  now_yyyymmdd_hhmmss
+        set time_start [clock format [clock seconds] -format "%Y%m%d %H%M%S"]
+    } 
+    if { $error_p } {
+        ns_log Warning "qal_vendor_write: rejected '[array get arr_name]'"
+    } else {
+
+        set rev_id [db_nextval qal_id]
+        set created [clock format [clock seconds] -format "%Y%m%d %H%M%S"]
+        if { [ns_conn isconnected] } {
+            set created_by [ad_conn user_id]
+        } else {
+            set created_by $user_id
+        } 
+
+        set trashed_p 0
+        set trashed_by ""
+        set trashed_ts ""
+        db_transaction {
+            if { !$create_p } {
+                db_dml qal_vendor_trash { update qal_vendor set trashed_p='1',trashed_by=:user_id,trashed_ts=now() where id=:id
+                }
+            }
+            # Make sure vendor_code is unique
+            set i 1
+            set vendor_code_orig $vendor_code
+            set id_from_vendor_code [qal_vendor_id_from_code $vendor_code]
+            while { ( $id_from_vendor_code ne "" && $id_from_vendor_code ne $id ) && $i < 1000 } {
+                incr i
+                set chars_max [expr { 31 - [string length $i] } ]
+                set vendor_code [string range $vendor_code_orig 0 $chars_max]
+                append vendor_code "-" $i
+                set id_from_vendor_code [qal_vendor_id_from_code $vendor_code]
+            }
+            db_dml qal_vendor_create_1 "insert into qal_vendor \
+ ([qal_vendor_keys ","]) values ([qal_vendor_keys ",:"])"
+        }
+    }
+    return $id
 }
 
 ad_proc qal_vendor_delete {
