@@ -165,17 +165,17 @@ ad_proc qal_contact_write {
             if { !$create_p } {
                 db_dml qal_contact_trash { update qal_contact set trashed_p='1',trashed_by=:user_id,trashed_ts=now() where id=:id
                 }
-                # Make sure label is unique
-                set i 1
-                set label_orig $label
+            }
+            # Make sure label is unique
+            set i 1
+            set label_orig $label
+            set id_from_label [qal_contact_id_from_label $label]
+            while { ( $id_from_label ne "" && $id_from_label ne $id ) && $i < 1000 } {
+                incr i
+                set chars_max [expr { 38 - [string length $i] } ]
+                set label [string range $label_orig 0 $chars_max]
+                append label "-" $i
                 set id_from_label [qal_contact_id_from_label $label]
-                while { ( $id_from_label ne "" && $id_from_label ne $id ) && $i < 1000 } {
-                    incr i
-                    set chars_max [expr { 38 - [string length $i] } ]
-                    set label [string range $label_orig 0 $chars_max]
-                    append label "-" $i
-                    set id_from_label [qal_contact_id_from_label $label]
-                }
             }
             db_dml qal_contact_create_1 "insert into qal_contact \
  ([qal_contact_keys ","]) values ([qal_contact_keys ",:"])"
@@ -256,8 +256,9 @@ ad_proc qal_contact_trash {
             if { $instance_write_p || $at_least_one_write_p } {
                 set success_p 1
                 db_transaction {
-                    db_dml qal_contact_ids_delete "delete from qal_contact \
-                            where instance_id=:instance_id and contact_id in \
+                    db_dml qal_contact_ids_trash "update qal_contact \
+                            set trashed_p='1',trashed_by=:user_id,trashed_ts=now() \
+                            where instance_id=:instance_id and trashed_p!='1' and contact_id in \
                             ([template::util::tcl_to_sql_list $filtered_contact_id_list])"
                 } on_error {
                     set success_p 0
@@ -351,23 +352,17 @@ ad_proc qal_customer_write {
             if { !$create_p } {
                 db_dml qal_customer_trash { update qal_customer set trashed_p='1',trashed_by=:user_id,trashed_ts=now() where id=:id
                 }
-                # Make sure label is unique
-                set i 1
-                set customer_code_orig $customer_code
-                set id_from_customer_code [qal_customer_id_from_customer_code $customer_code]
-                while { ( $id_from_customer_code ne "" && $id_from_customer_code ne $id ) && $i < 1000 } {
-                    incr i
-                    set chars_max [expr { 38 - [string length $i] } ]
-                    set customer_code [string range $customer_code_orig 0 $chars_max]
-                    append customer_code "-" $i
-                    set id_from_customer_code [qal_customer_id_from_customer_code $customer_code]
-                }
             }
-
-            set id_from_code [qal_customer_id_from_code $customer_code]
-            if { ( $id_from_code ne ""  && $id_from_code ne $id )  } {
-                ##code if old id exists with untrashed rev_id, trash it
-                db_dml qal_customer_trash_1 {update qal_customer set trashed_p
+            # Make sure customer_code is unique
+            set i 1
+            set customer_code_orig $customer_code
+            set id_from_customer_code [qal_customer_id_from_code $customer_code]
+            while { ( $id_from_customer_code ne "" && $id_from_customer_code ne $id ) && $i < 1000 } {
+                incr i
+                set chars_max [expr { 31 - [string length $i] } ]
+                set customer_code [string range $customer_code_orig 0 $chars_max]
+                append customer_code "-" $i
+                set id_from_customer_code [qal_customer_id_from_code $customer_code]
             }
             db_dml qal_customer_create_1 "insert into qal_customer \
  ([qal_customer_keys ","]) values ([qal_customer_keys ",:"])"
@@ -384,7 +379,6 @@ ad_proc qal_customer_delete {
     customer_id_list may be a one or a list.
     User must be a package admin.
 } {
-##code
     set success_p 1
     if { $customer_id_list ne "" } {
         set user_id [ad_conn user_id]
@@ -416,14 +410,48 @@ ad_proc qal_customer_delete {
 
 
 ad_proc qal_customer_trash {
-    arr_name
+    customer_id_list
 } {
-    Trash a customer record
+    Trash one or more customer records
 } {
-    upvar 1 instance_id instance_id
-    upvar 1 $arr_name a_arr
-
-
+    set success_p 0
+    if { $customer_id_list ne "" } {
+        set user_id [ad_conn user_id]
+        set instance_id [qc_set_instance_id]
+        set customer_id_list_len [llength $customer_id_list]
+        if { $customer_id_list_len > 0 } {
+            set validated_p [hf_natural_number_list_validate $customer_id_list]
+        } else {
+            set validated_p 0
+        }
+        if { $validated_p } {
+            set instance_write_p [qc_permission_p $user_id $instance_id non_assets write $instance_id]
+            if { $instance_write_p } {
+                set filtered_customer_id_list $customer_id_list
+            } else {
+                set filtered_customer_id_list [list ]
+                set at_least_one_write_p 0
+                foreach customer_id $customer_id_list {
+                    if { [qc_permission_p $user_id $customer_id non_assets write $instance_id] } {
+                        set at_least_one_write_p 1
+                        lappend filtered_customer_id_list $customer_id
+                    }
+                }
+            } 
+            if { $instance_write_p || $at_least_one_write_p } {
+                set success_p 1
+                db_transaction {
+                    db_dml qal_customer_ids_trash "update qal_customer \
+                            set trashed_p='1',trashed_by=:user_id,trashed_ts=now() \
+                            where instance_id=:instance_id and trashed_p!='1' and customer_id in \
+                            ([template::util::tcl_to_sql_list $filtered_customer_id_list])"
+                } on_error {
+                    set success_p 0
+                }
+            }
+        }
+    }
+    return $success_p
 }
 
 
@@ -439,7 +467,7 @@ ad_proc qal_vendor_write {
 } {
     upvar 1 instance_id instance_id
     upvar 1 $arr_name a_arr
-
+    ##code
 
 }
 
@@ -487,7 +515,7 @@ ad_proc qal_vendor_trash {
 } {
     upvar 1 instance_id instance_id
     upvar 1 $arr_name a_arr
-
+    ##code
 
 }
 

@@ -80,7 +80,7 @@ ad_proc qal_contact_id_from_customer_id {
     Returns contact_id(s) of customer_id(s)
 } {
     # used in contact-support, expects parameter to be a list
-
+    ##code
 }
 
 ad_proc qal_contact_id_from_vendor_id {
@@ -89,7 +89,7 @@ ad_proc qal_contact_id_from_vendor_id {
     Returns contact_id(s) of vendor_id(s)
 } {
     # used in contact-support, expects parameter to be a list
-
+    ##code
 }
 
 
@@ -101,7 +101,7 @@ ad_proc qal_contact_id_read {
 } {   
     # used in contact-support pkg
     # select data from one contact_id
-    
+    ##code
     
 }
 
@@ -112,7 +112,7 @@ ad_proc qal_contact_ids_of_user_id {
 } {
     upvar 1 instance_id instance_id
     set contact_id_list ""
-
+    ##code
     return $contact_id_list
 }
 
@@ -124,7 +124,7 @@ ad_proc qal_customer_ids_of_user_id {
 } {
     upvar 1 instance_id instance_id
     set customer_id_list ""
-
+    ##code
     return $customer_id_list
 }
 
@@ -137,7 +137,7 @@ ad_proc qal_vendor_ids_of_user_id {
 } {
     upvar 1 instance_id instance_id
     set vendor_id_list ""
-
+    ##code
     return $vendor_id_list
 }
 
@@ -151,7 +151,7 @@ ad_proc qal_user_ids_of_contact_id {
     # used in contact-support to determine timezone
     upvar 1 instance_id instance_id
     set user_id_list ""
-    
+    ##code
     if { [qf_is_true $all_p] } {
 
     } else {
@@ -216,13 +216,45 @@ ad_proc qal_customer_keys {
                        terms \
                        terms_unit \
                        annual_value \
-                       customer_number \
+                       customer_code \
                        pricegroup_id \
                        created \
                        created_by \
                        trashed_p \
                        trashed_by \
                        trashed_ts ]
+    set keys [qal_keys_by $keys_list $separator]
+    return $keys
+}
+
+ad_proc qal_vendor_keys {
+    {separator ""}
+} {
+    Returns an ordered list of keys for qal_vendor
+} {
+    set keys_list [list \
+                       id \
+                       instance_id \
+                       rev_id \
+                       contact_id \
+                       terms \
+                       terms_unit \
+                       tax_included \
+                       vendor_code \
+                       gifi_accno \
+                       discount \
+                       credit_limit \
+                       pricegroup_id \
+                       created \
+                       created_by \
+                       trashed_p \
+                       trashed_by \
+                       trashed_ts \
+                       area_market \
+                       purchase_policy \
+                       return_policy \
+                       price_guar_policy \
+                       installation_policy ]
     set keys [qal_keys_by $keys_list $separator]
     return $keys
 }

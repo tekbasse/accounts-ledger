@@ -171,9 +171,9 @@ CREATE TABLE qal_customer (
        credit_limit        numeric default '0',
        -- terms aka company_licenses.lic_type
        terms               numeric default '0',
-       -- annual value at rate aka company_licenses.lic_value
-       terms_unit          varchar(20) default 'days',
        -- terms_unit in tcl interval (days, weeks, month etc)
+       terms_unit          varchar(20) default 'days',
+       -- annual value at rate aka company_licenses.lic_value
        annual_value        numeric,
        --was customer_number
        customer_code     varchar(32),
@@ -197,6 +197,7 @@ CREATE TABLE qal_vendor (
        rev_id              integer default nextval('qal_id'),
        contact_id          integer,
        terms               integer default 0,
+       terms_unit          varchar(20) default 'days',
        tax_included        varchar(1) default '0',
        -- was vendor_number
        vendor_code         varchar(32),
