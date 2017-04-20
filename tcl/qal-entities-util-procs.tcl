@@ -74,36 +74,52 @@ ad_proc qal_vendor_id_from_code {
 
 
 
-ad_proc qal_contact_id_from_customer_id {
-    customer_id_list
-} {
-    Returns contact_id(s) of customer_id(s)
-} {
+#ad_proc qal_contact_id_from_customer_id {
+#    customer_id_list
+#} {
+#    Returns contact_id(s) of customer_id(s)
+#} {
+    # For one, use qal_customer_read to get contact_id
+
+    # Commenet says this is:
+
     # used in contact-support, expects parameter to be a list
-    ##code
-}
 
-ad_proc qal_contact_id_from_vendor_id {
-    vendor_id_list
-} {
-    Returns contact_id(s) of vendor_id(s)
-} {
+    # When are contact_ids needed for more than one customer?
+    # Grep -R contact_id_from_customer_id customer-support 
+    # returns nothing.
+    # Ignore for now.
+    ##code? no
+#}
+
+#ad_proc qal_contact_id_from_vendor_id {
+#    vendor_id_list
+#} {
+#    Returns contact_id(s) of vendor_id(s)
+#} {
+# Commenet says:
+
     # used in contact-support, expects parameter to be a list
-    ##code
-}
+
+    # Not found by grepping.
+    #code?  No.
+#}
 
 
-ad_proc qal_contact_id_read {
-    contact_id
-    names_list
-} {
-    Returns a record in a name value list. names are fields from qal_contact table.
-} {   
+#ad_proc qal_contact_id_read {
+#    contact_id
+#    names_list
+#} {
+#    Returns a record in a name value list. names are fields from qal_contact table.
+#} {   
+#  Comment says:
+
     # used in contact-support pkg
+
+    # but cannot find it. Use qal_contact_read instead.
     # select data from one contact_id
-    ##code
-    
-}
+    #code?  No
+#}
 
 ad_proc qal_contact_ids_of_user_id {
     user_id
@@ -111,8 +127,10 @@ ad_proc qal_contact_ids_of_user_id {
     
 } {
     upvar 1 instance_id instance_id
-    set contact_id_list ""
-    ##code
+    set contact_id_list [db_list qal_contact_user_map_read_ids { select contact_id from qal_contact_user_map 
+        where instance_id=:instance_id
+        and user_id=:user_id
+        and trashed_p!='1' } ]
     return $contact_id_list
 }
 
@@ -123,12 +141,16 @@ ad_proc qal_customer_ids_of_user_id {
     
 } {
     upvar 1 instance_id instance_id
-    set customer_id_list ""
-    ##code
+    # Every customer_id has one contact_id
+    set contact_id_list [qal_contact_ids_of_user_id $user_id]
+    set customer_id_list [list ]
+    if { [llength $contact_id_list] > 0 } {
+        set customer_id_list [db_list qal_customer_contact_ids_r " select id from qal_customer
+        where contact_id in ([template::util::tcl_to_sql_list $contact_id_list])
+        and instance_id=:instance_id"]
+    }
     return $customer_id_list
 }
-
-
 
 ad_proc qal_vendor_ids_of_user_id {
     user_id
@@ -136,8 +158,14 @@ ad_proc qal_vendor_ids_of_user_id {
     
 } {
     upvar 1 instance_id instance_id
-    set vendor_id_list ""
-    ##code
+    # Every vendor_id has one contact_id
+    set contact_id_list [qal_contact_ids_of_user_id $user_id]
+    set vendor_id_list [list ]
+    if { [llength $contact_id_list] > 0 } {
+        set vendor_id_list [db_list qal_vendor_contact_ids_r " select id from qal_vendor
+        where contact_id in ([template::util::tcl_to_sql_list $contact_id_list])
+        and instance_id=:instance_id"]
+    }
     return $vendor_id_list
 }
 
