@@ -168,11 +168,13 @@ ad_proc qal_contact_write {
                 # Make sure label is unique
                 set i 1
                 set label_orig $label
-                while { [qal_contact_id_from_label $label] ne "" && $i < 1000 } {
+                set id_from_label [qal_contact_id_from_label $label]
+                while { ( $id_from_label ne "" && $id_from_label ne $id ) && $i < 1000 } {
                     incr i
                     set chars_max [expr { 38 - [string length $i] } ]
                     set label [string range $label_orig 0 $chars_max]
                     append label "-" $i
+                    set id_from_label [qal_contact_id_from_label $label]
                 }
             }
             db_dml qal_contact_create_1 "insert into qal_contact \
@@ -279,27 +281,6 @@ ad_proc qal_customer_write {
 } {
     upvar 1 instance_id instance_id
     upvar 1 $arr_name a_arr
-#       id                  integer default nextval('qal_id'),
-#       instance_id         integer,
-#       rev_id              integer default nextval('qal_id'),
-#       contact_id          integer,
-#       discount            numeric,
-#       tax_included        varchar(1) default '0',
-#       credit_limit        numeric default '0',
-#       -- terms aka company_licenses.lic_type
-#       terms               numeric default '0',
-#       terms_unit          varchar(20) default 'days',
-#       -- annual value at rate aka company_licenses.lic_value
-#       annual_value        numeric,
-#       -- terms_unit in tcl interval (days, weeks, month etc)
-#       customer_number     varchar(32),
-#       pricegroup_id       integer,
-#       created             timestamptz not null DEFAULT now(),
-#       created_by          integer,
-#       trashed_p           integer,
-#       trashed_by          integer,
-#       trashed_ts          timestamptz
-#
     set error_p 0
     qal_customer_defaults arr_name
     qf_array_to_vars arr_name [qal_contact_keys]
@@ -333,7 +314,7 @@ ad_proc qal_customer_write {
         set annual_value ""
     }
 
-    set customer_number [string range $customer_number 0 31]
+    set customer_code [string range $customer_code 0 31]
 
     if { ![qf_is_natural_number $pricegroup_id] } {
         set pricegroup_id ""
@@ -367,7 +348,27 @@ ad_proc qal_customer_write {
         set trashed_by ""
         set trashed_ts ""
         db_transaction {
-            ##code if old id exists with untrashed rev_id, trash it
+            if { !$create_p } {
+                db_dml qal_customer_trash { update qal_customer set trashed_p='1',trashed_by=:user_id,trashed_ts=now() where id=:id
+                }
+                # Make sure label is unique
+                set i 1
+                set customer_code_orig $customer_code
+                set id_from_customer_code [qal_customer_id_from_customer_code $customer_code]
+                while { ( $id_from_customer_code ne "" && $id_from_customer_code ne $id ) && $i < 1000 } {
+                    incr i
+                    set chars_max [expr { 38 - [string length $i] } ]
+                    set customer_code [string range $customer_code_orig 0 $chars_max]
+                    append customer_code "-" $i
+                    set id_from_customer_code [qal_customer_id_from_customer_code $customer_code]
+                }
+            }
+
+            set id_from_code [qal_customer_id_from_code $customer_code]
+            if { ( $id_from_code ne ""  && $id_from_code ne $id )  } {
+                ##code if old id exists with untrashed rev_id, trash it
+                db_dml qal_customer_trash_1 {update qal_customer set trashed_p
+            }
             db_dml qal_customer_create_1 "insert into qal_customer \
  ([qal_customer_keys ","]) values ([qal_customer_keys ",:"])"
         }
