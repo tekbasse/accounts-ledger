@@ -297,11 +297,8 @@ ad_proc qal_customer_write {
         set discount ""
     }
     
-    if { [qf_is_true $tax_included] } {
-        set tax_included 1
-    } else {
-        set tax_included 0
-    }
+    set tax_included [qf_is_true $tax_included]
+
     if { ![qf_is_decimal $credit_limit] } {
         set credit_limit ""
     }
@@ -478,26 +475,25 @@ ad_proc qal_vendor_write {
     if { ![qf_is_natural_number $contact_id] } {
         set contact_id ""
     }
-    if { ![qf_is_decimal $discount] } {
-        set discount ""
-    }
-    
-    if { [qf_is_true $tax_included] } {
-        set tax_included 1
-    } else {
-        set tax_included 0
-    }
-    if { ![qf_is_decimal $credit_limit] } {
-        set credit_limit ""
-    }
     if { ![qf_is_decimal $terms] } {
         set terms ""
     }
 
     set terms_unit [string range $terms_unit 0 19]
-    set gifi_accno [string range $gifi_accno 0 29]
+
+    set tax_included [qf_is_true $tax_included]
 
     set vendor_code [string range $vendor_code 0 31]
+
+    set gifi_accno [string range $gifi_accno 0 29]
+
+    if { ![qf_is_decimal $discount] } {
+        set discount ""
+    }
+
+    if { ![qf_is_decimal $credit_limit] } {
+        set credit_limit ""
+    }
 
     if { ![qf_is_natural_number $pricegroup_id] } {
         set pricegroup_id ""
@@ -591,13 +587,46 @@ ad_proc qal_vendor_delete {
 
 
 ad_proc qal_vendor_trash {
-    arr_name
+    vendor_id_list
 } {
-    Trash a vendor record
+    Trash one or more vendor records
 } {
-    upvar 1 instance_id instance_id
-    upvar 1 $arr_name a_arr
-    ##code
-
+    set success_p 0
+    if { $vendor_id_list ne "" } {
+        set user_id [ad_conn user_id]
+        set instance_id [qc_set_instance_id]
+        set vendor_id_list_len [llength $vendor_id_list]
+        if { $vendor_id_list_len > 0 } {
+            set validated_p [hf_natural_number_list_validate $vendor_id_list]
+        } else {
+            set validated_p 0
+        }
+        if { $validated_p } {
+            set instance_write_p [qc_permission_p $user_id $instance_id non_assets write $instance_id]
+            if { $instance_write_p } {
+                set filtered_vendor_id_list $vendor_id_list
+            } else {
+                set filtered_vendor_id_list [list ]
+                set at_least_one_write_p 0
+                foreach vendor_id $vendor_id_list {
+                    if { [qc_permission_p $user_id $vendor_id non_assets write $instance_id] } {
+                        set at_least_one_write_p 1
+                        lappend filtered_vendor_id_list $vendor_id
+                    }
+                }
+            } 
+            if { $instance_write_p || $at_least_one_write_p } {
+                set success_p 1
+                db_transaction {
+                    db_dml qal_vendor_ids_trash "update qal_vendor \
+                            set trashed_p='1',trashed_by=:user_id,trashed_ts=now() \
+                            where instance_id=:instance_id and trashed_p!='1' and vendor_id in \
+                            ([template::util::tcl_to_sql_list $filtered_vendor_id_list])"
+                } on_error {
+                    set success_p 0
+                }
+            }
+        }
+    }
+    return $success_p
 }
-
