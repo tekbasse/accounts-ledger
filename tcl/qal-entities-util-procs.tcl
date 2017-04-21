@@ -170,24 +170,24 @@ ad_proc qal_vendor_ids_of_user_id {
 }
 
 
-ad_proc qal_user_ids_of_contact_id {
-    contact_id
-    {all_p "1"}
-} {
-    Returns user_ids of contact_id, if all_p is "0", just returns primary (default first user_id).
-} {
+#ad_proc qal_user_ids_of_contact_id {
+#    contact_id
+#    {all_p "1"}
+#} {
+#    Returns user_ids of contact_id, if all_p is "0", just returns primary (default first user_id).
+#} {
     # used in contact-support to determine timezone
-    upvar 1 instance_id instance_id
-    set user_id_list ""
-    ##code
-    if { [qf_is_true $all_p] } {
+#    upvar 1 instance_id instance_id
+#    set user_id_list ""
+    #code No. Replaced by qf_user_ids_of_contact_id
+#    if { [qf_is_true $all_p] } {
 
-    } else {
+#    } else {
 
 
-    }
-    return $user_id_list
-}
+#    }
+#    return $user_id_list
+#}
 
 
 ad_proc qal_contact_keys {
