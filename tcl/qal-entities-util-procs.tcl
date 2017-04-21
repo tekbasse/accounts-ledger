@@ -43,6 +43,24 @@ ad_proc qal_contact_id_from_customer_id {
     return $contact_ids
 }
 
+ad_proc qal_contact_id_from_vendor_id {
+    vendor_id
+} {
+    Returns contact_id(s) of vendor_id(s). If supplied 1, returns a scalar, otherwise returns a list.
+    Returns an empty string if vendor_id not found.
+} {
+    if { [llength $vendor_id] > 1 } {
+        set contact_ids [db_list qal_vendor_read_c_id_n "select contact_id from qal_vendor \
+ where vendor_id in {[template::util::tcl_to_sql_list $vendor_id]) and trashed_p!='1' and instance_id=:instance_id"]
+    } else {
+        set contact_ids ""
+        db_0or1row qal_vendor_read_vendor_id_1 {select contact_id as contact_ids from qal_vendor
+            where vendor_id=:vendor_id}
+    }
+    return $vendor_ids
+}
+
+
 ad_proc qal_customer_id_exists_q {
     customer_id
 } {
