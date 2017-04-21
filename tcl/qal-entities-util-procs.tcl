@@ -73,54 +73,6 @@ ad_proc qal_vendor_id_from_code {
 }
 
 
-
-#ad_proc qal_contact_id_from_customer_id {
-#    customer_id_list
-#} {
-#    Returns contact_id(s) of customer_id(s)
-#} {
-    # For one, use qal_customer_read to get contact_id
-
-    # Commenet says this is:
-
-    # used in contact-support, expects parameter to be a list
-
-    # When are contact_ids needed for more than one customer?
-    # Grep -R contact_id_from_customer_id customer-support 
-    # returns nothing.
-    # Ignore for now.
-    ##code? no
-#}
-
-#ad_proc qal_contact_id_from_vendor_id {
-#    vendor_id_list
-#} {
-#    Returns contact_id(s) of vendor_id(s)
-#} {
-# Commenet says:
-
-    # used in contact-support, expects parameter to be a list
-
-    # Not found by grepping.
-    #code?  No.
-#}
-
-
-#ad_proc qal_contact_id_read {
-#    contact_id
-#    names_list
-#} {
-#    Returns a record in a name value list. names are fields from qal_contact table.
-#} {   
-#  Comment says:
-
-    # used in contact-support pkg
-
-    # but cannot find it. Use qal_contact_read instead.
-    # select data from one contact_id
-    #code?  No
-#}
-
 ad_proc qal_contact_ids_of_user_id {
     user_id
 } {
@@ -168,26 +120,6 @@ ad_proc qal_vendor_ids_of_user_id {
     }
     return $vendor_id_list
 }
-
-
-#ad_proc qal_user_ids_of_contact_id {
-#    contact_id
-#    {all_p "1"}
-#} {
-#    Returns user_ids of contact_id, if all_p is "0", just returns primary (default first user_id).
-#} {
-    # used in contact-support to determine timezone
-#    upvar 1 instance_id instance_id
-#    set user_id_list ""
-    #code No. Replaced by qf_user_ids_of_contact_id
-#    if { [qf_is_true $all_p] } {
-
-#    } else {
-
-
-#    }
-#    return $user_id_list
-#}
 
 
 ad_proc qal_contact_keys {
