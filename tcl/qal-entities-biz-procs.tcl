@@ -4,7 +4,7 @@ ad_library {
 
 }
 
-    ##code 
+    ##code comments about implementing UBL package
     # if contact.id eq "" see if id exists in qal_contact_read, otherwise create an id via qal_contact_create?
     # No. This feature should be a separate function, only create after a qualified user accepts it.
     # Add to a UBL feature in accounts-ledger, such as when accepting a quotation request etc.
