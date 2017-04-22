@@ -78,6 +78,7 @@ create index qal_contact_label_idx on qal_contact (label);
 
 -- was qal_contact_group ( or contact_group in SL)
 -- mainly gets used in packages that depend on accounts-ledger
+-- Deprecated. See qc_user_ids_of_contact_id, and qc_user_role_add
 CREATE TABLE qal_contact_user_map (
        instance_id         integer,
        contact_id          integer,
@@ -94,16 +95,19 @@ create index qal_contact_user_map_contact_id_idx on qal_contact_user_map (contac
 create index qal_contact_user_map_user_id_idx on qal_contact_user_map (user_id);
 create index qal_contact_user_map_trashed_p_idx on qal_contact_user_map (trashed_p);
 
--- Plenty of caes do not fit traditional norms. Allow for more cases with this model.
+-- Plenty of cases do not fit traditional norms. Allow for more cases with this model.
 CREATE TABLE qal_other_address_map {
        contact_id          integer,
        instance_id         integer,
-       addrs_id            integer,
+       -- unique id of a means of contact
+       -- If record_type is address, addrs_id and address_id are same as qal_address.id
+       addrs_id            integer default nextval('qal_id'),
+       rev_id              integer default nextval('qal_id'),
        -- address, other..
        -- if record_type is not address, it may be YIM,AIM etc --
        record_type         varchar(30),
-       -- If this is an address, reference qal_address.id
-       -- otherwise this is a contact method (skype,aim,yim,jabber etc)
+       -- If this is an address, this references qal_address.id
+       -- If null, this is a contact method (skype,aim,yim,jabber etc)
        address_id          integer,
        sort_order          integer,
        created             timestamptz not null DEFAULT now(),
