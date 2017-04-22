@@ -66,6 +66,6 @@ DROP TABLE qal_chart_templates;
 
 DROP TABLE qal_template_accounts;
 
-DROP SEQUENCE qal_id;
-
 \i entities-channels-drop.sql
+
+DROP SEQUENCE qal_id;
