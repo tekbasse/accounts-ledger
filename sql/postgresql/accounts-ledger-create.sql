@@ -210,5 +210,4 @@ CREATE TABLE qal_translation (
 
 create index qal_translation_trans_id_idx on qal_translation (trans_id);
 
-
-
+\i entities-channels-create.sql

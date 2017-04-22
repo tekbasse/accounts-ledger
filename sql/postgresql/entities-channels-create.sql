@@ -96,7 +96,7 @@ create index qal_contact_user_map_user_id_idx on qal_contact_user_map (user_id);
 create index qal_contact_user_map_trashed_p_idx on qal_contact_user_map (trashed_p);
 
 -- Plenty of cases do not fit traditional norms. Allow for more cases with this model.
-CREATE TABLE qal_other_address_map {
+CREATE TABLE qal_other_address_map (
        contact_id          integer,
        instance_id         integer,
        -- unique id of a means of contact
@@ -120,7 +120,7 @@ CREATE TABLE qal_other_address_map {
        -- text allows for anything
        account_name        text,
        notes               text
-)
+);
 
 create index qal_other_address_map_contact_id_idx on qal_other_address_map (contact_id);
 create index qal_other_address_map_instance_id_idx on qal_other_address_map (instance_id);
@@ -155,7 +155,7 @@ CREATE TABLE qal_address (
 create index qal_address_instance_id_idx on qal_address (instance_id);
 create index qal_address_id_idx on qal_address (id);
 create index qal_address_address_type_idx on qal_address (address_type);
-create index qal_trashed_p_idx on qal_address (trashed_p);
+
 
  -- a contact manager style should have an additional table and map for
  -- multiple with:
@@ -192,7 +192,7 @@ CREATE TABLE qal_customer (
 create index qal_customer_instance_id_idx on qal_customer (instance_id);
 create index qal_customer_contact_id_idx on qal_customer (contact_id);
 create index qal_customer_id_idx on qal_customer (id);
-create index qal_customer_customer_number_idx on qal_customer (customer_number);
+create index qal_customer_customer_code_idx on qal_customer (customer_code);
 create index qal_customer_trashed_p_idx on qal_customer (trashed_p);
 
 CREATE TABLE qal_vendor (
@@ -260,7 +260,7 @@ CREATE TABLE qal_customer_tax (
 
 create index qal_customer_tax_instance_id_idx on qal_customer_tax (instance_id);
 create index qal_customer_tax_customer_id_idx on qal_customer_tax (customer_id);
-create index qal_customer_tax_trashed_by_idx on qal_customer_trax (trashed_p);
+create index qal_customer_tax_trashed_by_idx on qal_customer_tax (trashed_p);
 
 CREATE TABLE qal_vendor_tax (
        instance_id  integer,
