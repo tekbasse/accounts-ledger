@@ -100,14 +100,14 @@ CREATE TABLE qal_other_address_map {
        contact_id          integer,
        instance_id         integer,
        -- unique id of a means of contact
-       -- If record_type is address, addrs_id and address_id are same as qal_address.id
+       -- If record_type is address, address_id is same as qal_address.id
        addrs_id            integer default nextval('qal_id'),
-       rev_id              integer default nextval('qal_id'),
        -- address, other..
        -- if record_type is not address, it may be YIM,AIM etc --
        record_type         varchar(30),
        -- If this is an address, this references qal_address.id
        -- If null, this is a contact method (skype,aim,yim,jabber etc)
+       -- Address_id doubles as rev_id integer default nextval('qal_id'),
        address_id          integer,
        sort_order          integer,
        created             timestamptz not null DEFAULT now(),
@@ -149,8 +149,8 @@ CREATE TABLE qal_address (
         -- text type allows multiple entries
         email              text,
         cc                 text,
-        bcc                text,
- );
+        bcc                text
+);
 
 create index qal_address_instance_id_idx on qal_address (instance_id);
 create index qal_address_id_idx on qal_address (id);

@@ -109,7 +109,7 @@ ad_proc qal_vendor_id_from_code {
 ad_proc qal_contact_ids_of_user_id {
     user_id
 } {
-    
+    Returns contact_id(s) of user_id, or empty string if none found.
 } {
     upvar 1 instance_id instance_id
     set contact_id_list [db_list qal_contact_user_map_read_ids { select contact_id from qal_contact_user_map 
@@ -123,7 +123,7 @@ ad_proc qal_contact_ids_of_user_id {
 ad_proc qal_customer_ids_of_user_id {
     user_id
 } {
-    
+    Returns customer_id(s) of user_id, or empty string if none found.
 } {
     upvar 1 instance_id instance_id
     # Every customer_id has one contact_id
@@ -140,7 +140,7 @@ ad_proc qal_customer_ids_of_user_id {
 ad_proc qal_vendor_ids_of_user_id {
     user_id
 } {
-    
+    Returns vendor_id(s) of user_id, or empty string if none found.
 } {
     upvar 1 instance_id instance_id
     # Every vendor_id has one contact_id
@@ -158,7 +158,7 @@ ad_proc qal_vendor_ids_of_user_id {
 ad_proc qal_contact_keys {
     {separator ""}
 } {
-    Returns an ordered list of keys for qal_contact
+    Returns an ordered list of keys for qal_contact.
 } {
     set keys_list [list \
                        id \
@@ -196,7 +196,7 @@ ad_proc qal_contact_keys {
 ad_proc qal_customer_keys {
     {separator ""}
 } {
-    Returns an ordered list of keys for qal_customer
+    Returns an ordered list of keys for qal_customer.
 } {
     set keys_list [list \
                        id \
@@ -223,7 +223,7 @@ ad_proc qal_customer_keys {
 ad_proc qal_vendor_keys {
     {separator ""}
 } {
-    Returns an ordered list of keys for qal_vendor
+    Returns an ordered list of keys for qal_vendor.
 } {
     set keys_list [list \
                        id \
@@ -251,3 +251,6 @@ ad_proc qal_vendor_keys {
     set keys [qal_keys_by $keys_list $separator]
     return $keys
 }
+
+##code qal_address_keys
+##code qal_other_address_map_keys

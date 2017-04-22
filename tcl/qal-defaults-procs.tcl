@@ -194,3 +194,6 @@ It is out of sync with qal_vendor_keys"
     }
     return 1
 }
+
+##code qal_address_defaults
+##code qal_other_address_map_defaults

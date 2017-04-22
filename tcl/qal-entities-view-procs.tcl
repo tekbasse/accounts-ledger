@@ -154,3 +154,5 @@ ad_proc qal_vendors_read {
     return $rows_lists
 }
 
+##code qal_contact_address_read addrs_id
+##code qal_contact_addresses_read {contact_id_list ""}
