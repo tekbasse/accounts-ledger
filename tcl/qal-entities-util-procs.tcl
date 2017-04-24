@@ -252,5 +252,54 @@ ad_proc qal_vendor_keys {
     return $keys
 }
 
-##code qal_address_keys
-##code qal_other_address_map_keys
+ad_proc qal_address_keys {
+    {separator ""}
+} {
+    Returns an ordered list of keys for qal_address.
+} {
+    set keys_list [list \
+                       id \
+                       instance_id \
+                       rev_id \
+                       address_type \
+                       address0 \
+                       address1 \
+                       address2 \
+                       city \
+                       state \
+                       postal_code \
+                       country_code \
+                       attn \
+                       phone \
+                       phone_time \
+                       fax \
+                       email \
+                       cc \
+                       bcc ]
+    set keys [qal_keys_by $keys_list $separator]
+    return $keys
+}
+
+
+ad_proc qal_other_address_map_keys {
+    {separator ""}
+} {
+    Returns an ordered list of keys for qal_other_address_map.
+} {
+    set keys_list [list \
+                       contact_id \
+                       instance_id \
+                       addrs_id \
+                       record_type \
+                       address_id \
+                       sort_order \
+                       created \
+                       created_by \
+                       trashed_p \
+                       trashed_by \
+                       trashed_ts \
+                       account_name \
+                       notes ]
+    set keys [qal_keys_by $keys_list $separator]
+    return $keys
+}

@@ -51,7 +51,7 @@ ad_proc qal_contact_defaults {
     }
     if { [llength [set_difference_named_v c2_list [qal_contact_keys]]] > 0 } {
         ns_log Warning "qal_contact_defaults: Update this proc. \
-It is out of sync with qal_contact_keys"
+ It is out of sync with qal_contact_keys"
     }
     return 1
 }
@@ -83,7 +83,7 @@ ad_proc qal_contact_user_map_defaults {
     }
     if { [llength [set_difference_named_v c2_list [qal_contact_user_map_keys]]] > 0 } {
         ns_log Warning "qal_contact_user_map_defaults: Update this proc. \
-It is out of sync with qal_contact_user_map_keys"
+ It is out of sync with qal_contact_user_map_keys"
     }
     return 1
 }
@@ -118,7 +118,7 @@ ad_proc qal_other_address_map_defaults {
     }
     if { [llength [set_difference_named_v c2_list [qal_other_address_map_keys]]] > 0 } {
         ns_log Warning "qal_other_address_map_defaults: Update this proc. \
-It is out of sync with qal_other_address_map_keys"
+ It is out of sync with qal_other_address_map_keys"
     }
     return 1
 }
@@ -160,7 +160,7 @@ ad_proc qal_customer_defaults {
     }
     if { [llength [set_difference_named_v c2_list [qal_customer_keys]]] > 0 } {
         ns_log Warning "qal_customer_defaults: Update this proc. \
-It is out of sync with qal_customer_keys"
+ It is out of sync with qal_customer_keys"
     }
     return 1
 }
@@ -190,10 +190,90 @@ ad_proc qal_vendor_defaults {
     }
     if { [llength [set_difference_named_v v2_list [qal_vendor_keys]]] > 0 } {
         ns_log Warning "qal_vendor_defaults: Update this proc. \
-It is out of sync with qal_vendor_keys"
+ It is out of sync with qal_vendor_keys"
     }
     return 1
 }
 
-##code qal_address_defaults
-##code qal_other_address_map_defaults
+
+ad_proc qal_address_defaults {
+    arr_name
+} {
+    Sets defaults for a address record into array_name 
+    if element does not yet exist in array.
+} {
+    upvar 1 instance_id instance_id
+    upvar 1 $arr_name v_arr
+    set nowts [dt_systime -gmt 1]
+    set v_list [list \
+                    id "" \
+                    instance_id $instance_id \
+                    rev_id "" \
+                    address_type "" \
+                    address0 "" \
+                    address1 "" \
+                    address2 "" \
+                    city "" \
+                    state "" \
+                    postal_code "" \
+                    country_code "" \
+                    attn "" \
+                    phone "" \
+                    phone_time "" \
+                    fax "" \
+                    email "" \
+                    cc "" \
+                    bcc ""]
+    set v2_list [list ]
+    foreach {key value} $v_list {
+        lappend v2_list $key
+        if { ![exists_and_not_null v_arr(${key}) ] } {
+            set v_arr(${key}) $value
+        }
+    }
+    if { [llength [set_difference_named_v v2_list [qal_address_keys]]] > 0 } {
+        ns_log Warning "qal_address_defaults: Update this proc. \
+ It is out of sync with qal_address_keys"
+    }
+    return 1
+}
+
+
+
+ad_proc qal_other_address_map_defaults {
+    arr_name
+} {
+    Sets defaults for a other_address_map record into array_name 
+    if element does not yet exist in array.
+} {
+    upvar 1 instance_id instance_id
+    upvar 1 $arr_name v_arr
+    set nowts [dt_systime -gmt 1]
+    set v_list [list \
+                    contact_id "" \
+                    instance_id $instance_id \
+                    addrs_id "" \
+                    record_type "" \
+                    address_id "" \
+                    sort_order "" \
+                    created "" \
+                    created_by "" \
+                    trashed_p "" \
+                    trashed_by "" \
+                    trashed_ts "" \
+                    account_name "" \
+                    notes ""]
+    set v2_list [list ]
+    foreach {key value} $v_list {
+        lappend v2_list $key
+        if { ![exists_and_not_null v_arr(${key}) ] } {
+            set v_arr(${key}) $value
+        }
+    }
+    if { [llength [set_difference_named_v v2_list [qal_other_address_map_keys]]] > 0 } {
+        ns_log Warning "qal_other_address_map_defaults: Update this proc. \
+ It is out of sync with qal_other_address_map_keys"
+    }
+    return 1
+}
+
