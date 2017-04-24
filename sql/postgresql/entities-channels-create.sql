@@ -131,7 +131,8 @@ create index qal_other_address_map_trashed_p_idx on qal_other_address_map (trash
 CREATE TABLE qal_address (
         id                 integer default nextval('qal_id'),
         instance_id        integer,
-        rev_id             integer default nextval('qal_id'),
+        -- This is redundant. Use qal_other_address_map paradigm
+        -- rev_id             integer default nextval('qal_id'),
         -- e.g., billing, shipping
         address_type       varchar(20) not null default 'street',  
         address0           varchar(40),

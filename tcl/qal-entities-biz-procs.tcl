@@ -636,3 +636,65 @@ ad_proc qal_vendor_trash {
 ##code qal_contact_address_trash contact_id addrs_id
 ##code qal_contact_address_delete contact_id addrs_id
 ##code qal_contact_addresses_read {contact_id_list ""}
+
+ad_proc qal_address_create {
+    arr_name
+} {
+    # Creates a new qal_address record
+
+    upvar 1 instance_id instance_id
+    upvar 1 $arr_name arr_name
+    # at a minimum, object_id needs to be used to prevent id collision with other packges:
+    # set id \[db_nextval acs_object_id_seq\]
+    set arr_name(id) ""
+    set id [qal_address_write arr_name]
+    return $id
+}
+
+ad_proc qal_address_write {
+    arr_name
+} {
+    Writes a new revision to an existing qal_address record.
+    If id is empty, creates a new record.
+    A new id is returned if successful.
+    Otherwise empty string is returned.
+    @param array_name
+    @return id or ""
+} {
+    upvar 1 instance_id instance_id
+    upvar 1 $arr_name a_arr
+    set error_p 0
+    qal_address_defaults arr_name
+    qf_array_to_vars arr_name [qal_address_keys]
+
+    # validations etc
+    set address_type [string range $address_type 0 19]
+    set address0 [string range $address0 0 39]
+    set address1 [string range $address1 0 39]
+    set address2 [string range $address2 0 39]
+    set city [string range $city 0 39]
+    set state [string range $state 0 31]
+    set postal_code [string range $postal_code 0 19]
+    set country_code [string range $country_code 0 2]
+    set attn [string range $attn 0 63]
+    set phone [string range $phone 0 29]
+    set phone_time [string range $phone_time 0 9]
+    set fax [string range $fax 0 29]
+    regsub -all -- {[^[:graph:]\ ]+} $email {} email
+    regsub -all -- {[^[:graph:]\ ]+} $cc {} cc
+    regsub -all -- {[^[:graph:]\ ]+} $bcc {} bcc
+
+    # insert into db
+    if { ![qf_is_natural_number $id] } {
+        # record revision/new
+        set id [db_nextval qal_id]
+        #  now_yyyymmdd_hhmmss
+        set create_p 1
+    } else {
+        set create_p 0
+    }
+
+    db_dml qal_address_create_1 "insert into qal_address \
+ ([qal_address_keys ","]) values ([qal_address_keys ",:"])"
+    return $id
+}
