@@ -783,6 +783,9 @@ ad_proc -public qal_address_write {
     }
     if { ![qf_is_natural_number $addrs_id] } {
         set addrs_id [db_nextval qal_id]
+        set create_p 1
+    } else {
+        set create_p 0
     }
 
     set record_type [string range $record_type 0 29]
@@ -798,42 +801,37 @@ ad_proc -public qal_address_write {
         set created_s [clock seconds]
     }
     set created [qf_clock_format $created_s ]
+    if { [ns_conn isconnected] } {
+        set created_by [ad_conn user_id]
+    } else {
+        set created_by $instance_id
+    }
+
     set address_p 0
     # insert into db
     if { [string match -nocase "address"] } {
         # This is a street address
-        set address_id [db_nextval qal_id]
         set address_p 1
     }
-        if { [ns_conn isconnected] } {
-            set created_by [ad_conn user_id]
-        } else {
-            set created_by $instance_id
-        }
-        set trashed_p 0
-        set trashed_by ""
-        set trashed_ts ""
-        db_transaction {
-            if { !$create_p } {
-                db_dml qal_address_trash { update qal_address set trashed_p='1',trashed_by=:user_id,trashed_ts=now() where id=:id
+    set trashed_p 0
+    set trashed_by ""
+    set trashed_ts ""
+    db_transaction {
+        if { !$create_p } {
+            db_dml qal_address_trash { update qal_address set trashed_p='1',trashed_by=:user_id,trashed_ts=now() 
+                where addrs_id=:addrs_id 
+                and contact_id=:contact_id
+                and instance_id=:instance_id
                 }
-            }
-            # Make sure address_code is unique
-            set i 1
-            set address_code_orig $address_code
-            set id_from_address_code [qal_address_id_from_code $address_code]
-            while { ( $id_from_address_code ne "" && $id_from_address_code ne $id ) && $i < 1000 } {
-                incr i
-                set chars_max [expr { 31 - [string length $i] } ]
-                set address_code [string range $address_code_orig 0 $chars_max]
-                append address_code "-" $i
-                set id_from_address_code [qal_address_id_from_code $address_code]
-            }
-            db_dml qal_address_create_1 "insert into qal_address \
+        }
+        if { $address_p } {
+            set address_id [qal_address_postal_write arr_name]
+        }
+        db_dml qal_address_create_1 "insert into qal_address \
  ([qal_address_keys ","]) values ([qal_address_keys ",:"])"
         }
     }
-    return $id
+    return $addrs_id
 }
 
 ad_proc -public qal_address_delete {
