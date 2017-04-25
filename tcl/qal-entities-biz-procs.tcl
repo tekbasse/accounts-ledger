@@ -16,11 +16,16 @@ ad_library {
 
 ad_proc -public qal_contact_create {
     arr_name
+    {contact_id ""}
 } {
-    # Creates a new qal_contact record
-
+    Creates a new qal_contact record.
+    If contact_id is not "", replaces arr_name(contact_id) with value.
+} {
     upvar 1 instance_id instance_id
     upvar 1 $arr_name arr_name
+    if { $contact_id ne "" } {
+        set arr_name(contact_id) $contact_id
+    }
     # at a minimum, object_id needs to be used to prevent id collision with other packges:
     # set id \[db_nextval acs_object_id_seq\]
     set arr_name(id) ""
@@ -30,11 +35,13 @@ ad_proc -public qal_contact_create {
 
 ad_proc -public qal_contact_write {
     arr_name
+    {contact_id ""}
 } {
     Writes a new revision to an existing qal_contact record.
-    If id is empty, creates a new record.
-    A new id is returned if successful.
+    If id is empty, creates a new record and returns new id.
     Otherwise empty string is returned.
+    If contact_id is not "", replaces arr_name(contact_id) with value.
+
     @param array_name
     @return id or ""
 } {
@@ -270,18 +277,42 @@ ad_proc -public qal_contact_trash {
 }
 
 
+ad_proc -public qal_customer_create {
+    arr_name
+    {contact_id ""}
+} {
+    Creates a new qal_customer record.
+    If contact_id is supplied, sets arr_name(contact_id) to contact_id's value.
+} {
+    upvar 1 instance_id instance_id
+    upvar 1 $arr_name arr_name
+    if { $contact_id ne "" } {
+        set arr_name(contact_id) $contact_id
+    }
+    # at a minimum, object_id needs to be used to prevent id collision with other packges:
+    # set id \[db_nextval acs_object_id_seq\]
+    set arr_name(id) ""
+    set id [qal_customer_write arr_name]
+    return $id
+}
+
 ad_proc -public qal_customer_write {
     arr_name
+    {contact_id ""}
 } {
     Writes a new revision to an existing qal_customer record.
-    If id is empty, creates a new record.
-    A new id is returned if successful.
+    If id is empty, creates a new record and returns new id.
     Otherwise empty string is returned.
+    If contact_id is supplied, sets arr_name(contact_id) to contact_id's value.
+
     @param array_name
     @return id or ""
 } {
     upvar 1 instance_id instance_id
     upvar 1 $arr_name a_arr
+    if { $contact_id ne ""} {
+        set arr_name(contact_id) $contact_id
+    }
     set error_p 0
     qal_customer_defaults arr_name
     qf_array_to_vars arr_name [qal_contact_keys]
@@ -452,8 +483,29 @@ ad_proc -public qal_customer_trash {
 }
 
 
+ad_proc -public qal_vendor_create {
+    arr_name
+    {contact_id ""}
+} {
+    Creates a new qal_vendor record.
+    If contact_id is supplied, sets arr_name(contact_id) to contact_id's value.
+} {
+    upvar 1 instance_id instance_id
+    upvar 1 $arr_name arr_name
+    if { $contact_id ne "" } {
+        set arr_name(contact_id) $contact_id
+    }
+    # at a minimum, object_id needs to be used to prevent id collision with other packges:
+    # set id \[db_nextval acs_object_id_seq\]
+    set arr_name(id) ""
+    set id [qal_vendor_write arr_name]
+    return $id
+}
+
+
 ad_proc -public qal_vendor_write {
     arr_name
+    {contact_id ""}
 } {
     Writes a new revision to an existing qal_vendor record.
     If id is empty, creates a new record.
@@ -464,6 +516,9 @@ ad_proc -public qal_vendor_write {
 } {
     upvar 1 instance_id instance_id
     upvar 1 $arr_name a_arr
+    if { $contact_id ne "" } {
+        set arr_name(contact_id) $contact_id
+    }
     set error_p 0
     qal_vendor_defaults arr_name
     qf_array_to_vars arr_name [qal_contact_keys]
@@ -631,23 +686,13 @@ ad_proc -public qal_vendor_trash {
     return $success_p
 }
 
-##code qal_contact_address_create address_arr (req: contact_id address_type)
-    # includes ref to qal_addres_postal_create
-
-##code qal_contact_address_write address_arr contact_id addrs_id
-    # includes ref to qal_addres_postal_create
-
-##code qal_contact_address_trash contact_id addrs_id
-##code qal_contact_address_delete contact_id addrs_id
-##code qal_contact_addresses_read {contact_id_list ""}
-
 ad_proc -private qal_address_postal_create {
     arr_name
 } {
     Creates a qal_address record.
     @param array_name
 
-    @see qall
+    @see qal_address_create
 } {
     upvar 1 instance_id instance_id
     upvar 1 $arr_name a_arr
@@ -674,7 +719,224 @@ ad_proc -private qal_address_postal_create {
 
     # insert into db
     set id [db_nextval qal_id]
-    db_dml qal_address_create_1 "insert into qal_address \
+    db_dml qal_address_postal_create_1 "insert into qal_address \
  ([qal_address_keys ","]) values ([qal_address_keys ",:"])"
     return $id
+}
+
+
+##code qal_contact_address_create address_arr (req: contact_id address_type)
+    # includes ref to qal_addres_postal_create
+
+##code qal_contact_address_write address_arr contact_id addrs_id
+    # includes ref to qal_addres_postal_create
+
+##code qal_contact_address_trash contact_id addrs_id
+##code qal_contact_address_delete contact_id addrs_id
+##code qal_contact_addresses_read {contact_id_list ""}
+
+
+ad_proc -public qal_address_create {
+    arr_name
+    {contact_id ""}
+} {
+    Creates a new qal_address record. 
+    If contact_id is not supplied, the value is assumed to be in arr_name(contact_id).
+} {
+    upvar 1 instance_id instance_id
+    upvar 1 $arr_name arr_name
+    if { $contact_id ne "" } {
+        set arr_name(contact_id) $contact_id
+    }
+    # at a minimum, object_id needs to be used to prevent id collision with other packges:
+    # set id \[db_nextval acs_object_id_seq\]
+    set arr_name(id) ""
+    set id [qal_address_write arr_name]
+    return $id
+}
+
+
+
+ad_proc -public qal_address_write {
+    arr_name
+    {contact_id ""}
+} {
+    Writes a new revision to an existing qal_address record.
+    If id is empty, creates a new record and returns the new id.
+    Otherwise empty string is returned.
+    If contact_id is not supplied, the value is assumed to be in arr_name(contact_id).
+
+    @param array_name
+    @return id or ""
+} {
+    upvar 1 instance_id instance_id
+    upvar 1 $arr_name a_arr
+    if { $contact_id ne "" } {
+        set arr_name(contact_id) $contact_id
+    }
+    set error_p 0
+    qal_address_defaults arr_name
+    qf_array_to_vars arr_name [qal_contact_keys]
+
+    # validations etc
+    if { ![qf_is_natural_number $id] } {
+        set id ""
+    }
+    if { ![qf_is_natural_number $contact_id] } {
+        set contact_id ""
+    }
+    if { ![qf_is_decimal $terms] } {
+        set terms ""
+    }
+
+    set terms_unit [string range $terms_unit 0 19]
+
+    set tax_included [qf_is_true $tax_included]
+
+    set address_code [string range $address_code 0 31]
+
+    set gifi_accno [string range $gifi_accno 0 29]
+
+    if { ![qf_is_decimal $discount] } {
+        set discount ""
+    }
+
+    if { ![qf_is_decimal $credit_limit] } {
+        set credit_limit ""
+    }
+
+    if { ![qf_is_natural_number $pricegroup_id] } {
+        set pricegroup_id ""
+    }
+
+    set created_s [qf_clock_scan $created]
+    if { $created_s eq "" } {
+        set created_s [clock seconds]
+    }
+    set created [qf_clock_format $created_s ]
+    # insert into db
+    if { ![qf_is_natural_number $id] } {
+        # record revision/new
+        set id [application_group::new -package_id $instance_id -group_name "address_num_for_contact_${contact_id}"]
+        #  now_yyyymmdd_hhmmss
+        set time_start [clock format [clock seconds] -format "%Y%m%d %H%M%S"]
+    } 
+    if { $error_p } {
+        ns_log Warning "qal_address_write: rejected '[array get arr_name]'"
+    } else {
+
+        set rev_id [db_nextval qal_id]
+        set created [clock format [clock seconds] -format "%Y%m%d %H%M%S"]
+        if { [ns_conn isconnected] } {
+            set created_by [ad_conn user_id]
+        } else {
+            set created_by $user_id
+        } 
+
+        set trashed_p 0
+        set trashed_by ""
+        set trashed_ts ""
+        db_transaction {
+            if { !$create_p } {
+                db_dml qal_address_trash { update qal_address set trashed_p='1',trashed_by=:user_id,trashed_ts=now() where id=:id
+                }
+            }
+            # Make sure address_code is unique
+            set i 1
+            set address_code_orig $address_code
+            set id_from_address_code [qal_address_id_from_code $address_code]
+            while { ( $id_from_address_code ne "" && $id_from_address_code ne $id ) && $i < 1000 } {
+                incr i
+                set chars_max [expr { 31 - [string length $i] } ]
+                set address_code [string range $address_code_orig 0 $chars_max]
+                append address_code "-" $i
+                set id_from_address_code [qal_address_id_from_code $address_code]
+            }
+            db_dml qal_address_create_1 "insert into qal_address \
+ ([qal_address_keys ","]) values ([qal_address_keys ",:"])"
+        }
+    }
+    return $id
+}
+
+ad_proc -public qal_address_delete {
+    address_id_list
+} {
+    Deletes records.
+    address_id_list may be a one or a list.
+    User must be a package admin.
+} {
+    set success_p 1
+    if { $address_id_list ne "" } {
+        set user_id [ad_conn user_id]
+        set instance_id [qc_set_instance_id]
+        set admin_p [permission::permission_p -party_id $user_id \
+                         -object_id [ad_conn package_id] -privilege admin]
+        set success_p $admin_p
+        if { $admin_p } {
+            if { [llength $address_id_list] > 0 } {
+                set validated_p [hf_natural_number_list_validate $address_id_list]
+            } else {
+                set validated_p 0
+            }
+            if { $validated_p } {
+                db_transaction {
+                    db_dml qal_address_ids_delete "delete from qal_address \
+                            where instance_id=:instance_id and address_id in \
+                            ([template::util::tcl_to_sql_list $address_id_list])"
+                } on_error {
+                    set success_p 0
+                }
+            } else {
+                set success_p 0
+            }
+        }
+    }
+    return $success_p
+}
+
+
+ad_proc -public qal_address_trash {
+    address_id_list
+} {
+    Trash one or more address records
+} {
+    set success_p 0
+    if { $address_id_list ne "" } {
+        set user_id [ad_conn user_id]
+        set instance_id [qc_set_instance_id]
+        set address_id_list_len [llength $address_id_list]
+        if { $address_id_list_len > 0 } {
+            set validated_p [hf_natural_number_list_validate $address_id_list]
+        } else {
+            set validated_p 0
+        }
+        if { $validated_p } {
+            set instance_write_p [qc_permission_p $user_id $instance_id non_assets write $instance_id]
+            if { $instance_write_p } {
+                set filtered_address_id_list $address_id_list
+            } else {
+                set filtered_address_id_list [list ]
+                set at_least_one_write_p 0
+                foreach address_id $address_id_list {
+                    if { [qc_permission_p $user_id $address_id non_assets write $instance_id] } {
+                        set at_least_one_write_p 1
+                        lappend filtered_address_id_list $address_id
+                    }
+                }
+            } 
+            if { $instance_write_p || $at_least_one_write_p } {
+                set success_p 1
+                db_transaction {
+                    db_dml qal_address_ids_trash "update qal_address \
+                            set trashed_p='1',trashed_by=:user_id,trashed_ts=now() \
+                            where instance_id=:instance_id and trashed_p!='1' and address_id in \
+                            ([template::util::tcl_to_sql_list $filtered_address_id_list])"
+                } on_error {
+                    set success_p 0
+                }
+            }
+        }
+    }
+    return $success_p
 }
