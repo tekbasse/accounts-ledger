@@ -632,7 +632,11 @@ ad_proc -public qal_vendor_trash {
 }
 
 ##code qal_contact_address_create address_arr (req: contact_id address_type)
+    # includes ref to qal_addres_postal_create
+
 ##code qal_contact_address_write address_arr contact_id addrs_id
+    # includes ref to qal_addres_postal_create
+
 ##code qal_contact_address_trash contact_id addrs_id
 ##code qal_contact_address_delete contact_id addrs_id
 ##code qal_contact_addresses_read {contact_id_list ""}

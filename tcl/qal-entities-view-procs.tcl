@@ -154,5 +154,54 @@ ad_proc qal_vendors_read {
     return $rows_lists
 }
 
-##code qal_contact_address_read addrs_id
-##code qal_contact_addresses_read {contact_id_list ""}
+
+ad_proc qal_address_read {
+    addrs_id
+} {
+    Returns a name value list of one address record for a contact.
+} {
+    upvar 1 instance_id instance_id
+    set return_lists [qal_addresses_read [list $address_id]]
+    # list is in order of qal_address_keys
+    set return_val_list [lindex $return_lists 0]
+    set return_list [list ]
+    if { [llength $return_val_list] > 0 } {
+        set keys_list [qal_address_keys]
+        set i 0
+        foreach key $keys_list {
+            set val [lindex $return_val_list $i]
+            lappend return_list $key $val
+            incr i
+        }
+    }
+    return $return_list
+}
+
+
+##code -private qal_contact_address_postal_read addrs_id  
+
+ad_proc qal_addresses_read {
+    addrs_id_list
+} {
+    Returns list of lists; Each list is an address record for each address_id in address_id_list as a list of address record values.
+    
+    @param address_id_list
+
+    @see qal_address_keys and
+    @see qal_other_address_map for order of field (key) values..
+} {
+    upvar 1 instance_id instance_id
+    upvar 1 user_id user_id
+    if { ![info exists user_id] } {
+        if { [ns_conn isconnected] } {
+            set user_id [ad_conn user_id]
+        } else {
+            set user_id ""
+        }
+    }
+    set address_ids_list [hf_list_filter_by_natural_number $address_id_list]
+    set allowed_address_ids [qal_address_ids_of_user_id $user_id]
+    set intersect_ids [set_intersection $address_ids_list $allowed_address_ids]
+    set rows_lists [db_list_of_lists qal_address_get "select [qal_address_keys ","] from qal_address where address_id=:address_id and instance_id=:instance_id and trashed_p!='1' and address_id in ([template::util::tcl_to_sql_list $address_ids_list])" ]
+    return $rows_lists
+}
