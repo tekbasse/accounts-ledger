@@ -774,65 +774,42 @@ ad_proc -public qal_address_write {
     if { $contact_id ne "" } {
         set arr_name(contact_id) $contact_id
     }
-    set error_p 0
-    qal_address_defaults arr_name
-    qf_array_to_vars arr_name [qal_contact_keys]
+    qal_other_address_map_defaults arr_name
+    qf_array_to_vars arr_name [qal_other_address_map_keys]
 
     # validations etc
-    if { ![qf_is_natural_number $id] } {
-        set id ""
-    }
     if { ![qf_is_natural_number $contact_id] } {
         set contact_id ""
     }
-    if { ![qf_is_decimal $terms] } {
-        set terms ""
+    if { ![qf_is_natural_number $addrs_id] } {
+        set addrs_id [db_nextval qal_id]
     }
 
-    set terms_unit [string range $terms_unit 0 19]
-
-    set tax_included [qf_is_true $tax_included]
-
-    set address_code [string range $address_code 0 31]
-
-    set gifi_accno [string range $gifi_accno 0 29]
-
-    if { ![qf_is_decimal $discount] } {
-        set discount ""
+    set record_type [string range $record_type 0 29]
+    if { ![qf_is_natural_number $address_id] } {
+        set address_id ""
     }
-
-    if { ![qf_is_decimal $credit_limit] } {
-        set credit_limit ""
+    if { ![qf_is_natural_number $sort_order] } {
+        db_1row qal_other_address_map_c_recs_ct {select count(*) as addrs_id_ct from qal_other_address_map where instance_id=:instance_id and contact_id=:contact_id}
     }
-
-    if { ![qf_is_natural_number $pricegroup_id] } {
-        set pricegroup_id ""
-    }
-
+    
     set created_s [qf_clock_scan $created]
     if { $created_s eq "" } {
         set created_s [clock seconds]
     }
     set created [qf_clock_format $created_s ]
+    set address_p 0
     # insert into db
-    if { ![qf_is_natural_number $id] } {
-        # record revision/new
-        set id [application_group::new -package_id $instance_id -group_name "address_num_for_contact_${contact_id}"]
-        #  now_yyyymmdd_hhmmss
-        set time_start [clock format [clock seconds] -format "%Y%m%d %H%M%S"]
-    } 
-    if { $error_p } {
-        ns_log Warning "qal_address_write: rejected '[array get arr_name]'"
-    } else {
-
-        set rev_id [db_nextval qal_id]
-        set created [clock format [clock seconds] -format "%Y%m%d %H%M%S"]
+    if { [string match -nocase "address"] } {
+        # This is a street address
+        set address_id [db_nextval qal_id]
+        set address_p 1
+    }
         if { [ns_conn isconnected] } {
             set created_by [ad_conn user_id]
         } else {
-            set created_by $user_id
-        } 
-
+            set created_by $instance_id
+        }
         set trashed_p 0
         set trashed_by ""
         set trashed_ts ""
