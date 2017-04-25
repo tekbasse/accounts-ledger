@@ -34,7 +34,7 @@ ad_proc -public qal_contact_id_from_customer_id {
 } {
     if { [llength $customer_id] > 1 } {
         set contact_ids [db_list qal_customer_read_c_id_n "select contact_id from qal_customer \
- where customer_id in {[template::util::tcl_to_sql_list $customer_id]) and trashed_p!='1' and instance_id=:instance_id"]
+ where customer_id in ([template::util::tcl_to_sql_list $customer_id]) and trashed_p!='1' and instance_id=:instance_id"]
     } else {
         set contact_ids ""
         db_0or1row qal_customer_read_customer_id_1 {select contact_id as contact_ids from qal_customer
@@ -51,7 +51,7 @@ ad_proc -public qal_contact_id_from_vendor_id {
 } {
     if { [llength $vendor_id] > 1 } {
         set contact_ids [db_list qal_vendor_read_c_id_n "select contact_id from qal_vendor \
- where vendor_id in {[template::util::tcl_to_sql_list $vendor_id]) and trashed_p!='1' and instance_id=:instance_id"]
+ where vendor_id in ([template::util::tcl_to_sql_list $vendor_id]) and trashed_p!='1' and instance_id=:instance_id"]
     } else {
         set contact_ids ""
         db_0or1row qal_vendor_read_vendor_id_1 {select contact_id as contact_ids from qal_vendor
