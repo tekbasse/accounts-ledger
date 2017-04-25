@@ -4,7 +4,7 @@ ad_library {
 
 }
 
-ad_proc qal_contact_id_exists_q {
+ad_proc -public qal_contact_id_exists_q {
     contact_id
 } {
     Returns 1 if contact_id exists, otherwise returns 0
@@ -15,7 +15,7 @@ ad_proc qal_contact_id_exists_q {
 }
 
 
-ad_proc qal_contact_id_from_label {
+ad_proc -public qal_contact_id_from_label {
     contact_label
 } {
     Returns id if contact_label exists, otherwise returns ""
@@ -26,7 +26,7 @@ ad_proc qal_contact_id_from_label {
     return $id
 }
 
-ad_proc qal_contact_id_from_customer_id {
+ad_proc -public qal_contact_id_from_customer_id {
     customer_id
 } {
     Returns contact_id(s) of customer_id(s). If supplied 1, returns a scalar, otherwise returns a list.
@@ -43,7 +43,7 @@ ad_proc qal_contact_id_from_customer_id {
     return $contact_ids
 }
 
-ad_proc qal_contact_id_from_vendor_id {
+ad_proc -public qal_contact_id_from_vendor_id {
     vendor_id
 } {
     Returns contact_id(s) of vendor_id(s). If supplied 1, returns a scalar, otherwise returns a list.
@@ -61,7 +61,7 @@ ad_proc qal_contact_id_from_vendor_id {
 }
 
 
-ad_proc qal_customer_id_exists_q {
+ad_proc -public qal_customer_id_exists_q {
     customer_id
 } {
     Returns 1 if customer_id exists, otherwise returns 0
@@ -72,7 +72,7 @@ ad_proc qal_customer_id_exists_q {
 }
 
 
-ad_proc qal_customer_id_from_code {
+ad_proc -public qal_customer_id_from_code {
     customer_code
 } {
     Returns id if customer_code exists, otherwise returns ""
@@ -83,7 +83,7 @@ ad_proc qal_customer_id_from_code {
     return $id
 }
 
-ad_proc qal_vendor_id_exists_q {
+ad_proc -public qal_vendor_id_exists_q {
     vendor_id
 } {
     Returns 1 if vendor_id exists, otherwise returns 0
@@ -94,7 +94,7 @@ ad_proc qal_vendor_id_exists_q {
 }
 
 
-ad_proc qal_vendor_id_from_code {
+ad_proc -public qal_vendor_id_from_code {
     vendor_code
 } {
     Returns id if vendor_code exists, otherwise returns ""
@@ -106,7 +106,7 @@ ad_proc qal_vendor_id_from_code {
 }
 
 
-ad_proc qal_contact_ids_of_user_id {
+ad_proc -public qal_contact_ids_of_user_id {
     user_id
 } {
     Returns contact_id(s) of user_id, or empty string if none found.
@@ -120,7 +120,7 @@ ad_proc qal_contact_ids_of_user_id {
 }
 
 
-ad_proc qal_customer_ids_of_user_id {
+ad_proc -public qal_customer_ids_of_user_id {
     user_id
 } {
     Returns customer_id(s) of user_id, or empty string if none found.
@@ -137,7 +137,7 @@ ad_proc qal_customer_ids_of_user_id {
     return $customer_id_list
 }
 
-ad_proc qal_vendor_ids_of_user_id {
+ad_proc -public qal_vendor_ids_of_user_id {
     user_id
 } {
     Returns vendor_id(s) of user_id, or empty string if none found.
@@ -155,7 +155,7 @@ ad_proc qal_vendor_ids_of_user_id {
 }
 
 
-ad_proc qal_contact_keys {
+ad_proc -public qal_contact_keys {
     {separator ""}
 } {
     Returns an ordered list of keys for qal_contact.
@@ -193,7 +193,7 @@ ad_proc qal_contact_keys {
     return $keys
 }
 
-ad_proc qal_customer_keys {
+ad_proc -public qal_customer_keys {
     {separator ""}
 } {
     Returns an ordered list of keys for qal_customer.
@@ -220,7 +220,7 @@ ad_proc qal_customer_keys {
     return $keys
 }
 
-ad_proc qal_vendor_keys {
+ad_proc -public qal_vendor_keys {
     {separator ""}
 } {
     Returns an ordered list of keys for qal_vendor.
@@ -252,7 +252,7 @@ ad_proc qal_vendor_keys {
     return $keys
 }
 
-ad_proc qal_address_keys {
+ad_proc -public qal_address_keys {
     {separator ""}
 } {
     Returns an ordered list of keys for qal_address.
@@ -281,7 +281,7 @@ ad_proc qal_address_keys {
 }
 
 
-ad_proc qal_other_address_map_keys {
+ad_proc -public qal_other_address_map_keys {
     {separator ""}
 } {
     Returns an ordered list of keys for qal_other_address_map.

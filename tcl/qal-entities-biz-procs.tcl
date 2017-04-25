@@ -14,7 +14,7 @@ ad_library {
 
 
 
-ad_proc qal_contact_create {
+ad_proc -public qal_contact_create {
     arr_name
 } {
     # Creates a new qal_contact record
@@ -28,7 +28,7 @@ ad_proc qal_contact_create {
     return $id
 }
 
-ad_proc qal_contact_write {
+ad_proc -public qal_contact_write {
     arr_name
 } {
     Writes a new revision to an existing qal_contact record.
@@ -184,7 +184,7 @@ ad_proc qal_contact_write {
     return $id
 }
 
-ad_proc qal_contact_delete {
+ad_proc -public qal_contact_delete {
     contact_id_list
 } {
     Deletes records.
@@ -222,7 +222,7 @@ ad_proc qal_contact_delete {
     return $success_p
 }
 
-ad_proc qal_contact_trash {
+ad_proc -public qal_contact_trash {
     contact_id_list
 } {
     Trash a contact record.
@@ -270,7 +270,7 @@ ad_proc qal_contact_trash {
 }
 
 
-ad_proc qal_customer_write {
+ad_proc -public qal_customer_write {
     arr_name
 } {
     Writes a new revision to an existing qal_customer record.
@@ -369,7 +369,7 @@ ad_proc qal_customer_write {
 
 }
 
-ad_proc qal_customer_delete {
+ad_proc -public qal_customer_delete {
     customer_id_list
 } {
     Deletes records.
@@ -406,7 +406,7 @@ ad_proc qal_customer_delete {
 }
 
 
-ad_proc qal_customer_trash {
+ad_proc -public qal_customer_trash {
     customer_id_list
 } {
     Trash one or more customer records
@@ -452,7 +452,7 @@ ad_proc qal_customer_trash {
 }
 
 
-ad_proc qal_vendor_write {
+ad_proc -public qal_vendor_write {
     arr_name
 } {
     Writes a new revision to an existing qal_vendor record.
@@ -549,7 +549,7 @@ ad_proc qal_vendor_write {
     return $id
 }
 
-ad_proc qal_vendor_delete {
+ad_proc -public qal_vendor_delete {
     vendor_id_list
 } {
     Deletes records.
@@ -586,7 +586,7 @@ ad_proc qal_vendor_delete {
 }
 
 
-ad_proc qal_vendor_trash {
+ad_proc -public qal_vendor_trash {
     vendor_id_list
 } {
     Trash one or more vendor records
@@ -637,29 +637,13 @@ ad_proc qal_vendor_trash {
 ##code qal_contact_address_delete contact_id addrs_id
 ##code qal_contact_addresses_read {contact_id_list ""}
 
-ad_proc qal_address_create {
+ad_proc -private qal_address_postal_create {
     arr_name
 } {
-    # Creates a new qal_address record
-
-    upvar 1 instance_id instance_id
-    upvar 1 $arr_name arr_name
-    # at a minimum, object_id needs to be used to prevent id collision with other packges:
-    # set id \[db_nextval acs_object_id_seq\]
-    set arr_name(id) ""
-    set id [qal_address_write arr_name]
-    return $id
-}
-
-ad_proc qal_address_write {
-    arr_name
-} {
-    Writes a new revision to an existing qal_address record.
-    If id is empty, creates a new record.
-    A new id is returned if successful.
-    Otherwise empty string is returned.
+    Creates a qal_address record.
     @param array_name
-    @return id or ""
+
+    @see qall
 } {
     upvar 1 instance_id instance_id
     upvar 1 $arr_name a_arr
@@ -685,15 +669,7 @@ ad_proc qal_address_write {
     regsub -all -- {[^[:graph:]\ ]+} $bcc {} bcc
 
     # insert into db
-    if { ![qf_is_natural_number $id] } {
-        # record revision/new
-        set id [db_nextval qal_id]
-        #  now_yyyymmdd_hhmmss
-        set create_p 1
-    } else {
-        set create_p 0
-    }
-
+    set id [db_nextval qal_id]
     db_dml qal_address_create_1 "insert into qal_address \
  ([qal_address_keys ","]) values ([qal_address_keys ",:"])"
     return $id

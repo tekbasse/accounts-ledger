@@ -4,7 +4,7 @@ ad_library {
 
 }
 
-ad_proc qal_contact_defaults {
+ad_proc -private qal_contact_defaults {
     arr_name
 } {
     Sets defaults for a contact record into array_name 
@@ -56,7 +56,7 @@ ad_proc qal_contact_defaults {
     return 1
 }
 
-ad_proc qal_contact_user_map_defaults {
+ad_proc -private qal_contact_user_map_defaults {
     arr_name
 } {
     Sets defaults for a contact record into array_name 
@@ -89,7 +89,7 @@ ad_proc qal_contact_user_map_defaults {
 }
 
 
-ad_proc qal_other_address_map_defaults {
+ad_proc -private qal_other_address_map_defaults {
     arr_name
 } {
     Sets defaults for a contact record into array_name 
@@ -123,7 +123,7 @@ ad_proc qal_other_address_map_defaults {
     return 1
 }
 
-ad_proc qal_customer_defaults {
+ad_proc -private qal_customer_defaults {
     arr_name
 } {
     Sets defaults for a contact record into array_name 
@@ -166,7 +166,7 @@ ad_proc qal_customer_defaults {
 }
 
 
-ad_proc qal_vendor_defaults {
+ad_proc -private qal_vendor_defaults {
     arr_name
 } {
     Sets defaults for a contact record into array_name 
@@ -196,7 +196,7 @@ ad_proc qal_vendor_defaults {
 }
 
 
-ad_proc qal_address_defaults {
+ad_proc -private qal_address_defaults {
     arr_name
 } {
     Sets defaults for a address record into array_name 
@@ -240,7 +240,7 @@ ad_proc qal_address_defaults {
 
 
 
-ad_proc qal_other_address_map_defaults {
+ad_proc -private qal_other_address_map_defaults {
     arr_name
 } {
     Sets defaults for a other_address_map record into array_name 
