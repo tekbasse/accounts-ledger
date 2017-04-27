@@ -725,15 +725,6 @@ ad_proc -private qal_address_postal_create {
 }
 
 
-##code qal_contact_address_create address_arr (req: contact_id address_type)
-    # includes ref to qal_addres_postal_create
-
-##code qal_contact_address_write address_arr contact_id addrs_id
-    # includes ref to qal_addres_postal_create
-
-##code qal_contact_address_trash contact_id addrs_id
-##code qal_contact_address_delete contact_id addrs_id
-##code qal_contact_addresses_read {contact_id_list ""}
 
 
 ad_proc -public qal_address_create {
@@ -835,10 +826,10 @@ ad_proc -public qal_address_write {
 }
 
 ad_proc -public qal_address_delete {
-    address_id_list
+    addrs_id_list
 } {
     Deletes records.
-    address_id_list may be a one or a list.
+    addrs_id_list may be a one qal_contact.*_addrs_id or a list, where * is street, mailing or billing.
     User must be a package admin.
 } {
     set success_p 1
@@ -856,9 +847,18 @@ ad_proc -public qal_address_delete {
             }
             if { $validated_p } {
                 db_transaction {
-                    db_dml qal_address_ids_delete "delete from qal_address \
+                    set address_id_list [db_list qal_address_id_2_d \
+                        "select address_id from qal_other_address_map \
+                         where instance_id=:instance_id \
+                         and addrs_id in ([template::util::tcl_to_sql_list $addrs_id_list])"]
+                    if { [string length $address_id_list ] > 0 } {
+                        db_dml qal_address_ids_delete "delete from qal_address \
                             where instance_id=:instance_id and address_id in \
-                            ([template::util::tcl_to_sql_list $address_id_list])"
+                             ([template::util::tcl_to_sql_list $address_id_list])"
+                    }
+                    db_dml qal_addrs_ids_delete "delete from qal_address \
+                            where instance_id=:instance_id and addrs_id in \
+                            ([template::util::tcl_to_sql_list $addrs_id_list])"
                 } on_error {
                     set success_p 0
                 }
@@ -872,9 +872,9 @@ ad_proc -public qal_address_delete {
 
 
 ad_proc -public qal_address_trash {
-    address_id_list
+    addrs_id_list
 } {
-    Trash one or more address records
+    Trash one or more qal_contact.*_addrs_id address records, where * is street, mailing or billing.
 } {
     set success_p 0
     if { $address_id_list ne "" } {
@@ -903,9 +903,21 @@ ad_proc -public qal_address_trash {
             if { $instance_write_p || $at_least_one_write_p } {
                 set success_p 1
                 db_transaction {
-                    db_dml qal_address_ids_trash "update qal_address \
+                    db_dml qal_addrs_ids_trash "update qal_other_address_map \
                             set trashed_p='1',trashed_by=:user_id,trashed_ts=now() \
-                            where instance_id=:instance_id and trashed_p!='1' and address_id in \
+                            where instance_id=:instance_id and trashed_p!='1' and addrs_id in \
+                            ([template::util::tcl_to_sql_list $filtered_address_id_list])"
+                    db_dml qal_street_addrs_ids_trash "update qal_contact \
+                            set street_addrs_id=null
+                             where instance_id=:instance_id and trashed_p!='1' and street_addrs_id in \
+                            ([template::util::tcl_to_sql_list $filtered_address_id_list])"
+                    db_dml qal_mailing_addrs_ids_trash "update qal_contact \
+                            set mailing_addrs_id=null
+                             where instance_id=:instance_id and trashed_p!='1' and mailing_addrs_id in \
+                            ([template::util::tcl_to_sql_list $filtered_address_id_list])"
+                    db_dml qal_billing_addrs_ids_trash "update qal_contact \
+                            set billing_addrs_id=null
+                             where instance_id=:instance_id and trashed_p!='1' and billing_addrs_id in \
                             ([template::util::tcl_to_sql_list $filtered_address_id_list])"
                 } on_error {
                     set success_p 0
