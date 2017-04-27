@@ -902,21 +902,22 @@ ad_proc -public qal_address_trash {
             } 
             if { $instance_write_p || $at_least_one_write_p } {
                 set success_p 1
+                set null ""
                 db_transaction {
                     db_dml qal_addrs_ids_trash "update qal_other_address_map \
                             set trashed_p='1',trashed_by=:user_id,trashed_ts=now() \
                             where instance_id=:instance_id and trashed_p!='1' and addrs_id in \
                             ([template::util::tcl_to_sql_list $filtered_address_id_list])"
                     db_dml qal_street_addrs_ids_trash "update qal_contact \
-                            set street_addrs_id=null
+                            set street_addrs_id=:null
                              where instance_id=:instance_id and trashed_p!='1' and street_addrs_id in \
                             ([template::util::tcl_to_sql_list $filtered_address_id_list])"
                     db_dml qal_mailing_addrs_ids_trash "update qal_contact \
-                            set mailing_addrs_id=null
+                            set mailing_addrs_id=:null
                              where instance_id=:instance_id and trashed_p!='1' and mailing_addrs_id in \
                             ([template::util::tcl_to_sql_list $filtered_address_id_list])"
                     db_dml qal_billing_addrs_ids_trash "update qal_contact \
-                            set billing_addrs_id=null
+                            set billing_addrs_id=:null
                              where instance_id=:instance_id and trashed_p!='1' and billing_addrs_id in \
                             ([template::util::tcl_to_sql_list $filtered_address_id_list])"
                 } on_error {
