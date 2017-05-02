@@ -67,13 +67,66 @@ aa_register_case -cats {api smoke} qal_entities_check {
                              customer_code "" \
                              pricegroup_id "" \
                              created "" \
-                             created_by "" \
+                             created_by $user_id \
                              trashed_p "0" \
                              trashed_by "" \
                              trashed_ts "" ]
             set cu_id [qal_customer_create $customer_arr]
             set cu_created_p [qal_is_natural_number $cu_id] 
 
+            aa_true "Created a customer" $cu_created_p
+
+            set ve_list [list \
+                             id "" \
+                             instance_id $instance_id \
+                             contact_id $co_id \
+                             terms "" \
+                             terms_unit "" \
+                             tax_included "" \
+                             vendor_code "" \
+                             gifi_accno "" \
+                             discount "" \
+                             credit_limit "" \
+                             pricegroup_id "" \
+                             created "" \
+                             created_by $user_id \
+                             trashed_p "0" \
+                             trashed_by "" \
+                             trashed_ts "" \
+                             area_market "" \
+                             purchase_policy "" \
+                             return_policy "" \
+                             price_guar_policy "" \
+                             installation_policy ""]
+            set ve_id [qal_vendor_create $vendor_arr]
+            set ve_created_p [qal_is_natural_number $ve_id] 
+
+            aa_true "Created a vendor" $ve_created_p
+
+            aa_log "Read and verify each value"
+
+            set co_v2_list [qal_contact_read $co_id]
+
+            set cu_v2_list [qal_customer_read $cu_id]
+
+            set ve_v2_list [qal_vendor_read $ve_id]
+
+            aa_log "Change/update each value"
+
+
+            aa_log "Read and verify each updated value"
+
+            # Iterate through creating contact, customer, and vendor to test more trash/delete cases
+
+
+            # Trash customer or vendor, see if other and contact remains
+            # Trash other, see if contact remains
+            # Trash contact, verify customer and vendor trashed
+            
+            # Delete customer or vendor, see if other and contact remains
+            # Delete other, see if contact remains
+            # Delete contact, verify customer and vendor deleted
+            
 
             ns_log Notice "tcl/test/q-control-procs.tcl.429 end"
 
