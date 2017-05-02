@@ -18,8 +18,9 @@ ad_proc -public qal_contact_create {
     arr_name
     {contact_id ""}
 } {
-    Creates a new qal_contact record.
+    Creates a new qal_contact record. 
     If contact_id is not "", replaces arr_name(contact_id) with value.
+    Returns contact_id, or empty string if there was a problem.
 } {
     upvar 1 instance_id instance_id
     upvar 1 $arr_name arr_name

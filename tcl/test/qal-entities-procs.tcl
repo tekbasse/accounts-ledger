@@ -44,7 +44,7 @@ aa_register_case -cats {api smoke} qal_entities_check {
                              trashed_by "" \
                              trashed_ts "" \
                              notes "test from accounts-ledger/tcl/test/qal-entities-procs.tcl" ]
-            qal_contact_create contact_arr
+            set co_id [qal_contact_create contact_arr]
             aa_true "Created a contact"
 
             ns_log Notice "tcl/test/q-control-procs.tcl.429 end"
