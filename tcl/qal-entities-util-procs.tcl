@@ -158,7 +158,37 @@ ad_proc -public qal_vendor_ids_of_user_id {
 ad_proc -public qal_contact_keys {
     {separator ""}
 } {
-    Returns an ordered list of keys for qal_contact.
+    Returns an ordered list of keys for qal_contact: 
+
+    id 
+    rev_id 
+    instance_id 
+    parent_id 
+    label 
+    name 
+    street_addrs_id 
+    mailing_addrs_id 
+    billing_addrs_id 
+    vendor_id 
+    customer_id 
+    taxnumber 
+    sic_code 
+    iban 
+    bic 
+    language_code 
+    currency 
+    timezone 
+    time_start 
+    time_end 
+    url 
+    user_id 
+    created 
+    created_by 
+    trashed_p 
+    trashed_by 
+    trashed_ts 
+    notes 
+
 } {
     set keys_list [list \
                        id \
@@ -196,7 +226,24 @@ ad_proc -public qal_contact_keys {
 ad_proc -public qal_customer_keys {
     {separator ""}
 } {
-    Returns an ordered list of keys for qal_customer.
+    Returns an ordered list of keys for qal_customer:
+    id 
+    instance_id 
+    rev_id 
+    contact_id 
+    discount 
+    tax_included 
+    credit_limit 
+    terms 
+    terms_unit 
+    annual_value 
+    customer_code 
+    pricegroup_id 
+    created 
+    created_by 
+    trashed_p 
+    trashed_by 
+    trashed_ts
 } {
     set keys_list [list \
                        id \
@@ -223,7 +270,29 @@ ad_proc -public qal_customer_keys {
 ad_proc -public qal_vendor_keys {
     {separator ""}
 } {
-    Returns an ordered list of keys for qal_vendor.
+    Returns an ordered list of keys for qal_vendor:
+    id 
+    instance_id 
+    rev_id 
+    contact_id 
+    terms 
+    terms_unit 
+    tax_included 
+    vendor_code 
+    gifi_accno 
+    discount 
+    credit_limit 
+    pricegroup_id 
+    created 
+    created_by 
+    trashed_p 
+    trashed_by 
+    trashed_ts 
+    area_market 
+    purchase_policy 
+    return_policy 
+    price_guar_policy 
+    installation_policy 
 } {
     set keys_list [list \
                        id \
@@ -255,7 +324,25 @@ ad_proc -public qal_vendor_keys {
 ad_proc -public qal_address_keys {
     {separator ""}
 } {
-    Returns an ordered list of keys for qal_address.
+    Returns an ordered list of keys for qal_address:
+    id 
+    instance_id 
+    rev_id 
+    address_type 
+    address0 
+    address1 
+    address2 
+    city 
+    state 
+    postal_code 
+    country_code 
+    attn 
+    phone 
+    phone_time 
+    fax 
+    email 
+    cc 
+    bcc
 } {
     set keys_list [list \
                        id \
@@ -284,7 +371,21 @@ ad_proc -public qal_address_keys {
 ad_proc -public qal_other_address_map_keys {
     {separator ""}
 } {
-    Returns an ordered list of keys for qal_other_address_map.
+    Returns an ordered list of keys for qal_other_address_map:
+    contact_id 
+    instance_id 
+    addrs_id 
+    record_type 
+    address_id 
+    sort_order 
+    created 
+    created_by 
+    trashed_p 
+    trashed_by 
+    trashed_ts 
+    account_name 
+    notes 
+
 } {
     set keys_list [list \
                        contact_id \
