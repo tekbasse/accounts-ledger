@@ -316,7 +316,7 @@ ad_proc -public qal_customer_write {
     }
     set error_p 0
     qal_customer_defaults arr_name
-    qf_array_to_vars arr_name [qal_contact_keys]
+    qf_array_to_vars arr_name [qal_customer_keys]
 
     # validations etc
     if { ![qf_is_natural_number $id] } {
@@ -522,7 +522,7 @@ ad_proc -public qal_vendor_write {
     }
     set error_p 0
     qal_vendor_defaults arr_name
-    qf_array_to_vars arr_name [qal_contact_keys]
+    qf_array_to_vars arr_name [qal_vendor_keys]
 
     # validations etc
     if { ![qf_is_natural_number $id] } {
