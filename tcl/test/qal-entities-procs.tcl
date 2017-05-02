@@ -17,6 +17,11 @@ aa_register_case -cats {api smoke} qal_entities_check {
             set sysowner_user_id [party::get_by_email -email $sysowner_email]
             set user_id $sysowner_user_id
 
+            #
+            # CRURTRDR tests for contact, customer, vendor
+            #    C=Create, R=Read, U=Update T=Trash D=Delete
+            #
+
             # co = contact, cu = customer, ve = vendor
             set co_list [list  \
                              instance_id $instance_id \
@@ -45,7 +50,30 @@ aa_register_case -cats {api smoke} qal_entities_check {
                              trashed_ts "" \
                              notes "test from accounts-ledger/tcl/test/qal-entities-procs.tcl" ]
             set co_id [qal_contact_create contact_arr]
-            aa_true "Created a contact"
+            set co_created_p [qal_is_natural_number $co_id] 
+
+            aa_true "Created a contact" $co_created_p
+
+            set cu_list [list \
+                             id "" \
+                             instance_id $instance_id \
+                             contact_id $co_id
+                             discount "" \
+                             tax_included "" \
+                             credit_limit "" \
+                             terms "" \
+                             terms_unit "" \
+                             annual_value "" \
+                             customer_code "" \
+                             pricegroup_id "" \
+                             created "" \
+                             created_by "" \
+                             trashed_p "0" \
+                             trashed_by "" \
+                             trashed_ts "" ]
+            set cu_id [qal_customer_create $customer_arr]
+            set cu_created_p [qal_is_natural_number $cu_id] 
+
 
             ns_log Notice "tcl/test/q-control-procs.tcl.429 end"
 
