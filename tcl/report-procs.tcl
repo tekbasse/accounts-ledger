@@ -22,7 +22,7 @@ ad_proc qal_pretty_bytes_iec {
         set number [expr { $number * pow(1000,$unit_index) } ]
         set unit "B"
     }
-#    set units_list \[list bytes kibibyte mebibyte gibibyte tebibyte pebibyte exbibyte zebibyte yobibyte\]
+    # units: bytes kibibyte mebibyte gibibyte tebibyte pebibyte exbibyte zebibyte yobibyte
     set test_base_nbr 1
     set base_nbr 1
     foreach abbrev $abbrev_list {
@@ -59,7 +59,7 @@ ad_proc qal_pretty_bytes_dec {
         set number [expr { $number * pow(1000,$unit_index) } ]
         set unit "B"
     }
-#    set units_list \[list bytes kilobyte megabyte gigabyte terabyte petabyte exabyte zettabyte yottabyte\]
+    # units: bytes kilobyte megabyte gigabyte terabyte petabyte exabyte zettabyte yottabyte
     set test_base_nbr 1
     set base_nbr 1
     foreach abbrev $abbrev_list {
@@ -115,7 +115,7 @@ ad_proc qal_pretty_metric {
         set number_abs [expr { abs( $number ) } ]
         set unit ""
     }
-    #    set units_list \[list pico nano micro milli centi deci "" deca hecto kilo mega giga tera \]
+    # units pico nano micro milli centi deci "" deca hecto kilo mega giga tera
     set test_base_nbr 1e-192
     set i 0
     foreach abbrev $abbrev_list {

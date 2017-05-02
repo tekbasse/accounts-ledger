@@ -27,8 +27,8 @@ ad_proc -public qal_contact_create {
     if { $contact_id ne "" } {
         set arr_name(contact_id) $contact_id
     }
-    # at a minimum, object_id needs to be used to prevent id collision with other packges:
-    # set id \[db_nextval acs_object_id_seq\]
+    # at a minimum, object_id needs to be used to prevent id collision with other packages:
+
     set arr_name(id) ""
     set id [qal_contact_write arr_name]
     return $id
@@ -290,8 +290,8 @@ ad_proc -public qal_customer_create {
     if { $contact_id ne "" } {
         set arr_name(contact_id) $contact_id
     }
-    # at a minimum, object_id needs to be used to prevent id collision with other packges:
-    # set id \[db_nextval acs_object_id_seq\]
+    # at a minimum, object_id needs to be used to prevent id collision with other packages:
+
     set arr_name(id) ""
     set id [qal_customer_write arr_name]
     return $id
@@ -496,8 +496,8 @@ ad_proc -public qal_vendor_create {
     if { $contact_id ne "" } {
         set arr_name(contact_id) $contact_id
     }
-    # at a minimum, object_id needs to be used to prevent id collision with other packges:
-    # set id \[db_nextval acs_object_id_seq\]
+    # at a minimum, object_id needs to be used to prevent id collision with other packages:
+
     set arr_name(id) ""
     set id [qal_vendor_write arr_name]
     return $id
@@ -740,8 +740,8 @@ ad_proc -public qal_address_create {
     if { $contact_id ne "" } {
         set arr_name(contact_id) $contact_id
     }
-    # at a minimum, object_id needs to be used to prevent id collision with other packges:
-    # set id \[db_nextval acs_object_id_seq\]
+    # at a minimum, object_id needs to be used to prevent id collision with other packages:
+
     set arr_name(id) ""
     set id [qal_address_write arr_name]
     return $id
