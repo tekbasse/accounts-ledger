@@ -23,81 +23,16 @@ aa_register_case -cats {api smoke} qal_entities_check {
             #
 
             # co = contact, cu = customer, ve = vendor
-            set co_list [list  \
-                             instance_id $instance_id \
-                             label "test1" \
-                             name [qal_namelur]  \
-                             street_addrs_id "" \
-                             mailing_addrs_id "" \
-                             billing_addrs_id "" \
-                             vendor_id "" \
-                             customer_id "" \
-                             taxnumber [ad_generate_random_string [randomRange 32]] \
-                             sic_code [ad_generate_random_string [randomRange 15]] \
-                             iban [ad_generate_random_string [randomRange 34]] \
-                             bic [ad_generate_random_string [randomRange 12]] \
-                             language_code [ad_generate_random_string [randomRange 6]] \
-                             currency [ad_generate_random_string [randomRange 3]] \
-                             timezone [ad_generate_random_string [randomRange 3]] \
-                             time_start [qf_clock_format] \
-                             time_end "" \
-                             url [ad_generate_random_string [randomRange 200]] \
-                             user_id $user_id \
-                             created $nowts \
-                             created_by [ad_conn user_id] \
-                             trashed_p "0" \
-                             trashed_by "" \
-                             trashed_ts "" \
-                             notes "test from accounts-ledger/tcl/test/qal-entities-procs.tcl" ]
-            set co_id [qal_contact_create contact_arr]
+            set co_id [qal_demo_contact_create ]
             set co_created_p [qal_is_natural_number $co_id] 
 
             aa_true "Created a contact" $co_created_p
 
-            set cu_list [list \
-                             id "" \
-                             instance_id $instance_id \
-                             contact_id $co_id
-                             discount "" \
-                             tax_included "" \
-                             credit_limit "" \
-                             terms "" \
-                             terms_unit "" \
-                             annual_value "" \
-                             customer_code "" \
-                             pricegroup_id "" \
-                             created "" \
-                             created_by $user_id \
-                             trashed_p "0" \
-                             trashed_by "" \
-                             trashed_ts "" ]
             set cu_id [qal_customer_create $customer_arr]
             set cu_created_p [qal_is_natural_number $cu_id] 
 
             aa_true "Created a customer" $cu_created_p
 
-            set ve_list [list \
-                             id "" \
-                             instance_id $instance_id \
-                             contact_id $co_id \
-                             terms "" \
-                             terms_unit "" \
-                             tax_included "" \
-                             vendor_code "" \
-                             gifi_accno "" \
-                             discount "" \
-                             credit_limit "" \
-                             pricegroup_id "" \
-                             created "" \
-                             created_by $user_id \
-                             trashed_p "0" \
-                             trashed_by "" \
-                             trashed_ts "" \
-                             area_market "" \
-                             purchase_policy "" \
-                             return_policy "" \
-                             price_guar_policy "" \
-                             installation_policy ""]
             set ve_id [qal_vendor_create $vendor_arr]
             set ve_created_p [qal_is_natural_number $ve_id] 
 

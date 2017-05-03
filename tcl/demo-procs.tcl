@@ -314,3 +314,130 @@ ad_proc -public qal_namelur {
     return $names_list
 }
 
+
+ad_proc qal_demo_contact_create {
+    {contact_id ""}
+    {user_id ""}
+} {
+    Part of test suite and demo. 
+    Creates a contact. 
+    If contact_id provided, revises existing contact_id.
+    Returns contact_id or empty string if unsuccessful.
+
+    @see qal_contact_create
+} {
+    upvar 1 instance_id instance_id
+    set co_list [list  \
+                     instance_id $instance_id \
+                     label "test1" \
+                     name [qal_namelur]  \
+                     street_addrs_id "" \
+                     mailing_addrs_id "" \
+                     billing_addrs_id "" \
+                     vendor_id "" \
+                     customer_id "" \
+                     taxnumber [ad_generate_random_string [randomRange 32]] \
+                     sic_code [ad_generate_random_string [randomRange 15]] \
+                     iban [ad_generate_random_string [randomRange 34]] \
+                     bic [ad_generate_random_string [randomRange 12]] \
+                     language_code [ad_generate_random_string [randomRange 6]] \
+                     currency [ad_generate_random_string [randomRange 3]] \
+                     timezone [ad_generate_random_string [randomRange 3]] \
+                     time_start [qf_clock_format] \
+                     time_end "" \
+                     url [ad_generate_random_string [randomRange 200]] \
+                     user_id $user_id \
+                     created $nowts \
+                     created_by [ad_conn user_id] \
+                     trashed_p "0" \
+                     trashed_by "" \
+                     trashed_ts "" \
+                     notes "test from accounts-ledger/tcl/test/qal-entities-procs.tcl" ]
+    array set contact_arr $co_list
+    if { [qf_is_natural_number $contact_id] } {
+        set co_id [qal_contact_write contact_arr $contact_id] 
+    } else {
+        set co_id [qal_contact_create contact_arr ]
+    }
+    return $co_id
+}
+
+ad_proc qal_demo_customer_create {
+    {contact_id ""}
+    {user_id ""}
+} {
+    Part of test suite and demo. Creates a customer.
+    If contact_id provided, uses existing contact_id otherwise creates new contact_id.
+    Returns customer_id, or empty string if unsuccessful.
+} {
+    upvar 1 instance_id instance_id
+    # following from: http://wiki.tcl.tk/567
+    set maxint [expr 0x7[string range [format %X -1] 1 end]]
+    set pg_maxint 2147483647
+    incr maxint -1
+    set cu_list [list \
+                     id "" \
+                     instance_id $instance_id \
+                     contact_id $co_id \
+                     discount [random] \
+                     tax_included [randomRange 1] \
+                     credit_limit [lindex [list "" [expr { [random] * [randomRange $maxint] } ]] [randomRange 2]] \
+                     terms [expr { [random] * [randomRange $maxint] } ] \
+                     terms_unit [lindex [list days weeks months years seconds] [randomRange 4]] \
+                     annual_value [expr { $maxint * [random] } ] \
+                     customer_code [ad_generate_random_string [randomRange 32]] \
+                     pricegroup_id [lindex [list "" [randomRange $pg_maxint] [randomRange 1] ] \
+                     created "" \
+                     created_by $user_id \
+                     trashed_p "0" \
+                     trashed_by "" \
+                     trashed_ts "" ]
+    array set customer_arr $cu_list
+    if { [qf_is_natural_number $contact_id ] } {
+        set cu_id [qal_customer_write $customer_arr $contact_id]
+    } else {
+        set cu_id [qal_customer_create $customer_arr]
+    }
+    return $cu_id
+}
+
+ad_proc qal_demo_vendor_create {
+    {contact_id ""}
+    {user_id ""}
+} {
+    Part of test suite and demo. Creates a vendor.
+    If contact_id provided, uses existing contact_id otherwise creates new contact_id.
+    Returns vendor_id, or empty string if unsuccessful.
+} {
+    upvar 1 instance_id instance_id
+    set ve_list [list \
+                     id "" \
+                     instance_id $instance_id \
+                     contact_id $co_id \
+                     terms "" \
+                     terms_unit "" \
+                     tax_included "" \
+                     vendor_code "" \
+                     gifi_accno "" \
+                     discount "" \
+                     credit_limit "" \
+                     pricegroup_id "" \
+                     created "" \
+                     created_by $user_id \
+                     trashed_p "0" \
+                     trashed_by "" \
+                     trashed_ts "" \
+                     area_market "" \
+                     purchase_policy "" \
+                     return_policy "" \
+                     price_guar_policy "" \
+                     installation_policy ""]
+
+    array set vendor_arr $ve_list
+    if { [qf_is_natural_number $contact_id ] } {
+        set ve_id [qal_vendor_write $vendor_arr $contact_id]
+    } else {
+        set ve_id [qal_vendor_create $vendor_arr]
+    }
+    return $ve_id
+}
