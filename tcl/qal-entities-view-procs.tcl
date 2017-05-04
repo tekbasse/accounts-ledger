@@ -202,6 +202,7 @@ ad_proc qal_addresses_read {
     set address_ids_list [hf_list_filter_by_natural_number $address_id_list]
     set allowed_address_ids [qal_address_ids_of_user_id $user_id]
     set intersect_ids [set_intersection $address_ids_list $allowed_address_ids]
+##code  This needs to include qal_other_address_map in the records. Left join?
     set rows_lists [db_list_of_lists qal_address_get "select [qal_address_keys ","] from qal_address where address_id=:address_id and instance_id=:instance_id and trashed_p!='1' and address_id in ([template::util::tcl_to_sql_list $address_ids_list])" ]
     return $rows_lists
 }

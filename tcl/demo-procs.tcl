@@ -347,8 +347,8 @@ ad_proc qal_demo_contact_create {
                      time_end "" \
                      url [ad_generate_random_string [randomRange 200]] \
                      user_id $user_id \
-                     created $nowts \
-                     created_by [ad_conn user_id] \
+                     created "" \
+                     created_by $user_id \
                      trashed_p "0" \
                      trashed_by "" \
                      trashed_ts "" \
@@ -414,24 +414,24 @@ ad_proc qal_demo_vendor_create {
                      id "" \
                      instance_id $instance_id \
                      contact_id $co_id \
-                     terms "" \
-                     terms_unit "" \
-                     tax_included "" \
+                     terms [expr { [random] * [randomRange $maxint] } ] \
+                     terms_unit [lindex [list days weeks months years seconds] [randomRange 4]] \
+                     tax_included [randomRange 1] \
                      vendor_code "" \
                      gifi_accno "" \
                      discount "" \
-                     credit_limit "" \
+                     credit_limit [lindex [list "" [expr { [random] * [randomRange $maxint] } ]] [randomRange 2]] \
                      pricegroup_id "" \
                      created "" \
                      created_by $user_id \
                      trashed_p "0" \
                      trashed_by "" \
                      trashed_ts "" \
-                     area_market "" \
-                     purchase_policy "" \
-                     return_policy "" \
-                     price_guar_policy "" \
-                     installation_policy ""]
+                     area_market [qal_namelur] \
+                     purchase_policy [qal_namelur] \
+                     return_policy [qal_namelur] \
+                     price_guar_policy [qal_namelur] \
+                     installation_policy [qal_namelur]]
 
     array set vendor_arr $ve_list
     if { [qf_is_natural_number $contact_id ] } {
@@ -440,4 +440,21 @@ ad_proc qal_demo_vendor_create {
         set ve_id [qal_vendor_create $vendor_arr]
     }
     return $ve_id
+}
+
+ad_proc qal_demo_address_write {
+    address_name_arr
+    {contact_id ""}
+} {
+    Part of test suite and demo. 
+    Creates a contact address of type address_name_arr(address_type).
+    If contact_id is not supplied, the value is assumed to be in address_name_arr(contact_id). 
+    If contact_id is provided, request is ignored.
+    Returns address_id, or empty string if unsuccessful.
+
+    @see qal_address_write
+} {
+    upvar 1 instance_id instance_id
+
+    
 }

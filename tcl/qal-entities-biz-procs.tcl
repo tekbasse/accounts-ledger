@@ -4,12 +4,12 @@ ad_library {
 
 }
 
-    ##code comments about implementing UBL package
-    # if contact.id eq "" see if id exists in qal_contact_read, otherwise create an id via qal_contact_create?
-    # No. This feature should be a separate function, only create after a qualified user accepts it.
-    # Add to a UBL feature in accounts-ledger, such as when accepting a quotation request etc.
-    # This will mean there needs to be a stack for incoming documents with related info..
-    # as a part of UBL..
+##code comments about implementing UBL package
+# if contact.id eq "" see if id exists in qal_contact_read, otherwise create an id via qal_contact_create?
+# No. This feature should be a separate function, only create after a qualified user accepts it.
+# Add to a UBL feature in accounts-ledger, such as when accepting a quotation request etc.
+# This will mean there needs to be a stack for incoming documents with related info..
+# as a part of UBL..
 
 
 
@@ -109,7 +109,7 @@ ad_proc -public qal_contact_write {
         regsub -all -- {[^a-z_A-Z0-9]} $timezone {} timezone
         set timezone [string range $timezone 0 99]
     }
-   
+    
     set time_start_s [qf_clock_scan $time_start]
     if { $time_start_s eq "" } {
         set time_start_s [clock seconds]
@@ -757,9 +757,30 @@ ad_proc -public qal_address_write {
     If id is empty, creates a new record and returns the new id.
     Otherwise empty string is returned.
     If contact_id is not supplied, the value is assumed to be in arr_name(contact_id).
+    <br/><br/>
+    If address_type matches "*address*" then type is assumed to be a postal address.
+    <br/><br/>
+    Postal address_types: 
+    street_address, mailing_address, billing_address and anything that matches *address*.
+    <br/><br/>
+    Postal address fields: 
+    record_type sort_order address_type address0 address1 address2 city state postal_code country_code attn phone phone_time fax email cc bcc
+    <br/><br/>
+    If postal address is contact's first street_address, mailing_address, or billing address, then automatically maps to contact record via qal_contact.street_addrs_id etc.
+    </br>For other cases, app should change via qal_set_primary_address
+
+    <br/><br/>
+    Other addresses can be most anything: twitter, phone, etc.
+    <br/><br/>
+    Other address fields: 
+    record_type sort_order account_name notes
+    <br/><br/>
+
 
     @param array_name
-    @return id or ""
+    @return qal_other_address_map.id or ""
+
+    @see qal_set_primary_address
 } {
     upvar 1 instance_id instance_id
     upvar 1 $arr_name a_arr
@@ -814,15 +835,15 @@ ad_proc -public qal_address_write {
                 where addrs_id=:addrs_id 
                 and contact_id=:contact_id
                 and instance_id=:instance_id
-                }
+            }
         }
         if { $address_p } {
             set address_id [qal_address_postal_write arr_name]
         }
-        db_dml qal_address_create_1 "insert into qal_address \
- ([qal_address_keys ","]) values ([qal_address_keys ",:"])"
-        }
+        db_dml qal_address_create_1 "insert into qal_other_address_map \
+ ([qal_other_address_map_keys ","]) values ([qal_other_address_map_keys ",:"])"
     }
+
     return $addrs_id
 }
 
@@ -849,7 +870,7 @@ ad_proc -public qal_address_delete {
             if { $validated_p } {
                 db_transaction {
                     set address_id_list [db_list qal_address_id_2_d \
-                        "select address_id from qal_other_address_map \
+                                             "select address_id from qal_other_address_map \
                          where instance_id=:instance_id \
                          and addrs_id in ([template::util::tcl_to_sql_list $addrs_id_list])"]
                     if { [string length $address_id_list ] > 0 } {
@@ -927,5 +948,19 @@ ad_proc -public qal_address_trash {
             }
         }
     }
+    return $success_p
+}
+
+ad_proc -public qal_address_postal_set_primary {
+    contact_id
+    addrs_id
+    {address_type ""}
+} {
+    Set the primary street_addrs_id, mailing_addrs_id, or billing_addrs_id for contact_id.
+    If address_type is unknown, it's determined by reading addrs_id.
+    Returns 1 if successful, otherwise returns 0.
+} {
+    ##code
+    db_0or1row qal_other_address_map_record_type
     return $success_p
 }
