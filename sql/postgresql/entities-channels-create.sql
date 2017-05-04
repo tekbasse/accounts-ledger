@@ -103,7 +103,8 @@ CREATE TABLE qal_other_address_map (
        -- If record_type is address, address_id is same as qal_address.id
        addrs_id            integer default nextval('qal_id'),
        -- address, other..
-       -- if record_type is not address, it may be YIM,AIM etc --
+       -- If record_type does not match *address* as in for use with qal_address, 
+       -- it may be YIM,AIM etc
        record_type         varchar(30),
        -- If this is an address, this references qal_address.id
        -- If null, this is a contact method (skype,aim,yim,jabber etc)
@@ -131,10 +132,12 @@ create index qal_other_address_map_trashed_p_idx on qal_other_address_map (trash
 CREATE TABLE qal_address (
         id                 integer default nextval('qal_id'),
         instance_id        integer,
-        -- This is redundant. Use qal_other_address_map paradigm
-        -- rev_id             integer default nextval('qal_id'),
-        -- e.g., billing, shipping
-        address_type       varchar(20) not null default 'street',  
+        -- rev_id is redundant. Use qal_other_address_map paradigm
+        -- rev_id             integer default nextval('qal_id')
+
+        -- address_type is redundant too, but useful for integrity checks.
+        -- e.g., billing_address, shipping.. etc  see: qal_other_address_map.record_type
+        address_type       varchar(20) not null default 'street_address',  
         address0           varchar(40),
         address1           varchar(40),
         address2           varchar(40),
