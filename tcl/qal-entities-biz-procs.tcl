@@ -955,12 +955,61 @@ ad_proc -public qal_address_postal_set_primary {
     contact_id
     addrs_id
     {address_type ""}
+    {ignore_postal_constraint_p "0"}
 } {
     Set the primary street_addrs_id, mailing_addrs_id, or billing_addrs_id for contact_id.
-    If address_type is unknown, it's determined by reading addrs_id.
+    If address_type is unknown, it's determined by reading addrs_id's address_type.
+    If ignore_postal_constraint_p is 1, then any address type can be assigned to
+    a contact's primary street_adds_id is determined by supplied address_type.
     Returns 1 if successful, otherwise returns 0.
 } {
+    upvar1 instance_id instance_id
+    # supplied address_type is target address type
     ##code
-    db_0or1row qal_other_address_map_record_type
+    set success_p 0
+    set address_type_new ""
+    if { !$ignore_postal_constraint_p } {
+        db_0or1row qal_other_address_map_address_type_r {
+            select record_type as address_type_new from qal_other_address_map
+            where contact_id=:contact_id
+            and addrs_id=:addrs_id
+            and instance_id=:instance_id
+            and trashed_p!='1' }
+    }
+    if { $address_type_new ne "" } {
+        # address exists
+
+
+
+
+        
+        set co_list [qal_contact_read $contact_id]
+
+        if { [llength $co_list > 0 ] } {
+            i
+            switch -exact --
+            set name_idx [lsearch -exact ]
+
+            
+            
+            
+            switch -exact -- $address_type {
+                street_address {
+                    db_dml {
+                        update qal_contact_postal_addrs_id_update1 {
+                            update qal_contact
+                            set street_addrs_id=:addrs_id
+                            where contact_id=:contact_id
+                            and instance_id=:instance_id
+                            and trashed_
+                        }
+                    }
+                }
+                default {
+                    set success_p 0
+                }
+            }
+        }
+    }
     return $success_p
 }
