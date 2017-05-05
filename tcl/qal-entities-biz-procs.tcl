@@ -970,7 +970,6 @@ ad_proc -public qal_address_postal_set_primary {
 } {
     upvar1 instance_id instance_id
     # supplied address_type is target address type
-    ##code
     set success_p 0
     set address_type_list [list street_address mailing_address billing_address]
     set address_type_new ""
