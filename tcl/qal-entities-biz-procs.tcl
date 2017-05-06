@@ -820,11 +820,9 @@ ad_proc -public qal_address_write {
         set created_by $instance_id
     }
 
-    set address_p 0
-    # insert into db
-    if { [string match -nocase "address"] } {
-        # This is a street address
-        set address_p 1
+    set postal_address_p 0
+    if { [string match -nocase "address" $record_type] } {
+        set postal_address_p 1
     }
     set trashed_p 0
     set trashed_by ""
@@ -837,8 +835,8 @@ ad_proc -public qal_address_write {
                 and instance_id=:instance_id
             }
         }
-        if { $address_p } {
-            set address_id [qal_address_postal_write arr_name]
+        if { $postal_address_p } {
+            set address_id [qal_postal_address_postal_write arr_name]
         }
         db_dml qal_address_create_1 "insert into qal_other_address_map \
  ([qal_other_address_map_keys ","]) values ([qal_other_address_map_keys ",:"])"

@@ -445,16 +445,53 @@ ad_proc qal_demo_vendor_create {
 ad_proc qal_demo_address_write {
     address_name_arr
     {contact_id ""}
+    {addrs_id ""}
 } {
     Part of test suite and demo. 
-    Creates a contact address of type address_name_arr(address_type).
-    If contact_id is not supplied, the value is assumed to be in address_name_arr(contact_id). 
-    If contact_id is provided, request is ignored.
+    Writes a new contact address of type address_name_arr(address_type) to addrs_id.
+    If addrs_id is empty string, a new address is created.
+    If contact_id or addrs_id is not supplied, the value is assumed to be in address_name_arr(). 
     Returns address_id, or empty string if unsuccessful.
 
     @see qal_address_write
 } {
     upvar 1 instance_id instance_id
+    upvar 1 $address_name_arr a_arr
+    if { [qal_is_natural_number $contact_id] } {
+        set a_arr(contact_id) $contact_id
+    }
+    if { [qal_is_natural_number $addrs_id ] } {
+        set a_arr(addrs_id) $addrs_id
+    }
+    # Use of any specific trademark names in text without font or logo representation 
+    # is permitted under scenarios of "fair use" for purposes of demonstration of 
+    # usage of product as intended and/or parody.
+    # rt_list = record_types_list
+    set rt_list [list \
+                     street_address \
+                     mailing_address \
+                     billing_address \
+                     skype \
+                     whattsapp \
+                     snapchat \
+                     facebook \
+                     googleplus \
+                     twitter \
+                     linkedin \
+                     xing \
+                     makerbase \
+                     hackaday \
+                     etsy \
+                     ebay \
+                     myspace \
+                     secondlife \
+                     SCaN \
+                     IDSN ]
+    set rt_len [llength $rt_list]
+    incr rt_len -1
+    set record_type [lindex $rt_list [randomRange $rt_len]]
+##code
+    # qal_address_write a_arr
 
     
 }

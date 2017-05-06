@@ -28,12 +28,12 @@ aa_register_case -cats {api smoke} qal_entities_check {
 
             aa_true "Created a contact" $co_created_p
 
-            set cu_id [qal_customer_create $customer_arr]
+            set cu_id [qal_demo_customer_create $customer_arr]
             set cu_created_p [qal_is_natural_number $cu_id] 
 
             aa_true "Created a customer" $cu_created_p
 
-            set ve_id [qal_vendor_create $vendor_arr]
+            set ve_id [qal_demo_vendor_create $vendor_arr]
             set ve_created_p [qal_is_natural_number $ve_id] 
 
             aa_true "Created a vendor" $ve_created_p
