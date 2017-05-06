@@ -404,3 +404,80 @@ ad_proc -public qal_other_address_map_keys {
     set keys [qal_keys_by $keys_list $separator]
     return $keys
 }
+
+
+ad_proc -public qal_addresses_keys {
+    {separator ""}
+} {
+    Returns an ordered list of keys for the combined tables of qal_address and qal_other_address_map as qal_addresses_read: \
+        contact_id \
+        instance_id \
+        addrs_id \
+        record_type \
+        address_id \
+        sort_order \
+        created \
+        created_by \
+        trashed_p \
+        trashed_by \
+        trashed_ts \
+        accounts_name \
+        notes \
+        address_type \
+        address0 \
+        address1 \
+        address2 \
+        city \
+        state \
+        postal_code \
+        country_coude \
+        attn \
+        phone \
+        phone_time \
+        fax \
+        email \
+        cc \
+        bcc
+} {
+    # This only works to read from the database and a extract data from an ordered list.
+    # To write to database, use qal_address_keys and qal_other_address_map_keys.
+    set k_list [list \
+                    om.contact_id \
+                    om.instance_id \
+                    om.addrs_id \
+                    om.record_type \
+                    om.address_id \
+                    om.sort_order \
+                    om.created \
+                    om.created_by \
+                    om.trashed_p \
+                    om.trashed_by \
+                    om.trashed_ts \
+                    om.accounts_name \
+                    om.notes \
+                    ad.address_type \
+                    ad.address0 \
+                    ad.address1 \
+                    ad.address2 \
+                    ad.city \
+                    ad.state \
+                    ad.postal_code \
+                    ad.country_code \
+                    ad.attn \
+                    ad.phone \
+                    ad.phone_time \
+                    ad.fax \
+                    ad.email \
+                    ad.cc \
+                    ad.bcc ]
+    if { $separator eq "," } {
+        set keys_list $k_list
+    } else {
+        set keys_list [list ]
+        foreach key $k_list {
+            lappend keys_list [string range $key 3 end]
+        }
+    }
+    set keys [qal_keys_by $keys_list $separator]
+    return $keys
+}
