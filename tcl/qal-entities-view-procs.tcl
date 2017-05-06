@@ -200,44 +200,14 @@ ad_proc qal_addresses_read {
     set address_ids_list [hf_list_filter_by_natural_number $address_id_list]
     set allowed_address_ids [qal_address_ids_of_user_id $user_id]
     set intersect_ids [set_intersection $address_ids_list $allowed_address_ids]
-    # changes to k_list need to be reflected in qal_addresses_keys
-    set k_list [list \
-                    om.contact_id \
-                    om.instance_id \
-                    om.addrs_id \
-                    om.record_type \
-                    om.address_id \
-                    om.sort_order \
-                    om.created \
-                    om.created_by \
-                    om.trashed_p \
-                    om.trashed_by \
-                    om.trashed_ts \
-                    om.accounts_name \
-                    om.notes \
-                    ad.address_type \
-                    ad.address0 \
-                    ad.address1 \
-                    ad.address2 \
-                    ad.city \
-                    ad.state \
-                    ad.postal_code \
-                    ad.country_code \
-                    ad.attn \
-                    ad.phone \
-                    ad.phone_time \
-                    ad.fax \
-                    ad.email \
-                    ad.cc \
-                    ad.bcc ]
-    set k_list [qal_addresses_keys]
-    ##code test following query to verify addresses of any type are returned as expected
-    # otherwise consider making two queries. qal_addresses_read for non postal addresses
+
+    # If this query doesn't return all types of addresses, 
+    # consider making two queries: qal_addresses_read for non postal addresses
     # and a qal_contact_address_postal_read addrs_id 
-   set rows_lists [db_list_of_lists qal_address_get "select [qal_keys_by $k_list ","] \
- from qal_other_address_map om, qal_address ad \
- where om.addrs_id=ad.id and om.instance_id=ad.instance_id \
- and om.instance_id=:instance_id and trashed_p!='1' \
- and om.addrs_id in ([template::util::tcl_to_sql_list $address_ids_list])" ]
+    set rows_lists [db_list_of_lists qal_address_get "select [qal_addresses_keys ","] \
+        from qal_other_address_map om, qal_address ad \
+        where om.addrs_id=ad.id and om.instance_id=ad.instance_id \
+        and om.instance_id=:instance_id and trashed_p!='1' \
+        and om.addrs_id in ([template::util::tcl_to_sql_list $address_ids_list])" ]
     return $rows_lists
 }
