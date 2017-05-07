@@ -481,3 +481,71 @@ ad_proc -public qal_addresses_keys {
     set keys [qal_keys_by $keys_list $separator]
     return $keys
 }
+
+ad_proc -public qal_address_type {
+    addrs_id
+    {contact_id ""}
+} {
+    Returns address type (ie qal_other_address_map.record_type ) or empty string if not found.
+    If contact_id is nonempty, constrains query to contact_id.
+} {
+    upvar 1 instance_id instance_id
+    set record_type ""
+    if { [qf_is_natural_number $contact_id ] } {
+        db_0or1row qal_other_address_map_address_type_r {
+            select record_type from qal_other_address_map
+            where contact_id=:contact_id
+            and addrs_id=:addrs_id
+            and instance_id=:instance_id
+            and trashed_p!='1' }
+    } else {
+        db_0or1row qal_other_address_map_address_type_r2 {
+            select record_type from qal_other_address_map
+            where addrs_id=:addrs_id
+            and instance_id=:instance_id
+            and trashed_p!='1' }
+    }
+    return $record_type
+}
+
+ad_proc -public qal_address_type_keys {
+} {
+    Returns postal address_type keys
+} {
+    return [list mailing_address billing_address street_address]
+}
+
+ad_proc -private qal_address_type_fields {
+} {
+    Returns postal address_type fields that correspond to address_type keys
+
+    @see qal_address_type_keys
+} {
+    return [list mailing_addrs_id billing_addrs_id street_addrs_id]
+}
+
+ad_proc -public qal_address_type_is_postal_q {
+    address_type
+} {
+    Returns 1 if address type is a postal address, otherwise returns 0.
+} {
+    set is_postal_p 1
+    set address_type_list [qal_address_type_keys]
+    if { $address_type ni $address_type_list } {
+        set is_postal_p 0
+    }
+    return $is_postal_p
+}
+
+ad_proc -public qal_field_name_of_address_type {
+    address_type
+} {
+    Returns field name in table qal_other_address_map of record_type,
+    or empty string if address_type not in table.
+} {
+    set type_list [qal_address_type_keys]
+    set name_list [qal_address_type_fields]
+    set type_idx [lsearch -exact $type_list $address_type]
+    set field_name [lindex $name_list $type_idx]
+    return $field_name
+}

@@ -969,33 +969,25 @@ ad_proc -public qal_address_postal_set_primary {
     upvar1 instance_id instance_id
     # supplied address_type is target address type
     set success_p 0
-    set address_type_list [list street_address mailing_address billing_address]
     set address_type_new ""
     set postal_go_p 1
-    db_0or1row qal_other_address_map_address_type_r {
-        select record_type as address_type_new from qal_other_address_map
-        where contact_id=:contact_id
-        and addrs_id=:addrs_id
-        and instance_id=:instance_id
-        and trashed_p!='1' }
-
+    set address_type_new [qal_address_type $addrs_id $contact_id]
+    set is_postal_p [qal_address_type_is_postal_q $address_type_new]
     if { $postal_constraint_p } {
-        if { $address_type_new ni $address_type_list } {
+        if { $is_postal_p } {
             ns_log Notice "qal_address_postal_set_primary.987: address_type_new '${address_type_new}' not a postal address. Ignored for instance_id '${instance_id}' contact_id '${contact_id}' addrs_id '${addrs_id}' address_type '${address_type}'."
             set postal_go_p 0
         }
     }
-
-    set type_idx [lsearch -exact $address_type_list $address_type]
-    if { $type_idx > -1 && $postal_go_p && $address_type_new ne "" } {
+    
+    if { $is_postal_p && $postal_go_p && $address_type_new ne "" } {
         # target address validated
 
         set co_list [qal_contact_read $contact_id]
         if { [llength $co_list > 0 ] } {
             # contact record exists
             array set co_arr $co_list
-
-            set ati [lindex [list street_addrs_id mailing_addrs_id billing_addrs_id] $type_idx]
+            set ati [qal_field_name_of_address_type $address_type]
             set co_arr(${ati}) $addrs_id
 
             set updated_q [qal_contact_write co2_arr ]
