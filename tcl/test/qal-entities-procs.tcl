@@ -41,10 +41,22 @@ aa_register_case -cats {api smoke} qal_entities_check {
             aa_log "Read and verify each value"
 
             set co_v2_list [qal_contact_read $co_id]
+            set co_keys_list [qal_contact_keys]
+            foreach key $co_keys_list {
+                aa_equal "Contact read/write test key ${key}" [dict get $co_v2_list $key] $contact1_arr(${key})
+            }
 
             set cu_v2_list [qal_customer_read $cu_id]
+            set cu_keys_list [qal_customer_keys]
+            foreach key $cu_keys_list {
+                aa_equal "Customer read/write test key ${key}" [dict get $cu_v2_list $key] $customer1_arr(${key})
+            }
 
             set ve_v2_list [qal_vendor_read $ve_id]
+            set ve_keys_list [qal_vendor_keys]
+            foreach key $ve_keys_list {
+                aa_equal "Vendor read/write test key ${key}" [dict get $ve_v2_list $key] $vendor1_arr(${key})
+            }
 
             aa_log "Change/update each value"
 
