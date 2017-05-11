@@ -316,17 +316,20 @@ ad_proc -public qal_namelur {
 
 
 ad_proc qal_demo_contact_create {
+    {contact_arr_name "contact_arr"}
     {contact_id ""}
     {user_id ""}
 } {
     Part of test suite and demo. 
     Creates a contact. 
     If contact_id provided, revises existing contact_id.
+    Sets indexes in array with name contact_arr_name to values cooresponding to qal_contact_keys.
     Returns contact_id or empty string if unsuccessful.
 
     @see qal_contact_create
 } {
     upvar 1 instance_id instance_id
+    upvar 1 $contact_arr_name contact_arr
     set co_list [list  \
                      instance_id $instance_id \
                      label "test1" \
@@ -363,14 +366,17 @@ ad_proc qal_demo_contact_create {
 }
 
 ad_proc qal_demo_customer_create {
+    {customer_arr_name "customer_arr"}
     {contact_id ""}
     {user_id ""}
 } {
     Part of test suite and demo. Creates a customer.
     If contact_id provided, uses existing contact_id otherwise creates new contact_id.
+    Sets indexes in array with name customer_arr_name to values cooresponding to qal_customer_keys.
     Returns customer_id, or empty string if unsuccessful.
 } {
     upvar 1 instance_id instance_id
+    upvar 1 $customer_arr_name customer_arr
     # following from: http://wiki.tcl.tk/567
     set maxint [expr 0x7[string range [format %X -1] 1 end]]
     set pg_maxint 2147483647
@@ -402,6 +408,7 @@ ad_proc qal_demo_customer_create {
 }
 
 ad_proc qal_demo_vendor_create {
+    {vendor_arr_name "vendor_arr"}
     {contact_id ""}
     {user_id ""}
 } {
@@ -410,6 +417,7 @@ ad_proc qal_demo_vendor_create {
     Returns vendor_id, or empty string if unsuccessful.
 } {
     upvar 1 instance_id instance_id
+    upvar 1 $vendor_arr_name vendor_arr
     set ve_list [list \
                      id "" \
                      instance_id $instance_id \
@@ -443,7 +451,7 @@ ad_proc qal_demo_vendor_create {
 }
 
 ad_proc qal_demo_address_write {
-    address_name_arr
+    {address_name_arr "address_arr"}
     {contact_id ""}
     {addrs_id ""}
 } {
@@ -451,7 +459,7 @@ ad_proc qal_demo_address_write {
     Writes a new contact address of type address_name_arr(address_type) to addrs_id.
     If addrs_id is empty string, a new address is created.
     If contact_id or addrs_id is not supplied, the value is assumed to be in address_name_arr(). 
-    Returns address_id, or empty string if unsuccessful.
+    Returns populated array of address_name_arr and address_id, or empty string if unsuccessful.
 
     @see qal_address_write
 } {
