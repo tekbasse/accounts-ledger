@@ -23,14 +23,14 @@ ad_proc -public qal_contact_create {
     Returns contact_id, or empty string if there was a problem.
 } {
     upvar 1 instance_id instance_id
-    upvar 1 $arr_name arr_name
+    upvar 1 $arr_name c_arr
     if { $contact_id ne "" } {
-        set arr_name(contact_id) $contact_id
+        set c_arr(contact_id) $contact_id
     }
     # at a minimum, object_id needs to be used to prevent id collision with other packages:
 
-    set arr_name(id) ""
-    set id [qal_contact_write arr_name]
+    set c_arr(id) ""
+    set id [qal_contact_write c_arr]
     return $id
 }
 
@@ -49,8 +49,8 @@ ad_proc -public qal_contact_write {
     upvar 1 instance_id instance_id
     upvar 1 $arr_name a_arr
     set error_p 0
-    qal_contact_defaults arr_name
-    qf_array_to_vars arr_name [qal_contact_keys]
+    qal_contact_defaults a_arr
+    qf_array_to_vars a_arr [qal_contact_keys]
 
     # validations etc
     if { ![qf_is_natural_number $parent_id] } {
@@ -125,13 +125,13 @@ ad_proc -public qal_contact_write {
             set url2 "http://"
         }
         append url2 $url
-        set url2 [ad_urlencode_url $url2]
+        set url2 [ad_urlencode $url2]
     } else {
-        set url2 [ad_urlencode_url $url2]
+        set url2 [ad_urlencode $url2]
     }
     set url [string range $url2 0 198]
 
-    if { ![qf_natural_number $user_id] } {
+    if { ![qf_is_natural_number $user_id] } {
         if { [ns_conn isconnected] } {
             set user_id [ad_conn user_id]
         } else {
@@ -155,7 +155,7 @@ ad_proc -public qal_contact_write {
         set create_p 0
     }
     if { $error_p } {
-        ns_log Warning "qal_contact_write: rejected '[array get arr_name]'"
+        ns_log Warning "qal_contact_write: rejected '[array get a_arr]'"
     } else {
 
         set rev_id [db_nextval qal_id]
@@ -286,14 +286,14 @@ ad_proc -public qal_customer_create {
     If contact_id is supplied, sets arr_name(contact_id) to contact_id's value.
 } {
     upvar 1 instance_id instance_id
-    upvar 1 $arr_name arr_name
+    upvar 1 $arr_name a_arr
     if { $contact_id ne "" } {
-        set arr_name(contact_id) $contact_id
+        set a_arr(contact_id) $contact_id
     }
     # at a minimum, object_id needs to be used to prevent id collision with other packages:
 
-    set arr_name(id) ""
-    set id [qal_customer_write arr_name]
+    set a_arr(id) ""
+    set id [qal_customer_write a_arr]
     return $id
 }
 
@@ -312,11 +312,11 @@ ad_proc -public qal_customer_write {
     upvar 1 instance_id instance_id
     upvar 1 $arr_name a_arr
     if { $contact_id ne ""} {
-        set arr_name(contact_id) $contact_id
+        set a_arr(contact_id) $contact_id
     }
     set error_p 0
-    qal_customer_defaults arr_name
-    qf_array_to_vars arr_name [qal_customer_keys]
+    qal_customer_defaults a_arr
+    qf_array_to_vars a_arr [qal_customer_keys]
 
     # validations etc
     if { ![qf_is_natural_number $id] } {
@@ -363,7 +363,7 @@ ad_proc -public qal_customer_write {
         set time_start [clock format [clock seconds] -format "%Y%m%d %H%M%S"]
     } 
     if { $error_p } {
-        ns_log Warning "qal_customer_write: rejected '[array get arr_name]'"
+        ns_log Warning "qal_customer_write: rejected '[array get a_arr]'"
     } else {
 
         set rev_id [db_nextval qal_id]
@@ -492,14 +492,14 @@ ad_proc -public qal_vendor_create {
     If contact_id is supplied, sets arr_name(contact_id) to contact_id's value.
 } {
     upvar 1 instance_id instance_id
-    upvar 1 $arr_name arr_name
+    upvar 1 $arr_name v_arr
     if { $contact_id ne "" } {
-        set arr_name(contact_id) $contact_id
+        set v_arr(contact_id) $contact_id
     }
     # at a minimum, object_id needs to be used to prevent id collision with other packages:
 
-    set arr_name(id) ""
-    set id [qal_vendor_write arr_name]
+    set v_arr(id) ""
+    set id [qal_vendor_write v_arr]
     return $id
 }
 
@@ -521,8 +521,8 @@ ad_proc -public qal_vendor_write {
         set arr_name(contact_id) $contact_id
     }
     set error_p 0
-    qal_vendor_defaults arr_name
-    qf_array_to_vars arr_name [qal_vendor_keys]
+    qal_vendor_defaults a_arr
+    qf_array_to_vars a_arr [qal_vendor_keys]
 
     # validations etc
     if { ![qf_is_natural_number $id] } {
@@ -568,7 +568,7 @@ ad_proc -public qal_vendor_write {
         set time_start [clock format [clock seconds] -format "%Y%m%d %H%M%S"]
     } 
     if { $error_p } {
-        ns_log Warning "qal_vendor_write: rejected '[array get arr_name]'"
+        ns_log Warning "qal_vendor_write: rejected '[array get a_arr]'"
     } else {
 
         set rev_id [db_nextval qal_id]
@@ -698,8 +698,8 @@ ad_proc -private qal_address_postal_create {
     upvar 1 instance_id instance_id
     upvar 1 $arr_name a_arr
     set error_p 0
-    qal_address_defaults arr_name
-    qf_array_to_vars arr_name [qal_address_keys]
+    qal_address_defaults a_arr
+    qf_array_to_vars a_arr [qal_address_keys]
 
     # validations etc
     set address_type [string range $address_type 0 19]
@@ -736,14 +736,14 @@ ad_proc -public qal_address_create {
     If contact_id is not supplied, the value is assumed to be in arr_name(contact_id).
 } {
     upvar 1 instance_id instance_id
-    upvar 1 $arr_name arr_name
+    upvar 1 $arr_name a_arr
     if { $contact_id ne "" } {
-        set arr_name(contact_id) $contact_id
+        set a_arr(contact_id) $contact_id
     }
     # at a minimum, object_id needs to be used to prevent id collision with other packages:
 
-    set arr_name(id) ""
-    set id [qal_address_write arr_name]
+    set a_arr(id) ""
+    set id [qal_address_write a_arr]
     return $id
 }
 
@@ -785,10 +785,10 @@ ad_proc -public qal_address_write {
     upvar 1 instance_id instance_id
     upvar 1 $arr_name a_arr
     if { $contact_id ne "" } {
-        set arr_name(contact_id) $contact_id
+        set a_arr(contact_id) $contact_id
     }
-    qal_other_address_map_defaults arr_name
-    qf_array_to_vars arr_name [qal_other_address_map_keys]
+    qal_other_address_map_defaults a_arr
+    qf_array_to_vars a_arr [qal_other_address_map_keys]
 
     # validations etc
     if { ![qf_is_natural_number $contact_id] } {
@@ -836,7 +836,7 @@ ad_proc -public qal_address_write {
             }
         }
         if { $postal_address_p } {
-            set address_id [qal_postal_address_postal_write arr_name]
+            set address_id [qal_postal_address_postal_write a_arr]
         }
         db_dml qal_address_create_1 "insert into qal_other_address_map \
  ([qal_other_address_map_keys ","]) values ([qal_other_address_map_keys ",:"])"

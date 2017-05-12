@@ -1,10 +1,10 @@
 ad_library {
-    Automated tests for q-control
-    @creation-date 2015-03-19
+    Automated tests for accounts-ledger
+    @creation-date 2017-05-01
 }
 
 aa_register_case -cats {api smoke} qal_entities_check {
-    Test qal entities ie contact+customer+vendor procs for cases of CRUD
+    Test qal entities ie contact+customer+vendor procs for CRUD consistency
 } {
     aa_run_with_teardown \
         -test_code {
@@ -23,17 +23,17 @@ aa_register_case -cats {api smoke} qal_entities_check {
             #
 
             # co = contact, cu = customer, ve = vendor
-            set co_id [qal_demo_contact_create contact1_arr]
+            set co_id [qal_demo_contact_create contact_arr]
             set co_created_p [qal_is_natural_number $co_id] 
 
             aa_true "Created a contact" $co_created_p
 
-            set cu_id [qal_demo_customer_create customer1_arr]
+            set cu_id [qal_demo_customer_create customer_arr]
             set cu_created_p [qal_is_natural_number $cu_id] 
 
             aa_true "Created a customer" $cu_created_p
 
-            set ve_id [qal_demo_vendor_create vendor1_arr]
+            set ve_id [qal_demo_vendor_create vendor_arr]
             set ve_created_p [qal_is_natural_number $ve_id] 
 
             aa_true "Created a vendor" $ve_created_p
@@ -43,25 +43,68 @@ aa_register_case -cats {api smoke} qal_entities_check {
             set co_v2_list [qal_contact_read $co_id]
             set co_keys_list [qal_contact_keys]
             foreach key $co_keys_list {
-                aa_equal "Contact read/write test key ${key}" [dict get $co_v2_list $key] $contact1_arr(${key})
+                aa_equal "Contact read/write test key ${key}" [dict get $co_v2_list $key] $contact_arr(${key})
             }
 
             set cu_v2_list [qal_customer_read $cu_id]
             set cu_keys_list [qal_customer_keys]
             foreach key $cu_keys_list {
-                aa_equal "Customer read/write test key ${key}" [dict get $cu_v2_list $key] $customer1_arr(${key})
+                aa_equal "Customer read/write test key ${key}" [dict get $cu_v2_list $key] $customer_arr(${key})
             }
 
             set ve_v2_list [qal_vendor_read $ve_id]
             set ve_keys_list [qal_vendor_keys]
             foreach key $ve_keys_list {
-                aa_equal "Vendor read/write test key ${key}" [dict get $ve_v2_list $key] $vendor1_arr(${key})
+                aa_equal "Vendor read/write test key ${key}" [dict get $ve_v2_list $key] $vendor_arr(${key})
             }
 
             aa_log "Change/update each value"
 
+            set co2_id [qal_demo_contact_create contact_arr]
+            if { [qal_is_natural_number $co2_id] && $co_id eq $co2_id } {
+                set co_updated_p 1
+            } else {
+                set co_updated_p 0
+            }
+
+            aa_true "Updated a contact" $co_updated_p
+
+            set cu2_id [qal_demo_customer_create customer_arr]
+            if { [qal_is_natural_number $cu2_id] && $cu_id eq $cu2_id } {
+                set cu_updated_p 1
+            } else {
+                set cu_updated_p 0
+            }
+
+            aa_true "Updated a customer" $cu_updated_p
+
+            set ve2_id [qal_demo_vendor_create vendor_arr]
+            if { [qal_is_natural_number $ve2_id] && $ve_id eq $ve2_id } {
+                set ve_updated_p 1
+            } else {
+                set ve_updated_p 0
+            }
+
+            aa_true "Updated a vendor" $ve_updated_p
+
 
             aa_log "Read and verify each updated value"
+
+            set co_v3_list [qal_contact_read $co_id]
+            foreach key $co_keys_list {
+                aa_equal "Contact read/write test key ${key}" [dict get $co_v3_list $key] $contact_arr(${key})
+            }
+
+            set cu_v3_list [qal_customer_read $cu_id]
+            foreach key $cu_keys_list {
+                aa_equal "Customer read/write test key ${key}" [dict get $cu_v3_list $key] $customer_arr(${key})
+            }
+
+            set ve_v3_list [qal_vendor_read $ve_id]
+            foreach key $ve_keys_list {
+                aa_equal "Vendor read/write test key ${key}" [dict get $ve_v3_list $key] $vendor_arr(${key})
+            }
+
 
             # Iterate through creating contact, customer, and vendor to test more trash/delete cases
 
@@ -81,7 +124,7 @@ aa_register_case -cats {api smoke} qal_entities_check {
         } \
         -teardown_code {
             # 
-            #acs_user::delete -user_id $user1_arr(user_id) -permanent
+            #acs_user::delete -user_id $user_arr(user_id) -permanent
 
         }
     #aa_true "Test for .." $passed_p

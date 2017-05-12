@@ -465,10 +465,10 @@ ad_proc qal_demo_address_write {
 } {
     upvar 1 instance_id instance_id
     upvar 1 $address_name_arr a_arr
-    if { [qal_is_natural_number $contact_id] } {
+    if { [qf_is_natural_number $contact_id] } {
         set a_arr(contact_id) $contact_id
     }
-    if { [qal_is_natural_number $addrs_id ] } {
+    if { [qf_is_natural_number $addrs_id ] } {
         set a_arr(addrs_id) $addrs_id
     }
     # Use of any specific trademark names in text without font or logo representation 
