@@ -18,7 +18,7 @@ CREATE TABLE qal_contact (
        -- such as with customer-service package and this one.
        -- In general, it is a good idea to link an object_id to each contact anyway,
        -- in case conventional openacs group permissions are used.
-       -- set id  application_group::new -package_id $instance_id -group_name $label
+       -- set id group::new -context_id $instance_id -group_name $label -pretty_name $name
        id                  integer unique not null,
        -- revision_id. Updates create new record and trash old
        -- same id, new rev_id 
