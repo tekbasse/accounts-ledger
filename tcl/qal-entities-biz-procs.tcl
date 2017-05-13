@@ -147,7 +147,7 @@ ad_proc -public qal_contact_write {
     # insert into db
     if { ![qf_is_natural_number $id] } {
         # record revision/new
-        set id [group::new -context_id $instance_id -group_name $label -pretty_name $name]
+        set id [group::new -context_id $instance_id -group_name $label -pretty_name $name qal_grp_contacts]
         #  now_yyyymmdd_hhmmss
         set create_p 1
         set time_start [clock format [clock seconds] -format "%Y%m%d %H%M%S"]
@@ -360,7 +360,7 @@ ad_proc -public qal_customer_write {
         # record revision/new
         set customer_label "qal_customer "
         append customer_label $label
-        set id [group::new -context_id $instance_id -group_name $customer_label -pretty_name $name]
+        set id [group::new -context_id $instance_id -group_name $customer_label -pretty_name $name qal_grp_customers]
 
         #  now_yyyymmdd_hhmmss
         set time_start [clock format [clock seconds] -format "%Y%m%d %H%M%S"]
@@ -568,7 +568,7 @@ ad_proc -public qal_vendor_write {
         # record revision/new
         set vendor_label "qal_vendor "
         append vendor_label $label
-        set id [group::new -context_id $instance_id -group_name $vendor_label -pretty_name $name]
+        set id [group::new -context_id $instance_id -group_name $vendor_label -pretty_name $name qal_grp_vendors]
 
         #  now_yyyymmdd_hhmmss
         set time_start [clock format [clock seconds] -format "%Y%m%d %H%M%S"]
