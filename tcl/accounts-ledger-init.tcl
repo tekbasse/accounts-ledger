@@ -26,10 +26,15 @@ if { [catch { set instance_id [apm_package_id_from_key accounts-ledger] } error_
     set instance_id ""
 
 }
-if { $instance_id != 0 } {
+
+set group_types_exist_p [db_0or1row qal_select_qal_grp_contacts { 
+    select group_type from group_types where group_type='qal_grp_contacts' } ]
+if { !$group_types_exist_p } {
     # If this is this the first run, add some defaults. 
     # acs group types for use with acs groups later
-    group_type::new -group_type qal_grp_contacts -supertype group "#accounts-ledger.Contact" "#accounts-ledger.Contacts"
-    group_type::new -group_type qal_grp_customers -supertype group "#accounts-ledger.Customer" "#accounts-ledger.Customers"
-    group_type::new -group_type qal_grp_vendors -supertype group "#accounts-ledger.Vendor" "#accounts-ledger.Vendors"
+    db_transaction {
+        group_type::new -group_type qal_grp_contacts -supertype group "#accounts-ledger.Contact" "#accounts-ledger.Contacts"
+        group_type::new -group_type qal_grp_customers -supertype group "#accounts-ledger.Customer" "#accounts-ledger.Customers"
+        group_type::new -group_type qal_grp_vendors -supertype group "#accounts-ledger.Vendor" "#accounts-ledger.Vendors"
+    }
 }
