@@ -20,14 +20,14 @@
 -- create index qal_contact_object_id_map_contact_id_idx on qal_contact_object_id_map(contact_id);
 -- create index qal_contact_object_id_map_instance_id_idx on qal_contact_object_id_map(instance_id);
 -- 
-select acs_object_type__create_type (
+select acs_object_type__create_type(
    'qal_grps_contact',           -- content_type
    'qal Contact Group',          -- pretty_name 
    'qal Contact Groups',         -- pretty_plural
    'acs_object',                 -- supertype
-   '',  -- table_name is null. If issues, try setting to qal_contact_object_id_map
-   '',                  -- id_column is null. If issues, try setting to object_id 
-   'accounts-ledger',            -- package_name
+   '',  -- table_name is null  If issues persist try setting to qal_contact_object_id_map
+   '',                  -- id_column is null  If issues persist try setting to object_id 
+   'qal_groups_contact',            -- package_name
    'f',                          -- abstract_p
    NULL,                         -- type_extension_table
    NULL                          -- name_method
@@ -45,14 +45,14 @@ select acs_object_type__create_type (
 -- create index qal_customer_object_id_map_customer_id_idx on qal_customer_object_id_map(customer_id);
 -- create index qal_customer_object_id_map_instance_id_idx on qal_customer_object_id_map(instance_id);
 -- 
-select acs_object_type__create_type (
+select acs_object_type__create_type(
    'qal_grps_customer',          -- content_type
    'qal Customer Group',         -- pretty_name 
-   'qal Customer Groups'         -- pretty_plural
+   'qal Customer Groups',         -- pretty_plural
    'acs_object',                 -- supertype
-   '', -- table_name is null. If issues try setting to qal_customer_object_id_map
-   '',                  -- id_column is null. If issues try setting to object_id
-   'accounts-ledger',            -- package_name
+   '', -- table_name is null  If issues persist try setting to qal_customer_object_id_map
+   '',                  -- id_column is null  If issues persist try setting to object_id
+   'qal_groups_customer',            -- package_name
    'f',                          -- abstract_p
    NULL,                         -- type_extension_table
    NULL                          -- name_method
@@ -70,14 +70,14 @@ select acs_object_type__create_type (
 -- create index qal_vendor_object_id_map_vendor_id_idx on qal_vendor_object_id_map(vendor_id);
 -- create index qal_vendor_object_id_map_instance_id_idx on qal_vendor_object_id_map(instance_id);
 -- 
-select acs_object_type__create_type (
+select acs_object_type__create_type(
    'qal_grps_vendor',           -- content_type
    'qal Vendor Group',          -- pretty_name 
    'qal Vendor Groups',         -- pretty_plural
    'acs_object',                -- supertype
    '',  -- table_name is null. If issues, try setting to qal_vendor_object_id_map
    '',                 -- id_column is null. If issues, try setting to object_id
-   'accounts-ledger',           -- package_name
+   'qal_groups_vendor',           -- package_name
    'f',                         -- abstract_p
    NULL,                        -- type_extension_table
    NULL                         -- name_method
