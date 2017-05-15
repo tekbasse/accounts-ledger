@@ -9,22 +9,24 @@
 -- It is made available to help support integration with deployments that rely on standard
 -- OpenACS features.
 
-CREATE TABLE qal_contact_object_id_map (
-       object_id integer unique not null,
-       -- For now, contact_id is the same as object_id. See qal_contact
-       -- Apparently acs_object_type__create_type needs an external table.
-       contact_id integer
-);       
-
-create index qal_contact_object_id_map_contact_id_idx on qal_contact_object_id_map(contact_id);
-
+-- CREATE TABLE qal_contact_object_id_map (
+--        object_id integer unique not null,
+--        instance_id integer,
+--        -- For now, contact_id is the same as object_id. See qal_contact
+--        -- Apparently acs_object_type__create_type needs an external table.
+--        contact_id integer
+-- );       
+-- 
+-- create index qal_contact_object_id_map_contact_id_idx on qal_contact_object_id_map(contact_id);
+-- create index qal_contact_object_id_map_instance_id_idx on qal_contact_object_id_map(instance_id);
+-- 
 select acs_object_type__create_type (
    'qal_grps_contact',           -- content_type
    'qal Contact Group',          -- pretty_name 
    'qal Contact Groups',         -- pretty_plural
    'acs_object',                 -- supertype
-   'qal_contact_object_id_map',  -- table_name
-   'object_id',                  -- id_column 
+   '',  -- table_name is null. If issues, try setting to qal_contact_object_id_map
+   '',                  -- id_column is null. If issues, try setting to object_id 
    'accounts-ledger',            -- package_name
    'f',                          -- abstract_p
    NULL,                         -- type_extension_table
@@ -32,22 +34,24 @@ select acs_object_type__create_type (
 );
 
 
-CREATE TABLE qal_customer_object_id_map (
-       object_id integer unique not null,
-       -- For now, customer_id is the same as object_id. See qal_customer
-       -- Apparently acs_object_type__create_type needs an external table.
-       customer_id integer
-);       
-
-create index qal_customer_object_id_map_customer_id_idx on qal_customer_object_id_map(customer_id);
-
+-- CREATE TABLE qal_customer_object_id_map (
+--        object_id integer unique not null,
+--        instance_id integer,
+--        -- For now, customer_id is the same as object_id. See qal_customer
+--        -- Apparently acs_object_type__create_type needs an external table.
+--        customer_id integer
+-- );       
+-- 
+-- create index qal_customer_object_id_map_customer_id_idx on qal_customer_object_id_map(customer_id);
+-- create index qal_customer_object_id_map_instance_id_idx on qal_customer_object_id_map(instance_id);
+-- 
 select acs_object_type__create_type (
    'qal_grps_customer',          -- content_type
    'qal Customer Group',         -- pretty_name 
    'qal Customer Groups'         -- pretty_plural
    'acs_object',                 -- supertype
-   'qal_customer_object_id_map', -- table_name
-   'object_id',                  -- id_column 
+   '', -- table_name is null. If issues try setting to qal_customer_object_id_map
+   '',                  -- id_column is null. If issues try setting to object_id
    'accounts-ledger',            -- package_name
    'f',                          -- abstract_p
    NULL,                         -- type_extension_table
@@ -55,22 +59,24 @@ select acs_object_type__create_type (
 );
 
 
-CREATE TABLE qal_vendor_object_id_map (
-       object_id integer unique not null,
-       -- For now, vendor_id is the same as object_id. See qal_vendor
-       -- Apparently acs_object_type__create_type needs an external table.
-       vendor_id integer
-);       
-
-create index qal_vendor_object_id_map_vendor_id_idx on qal_vendor_object_id_map(vendor_id);
-
+-- CREATE TABLE qal_vendor_object_id_map (
+--        object_id integer unique not null,
+--        instance_id integer,
+--        -- For now, vendor_id is the same as object_id. See qal_vendor
+--        -- Apparently acs_object_type__create_type needs an external table.
+--        vendor_id integer
+-- );       
+-- 
+-- create index qal_vendor_object_id_map_vendor_id_idx on qal_vendor_object_id_map(vendor_id);
+-- create index qal_vendor_object_id_map_instance_id_idx on qal_vendor_object_id_map(instance_id);
+-- 
 select acs_object_type__create_type (
    'qal_grps_vendor',           -- content_type
    'qal Vendor Group',          -- pretty_name 
    'qal Vendor Groups',         -- pretty_plural
    'acs_object',                -- supertype
-   'qal_vendor_object_id_map',  -- table_name
-   'object_id',                 -- id_column 
+   '',  -- table_name is null. If issues, try setting to qal_vendor_object_id_map
+   '',                 -- id_column is null. If issues, try setting to object_id
    'accounts-ledger',           -- package_name
    'f',                         -- abstract_p
    NULL,                        -- type_extension_table

@@ -5,20 +5,23 @@
 
 -- OpenACS core integration
 
-select acs_object__delete(object_id) from qal_vendor_object_id_map;
+-- select acs_object__delete(object_id) from qal_vendor_object_id_map;
 select acs_object_type__drop_type('qal_grp_vendor');
-drop index qal_vendor_object_id_map_vendor_id_idx;
-DROP TABLE qal_vendor_object_id_map;
+-- drop index qal_vendor_object_id_map_vendor_id_idx;
+-- drop index qal_vendor_object_id_map_instance_id_idx;
+-- DROP TABLE qal_vendor_object_id_map;
 
-select acs_object__delete(object_id) from qal_customer_object_id_map;
+-- select acs_object__delete(object_id) from qal_customer_object_id_map;
 select acs_object_type__drop_type('qal_grp_customer');
-drop index qal_customer_object_id_map_customer_id_idx;
-DROP TABLE qal_customer_object_id_map;
+-- drop index qal_customer_object_id_map_customer_id_idx;
+-- drop index qal_customer_object_id_map_instance_id_idx;
+-- DROP TABLE qal_customer_object_id_map;
 
-select acs_object__delete(object_id) from qal_contact_object_id_map;
+-- select acs_object__delete(object_id) from qal_contact_object_id_map;
 select acs_object_type__drop_type('qal_grp_contact');
-drop index qal_contact_object_id_map_contact_id_idx;
-DROP TABLE qal_contact_object_id_map;
+-- drop index qal_contact_object_id_map_contact_id_idx;
+-- drop index qal_contact_object_id_map_instance_id_idx;
+-- DROP TABLE qal_contact_object_id_map;
 
 
 -- App data model
