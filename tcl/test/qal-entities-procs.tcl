@@ -24,17 +24,17 @@ aa_register_case -cats {api smoke} qal_entities_check {
 
             # co = contact, cu = customer, ve = vendor
             set co_id [qal_demo_contact_create contact_arr]
-            set co_created_p [qal_is_natural_number $co_id] 
+            set co_created_p [qf_is_natural_number $co_id] 
 
             aa_true "Created a contact" $co_created_p
 
             set cu_id [qal_demo_customer_create customer_arr]
-            set cu_created_p [qal_is_natural_number $cu_id] 
+            set cu_created_p [qf_is_natural_number $cu_id] 
 
             aa_true "Created a customer" $cu_created_p
 
             set ve_id [qal_demo_vendor_create vendor_arr]
-            set ve_created_p [qal_is_natural_number $ve_id] 
+            set ve_created_p [qf_is_natural_number $ve_id] 
 
             aa_true "Created a vendor" $ve_created_p
 
@@ -61,7 +61,7 @@ aa_register_case -cats {api smoke} qal_entities_check {
             aa_log "Change/update each value"
 
             set co2_id [qal_demo_contact_create contact_arr]
-            if { [qal_is_natural_number $co2_id] && $co_id eq $co2_id } {
+            if { [qf_is_natural_number $co2_id] && $co_id eq $co2_id } {
                 set co_updated_p 1
             } else {
                 set co_updated_p 0
@@ -70,7 +70,7 @@ aa_register_case -cats {api smoke} qal_entities_check {
             aa_true "Updated a contact" $co_updated_p
 
             set cu2_id [qal_demo_customer_create customer_arr]
-            if { [qal_is_natural_number $cu2_id] && $cu_id eq $cu2_id } {
+            if { [qf_is_natural_number $cu2_id] && $cu_id eq $cu2_id } {
                 set cu_updated_p 1
             } else {
                 set cu_updated_p 0
@@ -79,7 +79,7 @@ aa_register_case -cats {api smoke} qal_entities_check {
             aa_true "Updated a customer" $cu_updated_p
 
             set ve2_id [qal_demo_vendor_create vendor_arr]
-            if { [qal_is_natural_number $ve2_id] && $ve_id eq $ve2_id } {
+            if { [qf_is_natural_number $ve2_id] && $ve_id eq $ve2_id } {
                 set ve_updated_p 1
             } else {
                 set ve_updated_p 0

@@ -384,7 +384,7 @@ ad_proc qal_demo_customer_create {
     set cu_list [list \
                      id "" \
                      instance_id $instance_id \
-                     contact_id $co_id \
+                     contact_id $contact_id \
                      discount [random] \
                      tax_included [randomRange 1] \
                      credit_limit [lindex [list "" [expr { [random] * [randomRange $maxint] } ]] [randomRange 2]] \
@@ -392,7 +392,7 @@ ad_proc qal_demo_customer_create {
                      terms_unit [lindex [list days weeks months years seconds] [randomRange 4]] \
                      annual_value [expr { $maxint * [random] } ] \
                      customer_code [ad_generate_random_string [randomRange 32]] \
-                     pricegroup_id [lindex [list "" [randomRange $pg_maxint] [randomRange 1] ] \
+                     pricegroup_id [lindex [list "" [randomRange $pg_maxint] [randomRange 1] ]] \
                      created "" \
                      created_by $user_id \
                      trashed_p "0" \
@@ -400,9 +400,9 @@ ad_proc qal_demo_customer_create {
                      trashed_ts "" ]
     array set customer_arr $cu_list
     if { [qf_is_natural_number $contact_id ] } {
-        set cu_id [qal_customer_write $customer_arr $contact_id]
+        set cu_id [qal_customer_write customer_arr $contact_id]
     } else {
-        set cu_id [qal_customer_create $customer_arr]
+        set cu_id [qal_customer_create customer_arr]
     }
     return $cu_id
 }
@@ -421,7 +421,7 @@ ad_proc qal_demo_vendor_create {
     set ve_list [list \
                      id "" \
                      instance_id $instance_id \
-                     contact_id $co_id \
+                     contact_id $contact_id \
                      terms [expr { [random] * [randomRange $maxint] } ] \
                      terms_unit [lindex [list days weeks months years seconds] [randomRange 4]] \
                      tax_included [randomRange 1] \
@@ -439,13 +439,13 @@ ad_proc qal_demo_vendor_create {
                      purchase_policy [qal_namelur] \
                      return_policy [qal_namelur] \
                      price_guar_policy [qal_namelur] \
-                     installation_policy [qal_namelur]]
+                     installation_policy [qal_namelur] ]
 
     array set vendor_arr $ve_list
     if { [qf_is_natural_number $contact_id ] } {
-        set ve_id [qal_vendor_write $vendor_arr $contact_id]
+        set ve_id [qal_vendor_write vendor_arr $contact_id]
     } else {
-        set ve_id [qal_vendor_create $vendor_arr]
+        set ve_id [qal_vendor_create vendor_arr]
     }
     return $ve_id
 }
