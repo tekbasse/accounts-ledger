@@ -147,8 +147,20 @@ ad_proc -public qal_contact_write {
     # insert into db
     if { ![qf_is_natural_number $id] } {
         # record revision/new
-        #set id \[group::new -context_id $instance_id -group_name $label -pretty_name $name qal_grp_contacts\]
-        set id [db_nextval acs_object_id_seq]
+        # In the openacs permissions system, a contact is a party that can represent a group or a person.
+        # The email address of a party must be unique within an OpenACS system (or be empty string).
+        # So, email is not passed to the party object. email is stored in qal_contact
+        # party_type is group, because some contacts may be members of other contacts
+        set group_arr(join_policy) "closed"
+        set id [party::new -context_id $instance_id -email "" group] 
+        group::update -group_id $id -array group_arr
+        set group_arr(group_name) $label
+        # Having a contact group for this party makes it easier to manage complex memberships 
+        set contact_grp_id [group::new -context_id $instance_id -group_name $label -pretty_name $name qal_grp_contacts]
+        group::update -group_id $contact_grp_id -array group_arr
+        ##code later. Must make contact_grp_id a member of id
+
+
         #  now_yyyymmdd_hhmmss
         set create_p 1
         set time_start [clock format [clock seconds] -format "%Y%m%d %H%M%S"]
@@ -320,9 +332,6 @@ ad_proc -public qal_customer_write {
     qf_array_to_vars a_arr [qal_customer_keys]
 
     # validations etc
-    if { ![qf_is_natural_number $id] } {
-        set id ""
-    }
     if { ![qf_is_natural_number $contact_id] } {
         set contact_id ""
     }
@@ -361,8 +370,15 @@ ad_proc -public qal_customer_write {
         # record revision/new
         set customer_label "qal_customer "
         append customer_label $label
-        #set id \[group::new -context_id $instance_id -group_name $customer_label -pretty_name $name qal_grp_customers\]
-        set id [db_nextval acs_object_id_seq]
+
+        # Create an OpenACS group for party_id customers
+        # Having a customer group for the contact party makes it easier to manage user memberships in bulk
+        # In any case, id must be an object_id to avoid id collisions
+        set id [group::new -context_id $instance_id -group_name $customer_label -pretty_name $name qal_grp_customers]
+        set group_arr(join_policy) "closed"
+        set group_arr(group_name) $customer_label
+        group::update -group_id $id -array group_arr
+        ##code later. Must make this id a member of customer_id
 
         #  now_yyyymmdd_hhmmss
         set time_start [clock format [clock seconds] -format "%Y%m%d %H%M%S"]
@@ -530,9 +546,6 @@ ad_proc -public qal_vendor_write {
     qf_array_to_vars a_arr [qal_vendor_keys]
 
     # validations etc
-    if { ![qf_is_natural_number $id] } {
-        set id ""
-    }
     if { ![qf_is_natural_number $contact_id] } {
         set contact_id ""
     }
@@ -570,8 +583,15 @@ ad_proc -public qal_vendor_write {
         # record revision/new
         set vendor_label "qal_vendor "
         append vendor_label $label
-        #set id \[group::new -context_id $instance_id -group_name $vendor_label -pretty_name $name qal_grp_vendors\]
-        set id [db_nextval acs_object_id_seq]
+
+        # Create an OpenACS group for party_id vendors
+        # Having a vendor group for the contact party makes it easier to manage user memberships in bulk
+        # In any case, id must be an object_id to avoid id collisions
+        set id [group::new -context_id $instance_id -group_name $vendor_label -pretty_name $name qal_grp_vendors]
+        set group_arr(join_policy) "closed"
+        set group_arr(group_name) $vendor_label
+        group::update -group_id $id -array group_arr
+        ##code later. Must make this id a member of vendor_id
 
         #  now_yyyymmdd_hhmmss
         set time_start [clock format [clock seconds] -format "%Y%m%d %H%M%S"]
