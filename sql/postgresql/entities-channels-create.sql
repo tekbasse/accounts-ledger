@@ -10,11 +10,16 @@
 -- OpenACS features.
 
 CREATE TABLE qal_contact_object_id_map (
+       -- contact is a party of type group
        object_id integer unique not null,
        instance_id integer,
+
        -- For now, contact_id is the same as object_id. See qal_contact table.
        -- acs_object_type__create_type needs an external table.
-       contact_id integer
+       contact_id integer,
+       -- A contact party has a subgroup that contact users are assigned to.
+       -- This helps to separate user membership from contacts that have memberships to other contacts etc.
+       contact_grp_id integer
 );       
 
 create index qal_contact_object_id_map_contact_id_idx on qal_contact_object_id_map(contact_id);
