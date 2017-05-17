@@ -15,6 +15,16 @@ ad_proc -public qal_contact_id_exists_q {
 }
 
 
+ad_proc -public qal_contact_label_from_id {
+    contact_id
+} {
+    Returns contact label if it exists, otherwise returns ""
+} {
+    set label ""
+    db_0or1row qal_contact_label_exists_q {select label from qal_contact where instance_id=:instance_id and id=:contact_id and trashed_p!='1'}
+    return $label
+}
+
 ad_proc -public qal_contact_id_from_label {
     contact_label
 } {
