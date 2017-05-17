@@ -289,7 +289,7 @@ CREATE TABLE qal_vendor (
        instance_id         integer,
        rev_id              integer default nextval('qal_id'),
        contact_id          integer,
-       terms               integer default 0,
+       terms               numeric default '0',
        terms_unit          varchar(20) default 'days',
        tax_included        varchar(1) default '0',
        -- was vendor_number

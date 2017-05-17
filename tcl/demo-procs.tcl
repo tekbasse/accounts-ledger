@@ -333,7 +333,7 @@ ad_proc qal_demo_contact_create {
     set co_list [list  \
                      instance_id $instance_id \
                      label "test1" \
-                     name [qal_namelur]  \
+                     name [qal_namelur] \
                      street_addrs_id "" \
                      mailing_addrs_id "" \
                      billing_addrs_id "" \
@@ -378,7 +378,8 @@ ad_proc qal_demo_customer_create {
     upvar 1 instance_id instance_id
     upvar 1 $customer_arr_name customer_arr
     # following from: http://wiki.tcl.tk/567
-    set maxint [expr 0x7[string range [format %X -1] 1 end]]
+    #set maxint \[expr 0x7\[string range \[format %X -1\] 1 end\]\]
+    set maxint 6531464675862196
     set pg_maxint 2147483647
     incr maxint -1
     set cu_list [list \
@@ -418,6 +419,9 @@ ad_proc qal_demo_vendor_create {
 } {
     upvar 1 instance_id instance_id
     upvar 1 $vendor_arr_name vendor_arr
+    # following from: http://wiki.tcl.tk/567
+    #set maxint \[expr 0x7\[string range \[format %X -1\] 1 end\]\]
+    set maxint 6531464675862196
     set ve_list [list \
                      id "" \
                      instance_id $instance_id \
