@@ -52,7 +52,7 @@ ad_proc qal_contacts_read {
         # Consider re-working if there is a way to combine multiple db calls.
         set read_p [qc_permission_p $user_id $contact_id non_assets read $instance_id]
         if { $read_p } {
-            set rows_lists [db_list_of_lists qal_contact_get "select [qal_contact_keys ","] from qal_contact where contact_id=:contact_id and instance_id=:instance_id and trashed_p!='1'" ]
+            set rows_lists [db_list_of_lists qal_contact_get "select [qal_contact_keys ","] from qal_contact where id=:contact_id and instance_id=:instance_id and trashed_p!='1'" ]
             # should return only 1 row max
             set row_list [lindex $rows_lists 0]
             if { [llength $row_list] > 0 } {
@@ -110,7 +110,7 @@ ad_proc qal_customers_read {
     set customer_ids_list [hf_list_filter_by_natural_number $customer_id_list]
     set allowed_customer_ids [qal_customer_ids_of_user_id $user_id]
     set intersect_ids [set_intersection $customer_ids_list $allowed_customer_ids]
-    set rows_lists [db_list_of_lists qal_customer_get "select [qal_customer_keys ","] from qal_customer where customer_id=:customer_id and instance_id=:instance_id and trashed_p!='1' and customer_id in ([template::util::tcl_to_sql_list $customer_ids_list])" ]
+    set rows_lists [db_list_of_lists qal_customer_get "select [qal_customer_keys ","] from qal_customer where id=:customer_id and instance_id=:instance_id and trashed_p!='1' and id in ([template::util::tcl_to_sql_list $customer_ids_list])" ]
     return $rows_lists
 }
 
@@ -160,7 +160,7 @@ ad_proc qal_vendors_read {
     set vendor_ids_list [hf_list_filter_by_natural_number $vendor_id_list]
     set allowed_vendor_ids [qal_vendor_ids_of_user_id $user_id]
     set intersect_ids [set_intersection $vendor_ids_list $allowed_vendor_ids]
-    set rows_lists [db_list_of_lists qal_vendor_get "select [qal_vendor_keys ","] from qal_vendor where vendor_id=:vendor_id and instance_id=:instance_id and trashed_p!='1' and vendor_id in ([template::util::tcl_to_sql_list $vendor_ids_list])" ]
+    set rows_lists [db_list_of_lists qal_vendor_get "select [qal_vendor_keys ","] from qal_vendor where id=:vendor_id and instance_id=:instance_id and trashed_p!='1' and id in ([template::util::tcl_to_sql_list $vendor_ids_list])" ]
     return $rows_lists
 }
 
