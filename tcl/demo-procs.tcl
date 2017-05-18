@@ -349,7 +349,7 @@ ad_proc qal_demo_contact_create {
                      timezone [ad_generate_random_string [randomRange 2]] \
                      time_start [qf_clock_format] \
                      time_end "" \
-                     url [ad_generate_random_string [randomRange 200]] \
+                     url "http://[ad_generate_random_string [randomRange 20]].[ad_generate_random_string [randomRange 20]]/[qal_namelur 1]" \
                      user_id $user_id \
                      created "" \
                      created_by $user_id \

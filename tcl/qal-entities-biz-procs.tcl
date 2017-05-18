@@ -115,19 +115,24 @@ ad_proc -public qal_contact_write {
         set time_start_s [clock seconds]
     }
     set time_start [qf_clock_format $time_start_s ]
-    set time_end_s [qf_clock_scan $time_end]
-    if { $time_end_s ne "" } {
-        set time_end [qf_clock_format $time_end_s ]
+
+    if { $time_end ne "" } {
+        set time_end_s [qf_clock_scan $time_end]
+        if { $time_end_s ne "" } {
+            set time_end [qf_clock_format $time_end_s ]
+        }
     }
 
     if { [hf_are_safe_and_printable_characters_q $url] } {
         if  { ![util_url_valid_p $url ] } {
             set url2 "http://"
+        } else {
+            set url2 ""
         }
         append url2 $url
-        set url2 [ad_urlencode $url2]
+        set url2 [ns_absoluteurl $url2 [ad_url]]
     } else {
-        set url2 [ad_urlencode $url2]
+        set url2 [ns_absoluteurl $url2 [ad_url]]
     }
     set url [string range $url2 0 198]
 
