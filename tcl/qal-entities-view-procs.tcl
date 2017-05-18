@@ -10,6 +10,7 @@ ad_proc qal_contact_read {
     Returns a name value list of one contact record.
 } {
     upvar 1 instance_id instance_id
+    upvar 1 user_id user_id
     set return_lists [qal_contacts_read [list $contact_id]]
     # list is in order of qal_contact_keys
     set return_val_list [lindex $return_lists 0]
@@ -36,6 +37,13 @@ ad_proc qal_contacts_read {
 } {
     upvar 1 instance_id instance_id
     upvar 1 user_id user_id
+    if { ![info exists user_id] } {
+        if { [ns_conn isconnected] } {
+            set user_id [ad_conn user_id]
+        } else {
+            set user_id ""
+        }
+    }
     set contact_ids_list [hf_list_filter_by_natural_number $contact_id_list]
     set return_lists [list ]
     foreach contact_id $contact_ids_list {
@@ -64,6 +72,7 @@ ad_proc qal_customer_read {
     Returns a name value list of one customer record.
 } {
     upvar 1 instance_id instance_id
+    upvar 1 user_id user_id
     set return_lists [qal_customers_read [list $customer_id]]
     # list is in order of qal_customer_keys
     set return_val_list [lindex $return_lists 0]
@@ -113,6 +122,7 @@ ad_proc qal_vendor_read {
     Returns a name value list of one vendor record.
 } {
     upvar 1 instance_id instance_id
+    upvar 1 user_id user_id
     set return_lists [qal_vendors_read [list $vendor_id]]
     # list is in order of qal_vendor_keys
     set return_val_list [lindex $return_lists 0]
@@ -160,7 +170,8 @@ ad_proc qal_address_read {
 } {
     Returns a name value list of one address record for a contact.
 } {
-    upvar 1 instance_id instance_id
+    upvar 1 instance_id instance_i
+    upvar 1 user_id user_id
     set return_lists [qal_addresses_read [list $address_id]]
     # list is in order of qal_address_keys
     set return_val_list [lindex $return_lists 0]
