@@ -42,20 +42,23 @@ aa_register_case -cats {api smoke} qal_entities_check {
 
             set co_v2_list [qal_contact_read $co_id]
             set co_keys_list [qal_contact_keys]
+            set co_keys_list 
             foreach key $co_keys_list {
-                aa_equal "Contact read/write test key ${key}" [dict get $co_v2_list $key] $contact_arr(${key})
+                if { $key ne "id" && $key ne "rev_id" } {
+                    aa_equals "Contact read/write test key ${key}" [dict get $co_v2_list $key] $contact_arr(${key})
+                }
             }
 
             set cu_v2_list [qal_customer_read $cu_id]
             set cu_keys_list [qal_customer_keys]
             foreach key $cu_keys_list {
-                aa_equal "Customer read/write test key ${key}" [dict get $cu_v2_list $key] $customer_arr(${key})
+                aa_equals "Customer read/write test key ${key}" [dict get $cu_v2_list $key] $customer_arr(${key})
             }
 
             set ve_v2_list [qal_vendor_read $ve_id]
             set ve_keys_list [qal_vendor_keys]
             foreach key $ve_keys_list {
-                aa_equal "Vendor read/write test key ${key}" [dict get $ve_v2_list $key] $vendor_arr(${key})
+                aa_equals "Vendor read/write test key ${key}" [dict get $ve_v2_list $key] $vendor_arr(${key})
             }
 
             aa_log "Change/update each value"
@@ -92,17 +95,17 @@ aa_register_case -cats {api smoke} qal_entities_check {
 
             set co_v3_list [qal_contact_read $co_id]
             foreach key $co_keys_list {
-                aa_equal "Contact read/write test key ${key}" [dict get $co_v3_list $key] $contact_arr(${key})
+                aa_equals "Contact read/write test key ${key}" [dict get $co_v3_list $key] $contact_arr(${key})
             }
 
             set cu_v3_list [qal_customer_read $cu_id]
             foreach key $cu_keys_list {
-                aa_equal "Customer read/write test key ${key}" [dict get $cu_v3_list $key] $customer_arr(${key})
+                aa_equals "Customer read/write test key ${key}" [dict get $cu_v3_list $key] $customer_arr(${key})
             }
 
             set ve_v3_list [qal_vendor_read $ve_id]
             foreach key $ve_keys_list {
-                aa_equal "Vendor read/write test key ${key}" [dict get $ve_v3_list $key] $vendor_arr(${key})
+                aa_equals "Vendor read/write test key ${key}" [dict get $ve_v3_list $key] $vendor_arr(${key})
             }
 
 

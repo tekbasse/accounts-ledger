@@ -330,22 +330,23 @@ ad_proc qal_demo_contact_create {
 } {
     upvar 1 instance_id instance_id
     upvar 1 $contact_arr_name contact_arr
+    # ad_generate_random_string returns one more than expected
     set co_list [list  \
                      instance_id $instance_id \
-                     label "test1" \
+                     label "test@[clock seconds]" \
                      name [qal_namelur] \
                      street_addrs_id "" \
                      mailing_addrs_id "" \
                      billing_addrs_id "" \
                      vendor_id "" \
                      customer_id "" \
-                     taxnumber [ad_generate_random_string [randomRange 32]] \
-                     sic_code [ad_generate_random_string [randomRange 15]] \
-                     iban [ad_generate_random_string [randomRange 34]] \
-                     bic [ad_generate_random_string [randomRange 12]] \
-                     language_code [ad_generate_random_string [randomRange 6]] \
-                     currency [ad_generate_random_string [randomRange 3]] \
-                     timezone [ad_generate_random_string [randomRange 3]] \
+                     taxnumber [ad_generate_random_string [randomRange 31]] \
+                     sic_code [ad_generate_random_string [randomRange 14]] \
+                     iban [ad_generate_random_string [randomRange 33]] \
+                     bic [ad_generate_random_string [randomRange 11]] \
+                     language_code [ad_generate_random_string [randomRange 5]] \
+                     currency [ad_generate_random_string [randomRange 2]] \
+                     timezone [ad_generate_random_string [randomRange 2]] \
                      time_start [qf_clock_format] \
                      time_end "" \
                      url [ad_generate_random_string [randomRange 200]] \
@@ -392,7 +393,7 @@ ad_proc qal_demo_customer_create {
                      terms [expr { [random] * [randomRange $maxint] } ] \
                      terms_unit [lindex [list days weeks months years seconds] [randomRange 4]] \
                      annual_value [expr { $maxint * [random] } ] \
-                     customer_code [ad_generate_random_string [randomRange 32]] \
+                     customer_code [ad_generate_random_string [randomRange 31]] \
                      pricegroup_id [lindex [list "" [randomRange $pg_maxint] [randomRange 1] ]] \
                      created "" \
                      created_by $user_id \
