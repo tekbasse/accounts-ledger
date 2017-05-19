@@ -51,10 +51,10 @@ aa_register_case -cats {api smoke} qal_entities_check {
                     if { $key in [list time_start time_end created] } {
                         # compare epochs
                         if { $actual ne "" } {
-                            set actual [qf_clock_scan_from_db $actual]
+                            set actual [qf_clock_scan $actual]
                         }
                         if { $expected ne "" } {
-                            set expected [qf_clock_scan_from_db $expected]
+                            set expected [qf_clock_scan $expected]
                         }
                     } 
                     aa_equals "Contact read/write test key ${key}" $actual $expected
@@ -71,10 +71,10 @@ aa_register_case -cats {api smoke} qal_entities_check {
                     if { $key in [list time_start time_end created] } {
                         # compare epochs
                         if { $actual ne "" } {
-                            set actual [qf_clock_scan_from_db $actual]
+                            set actual [qf_clock_scan $actual]
                         }
                         if { $expected ne "" } {
-                            set expected [qf_clock_scan_from_db $expected]
+                            set expected [qf_clock_scan $expected]
                         }
                     } 
                     aa_equals "Customer read/write test key ${key}" $actual $expected
@@ -91,10 +91,10 @@ aa_register_case -cats {api smoke} qal_entities_check {
                     if { $key in [list time_start time_end created] } {
                         # compare epochs
                         if { $actual ne "" } {
-                            set actual [qf_clock_scan_from_db $actual]
+                            set actual [qf_clock_scan $actual]
                         }
                         if { $expected ne "" } {
-                            set expected [qf_clock_scan_from_db $expected]
+                            set expected [qf_clock_scan $expected]
                         }
                     } 
                     aa_equals "Vendor read/write test key ${key}" $actual $expected
