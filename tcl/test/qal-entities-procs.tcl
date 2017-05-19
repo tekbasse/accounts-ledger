@@ -23,6 +23,7 @@ aa_register_case -cats {api smoke} qal_entities_check {
             #
 
             # co = contact, cu = customer, ve = vendor
+            set create_start_cs [clock seconds]
             set co_id [qal_demo_contact_create contact_arr "" $user_id]
             set co_created_p [qf_is_natural_number $co_id] 
 
@@ -35,7 +36,10 @@ aa_register_case -cats {api smoke} qal_entities_check {
 
             set ve_id [qal_demo_vendor_create vendor_arr "" $user_id]
             set ve_created_p [qf_is_natural_number $ve_id] 
-
+            set create_end_cs [clock seconds]
+            if { $create_end_cs ne $create_start_cs } {
+                aa_log "Expect a timing error with 'created' field."
+            }
             aa_true "Created a vendor" $ve_created_p
 
             aa_log "Read and verify each value"
@@ -47,14 +51,18 @@ aa_register_case -cats {api smoke} qal_entities_check {
                 if { $key ne "id" && $key ne "rev_id" } {
                     set actual [dict get $co_v2_list $key] 
                     set expected $contact_arr(${key})
-
                     if { $key in [list time_start time_end created] } {
                         # compare epochs
+                        aa_log "actual from db: '${actual}', expected from var cache: '${expected}'"
                         if { $actual ne "" } {
                             set actual [qf_clock_scan_from_db $actual]
                         }
                         if { $expected ne "" } {
                             set expected [qf_clock_scan $expected]
+                        } else {
+                            if { $key eq "created" } {
+                                set expected $create_start_cs]
+                            }
                         }
                     } 
                     aa_equals "Contact read/write test key ${key}" $actual $expected
@@ -75,6 +83,10 @@ aa_register_case -cats {api smoke} qal_entities_check {
                         }
                         if { $expected ne "" } {
                             set expected [qf_clock_scan $expected]
+                        } else {
+                            if { $key eq "created" } {
+                                set expected $create_end_cs
+                            }
                         }
                     } 
                     aa_equals "Customer read/write test key ${key}" $actual $expected
@@ -95,6 +107,10 @@ aa_register_case -cats {api smoke} qal_entities_check {
                         }
                         if { $expected ne "" } {
                             set expected [qf_clock_scan $expected]
+                        } else {
+                            if { $key eq "created" } {
+                                set expected $create_end_cs
+                            }
                         }
                     } 
                     aa_equals "Vendor read/write test key ${key}" $actual $expected

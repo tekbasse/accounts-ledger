@@ -109,10 +109,10 @@ ad_proc -public qal_contact_write {
         regsub -all -- {[^a-z_A-Z0-9]} $timezone {} timezone
         set timezone [string range $timezone 0 99]
     }
-    
-    set time_start_s [qf_clock_scan $time_start]
-    set time_start [qf_clock_format $time_start_s ]
-
+    if { $time_start ne "" } {
+        set time_start_s [qf_clock_scan $time_start]
+        set time_start [qf_clock_format $time_start_s ]
+    }
     if { $time_end ne "" } {
         set time_end_s [qf_clock_scan $time_end]
         if { $time_end_s ne "" } {
@@ -140,9 +140,6 @@ ad_proc -public qal_contact_write {
             set user_id $instance_id
         }
     }
-
-    set created_s [qf_clock_scan $created]
-    set created [qf_clock_format $created_s ]
     # insert into db
     if { ![qf_is_natural_number $id] } {
         # record revision/new
@@ -174,6 +171,9 @@ ad_proc -public qal_contact_write {
 
         set rev_id [db_nextval qal_id]
 
+        set created_s [qf_clock_scan $created]
+        set created [qf_clock_format $created_s ]
+
         if { [ns_conn isconnected] } {
             set created_by [ad_conn user_id]
         } else {
@@ -183,11 +183,22 @@ ad_proc -public qal_contact_write {
         set trashed_p 0
         set trashed_by ""
         set trashed_ts ""
+
+
         db_transaction {
-            if { !$create_p } {
+            if { $create_p } {
+                set created [qf_clock_format [clock seconds]]
+            } else {
+                if { $created eq "" } {
+                    db_0or1row qal_contact_created_r1 {
+                        select created from qal_contact 
+                        where id=:id 
+                        and trashed_p!='1'
+                        and instance_id=:instance_id }
+                }
                 db_dml qal_contact_trash { update qal_contact set trashed_p='1',trashed_by=:user_id,trashed_ts=now() where id=:id
                 }
-            }
+            } 
             # Make sure label is unique
             set i 1
             set label_orig $label
@@ -199,6 +210,7 @@ ad_proc -public qal_contact_write {
                 append label "-" $i
                 set id_from_label [qal_contact_id_from_label $label]
             }
+            ns_log Notice "qal_contact_create.213: created '${created}' qf_clock_scan -> '[qf_clock_scan $created]' qf_clock_scan_from_db -> '[qf_clock_scan_from_db $created]'"
             db_dml qal_contact_create_1 "insert into qal_contact \
  ([qal_contact_keys ","]) values ([qal_contact_keys ",:"])"
         }
@@ -404,7 +416,16 @@ ad_proc -public qal_customer_write {
         set trashed_by ""
         set trashed_ts ""
         db_transaction {
-            if { !$create_p } {
+            if { $create_p } {
+                set created [qf_clock_format [clock seconds]]
+            } else {
+                if { $created eq "" } {
+                    db_0or1row qal_customer_created_r1 {
+                        select created from qal_customer 
+                        where id=:id 
+                        and trashed_p!='1'
+                        and instance_id=:instance_id }
+                }
                 db_dml qal_customer_trash { update qal_customer set trashed_p='1',trashed_by=:user_id,trashed_ts=now() where id=:id
                 }
             }
@@ -619,7 +640,16 @@ ad_proc -public qal_vendor_write {
         set trashed_by ""
         set trashed_ts ""
         db_transaction {
-            if { !$create_p } {
+            if { $create_p } {
+                set created [qf_clock_format [clock seconds]]
+            } else {
+                if { $created eq "" } {
+                    db_0or1row qal_vendor_created_r1 {
+                        select created from qal_vendor 
+                        where id=:id 
+                        and trashed_p!='1'
+                        and instance_id=:instance_id }
+                }
                 db_dml qal_vendor_trash { update qal_vendor set trashed_p='1',trashed_by=:user_id,trashed_ts=now() where id=:id
                 }
             }
@@ -861,7 +891,16 @@ ad_proc -public qal_address_write {
     set trashed_by ""
     set trashed_ts ""
     db_transaction {
-        if { !$create_p } {
+        if { $create_p } {
+            set created [qf_clock_format [clock seconds]]
+        } else {
+            if { $created eq "" } {
+                db_0or1row qal_contact_created_r1 {
+                    select created from qal_contact 
+                    where id=:id 
+                    and trashed_p!='1'
+                    and instance_id=:instance_id }
+            }
             db_dml qal_address_trash { update qal_address set trashed_p='1',trashed_by=:user_id,trashed_ts=now() 
                 where addrs_id=:addrs_id 
                 and contact_id=:contact_id

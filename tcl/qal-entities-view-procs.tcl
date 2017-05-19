@@ -22,6 +22,10 @@ ad_proc qal_contact_read {
             set val [lindex $return_val_list $i]
             lappend return_list $key $val
             incr i
+            if { $key eq "created" } {
+                set created $val
+                ns_log Notice "qal_contact_read.26: created '${created}' qf_clock_scan -> '[qf_clock_scan $created]' qf_clock_scan_from_db -> '[qf_clock_scan_from_db $created]'"
+            }
         }
     }
     return $return_list

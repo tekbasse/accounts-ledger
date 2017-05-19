@@ -38,7 +38,7 @@ ad_proc -private qal_contact_defaults {
                     time_end "" \
                     url "" \
                     user_id "" \
-                    created [qf_clock_format] \
+                    created [qf_clock_format [clock seconds]] \
                     created_by "" \
                     trashed_p "0" \
                     trashed_by "" \
@@ -73,7 +73,7 @@ ad_proc -private qal_contact_user_map_defaults {
                     instance_id $instance_id \
                     contact_id "" \
                     user_id "" \
-                    created [qf_clock_format] \
+                    created [qf_clock_format [clock seconds]] \
                     created_by "" \
                     trashed_p "0" \
                     trashed_by "" \
@@ -109,8 +109,8 @@ ad_proc -private qal_customer_defaults {
 
     set c_list [list \
                     id "" \
-                    rev_id "" \
                     instance_id $instance_id \
+                    rev_id "" \
                     contact_id "" \
                     discount "" \
                     tax_included "" \
@@ -118,9 +118,9 @@ ad_proc -private qal_customer_defaults {
                     terms "" \
                     terms_unit "" \
                     annual_value "" \
-                    customer_number "" \
+                    customer_code "" \
                     pricegroup_id "" \
-                    created [qf_clock_format] \
+                    created [qf_clock_format [clock seconds]] \
                     created_by "" \
                     trashed_p "0" \
                     trashed_by "" \
@@ -165,7 +165,7 @@ ad_proc -private qal_vendor_defaults {
                     discount "" \
                     credit_limit "" \
                     pricegroup_id "" \
-                    created [qf_clock_format] \
+                    created [qf_clock_format [clock seconds]] \
                     created_by "" \
                     trashed_p "0" \
                     trashed_by "" \
