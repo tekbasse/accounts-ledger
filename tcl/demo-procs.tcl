@@ -394,7 +394,7 @@ ad_proc qal_demo_customer_create {
                      terms_unit [lindex [list days weeks months years seconds] [randomRange 4]] \
                      annual_value [expr { $maxint * [random] } ] \
                      customer_code [ad_generate_random_string [randomRange 31]] \
-                     pricegroup_id [lindex [list "" [randomRange $pg_maxint] [randomRange 1] ]] \
+                     pricegroup_id [lindex [list "" [randomRange $pg_maxint]] [randomRange 1] ] \
                      created "" \
                      created_by $user_id \
                      trashed_p "0" \
@@ -433,7 +433,7 @@ ad_proc qal_demo_vendor_create {
                      vendor_code "" \
                      gifi_accno "" \
                      discount "" \
-                     credit_limit [lindex [list "" [expr { [random] * [randomRange $maxint] } ]] [randomRange 2]] \
+                     credit_limit [lindex [list "" [expr { [random] * [randomRange $maxint] } ]] [randomRange 1]] \
                      pricegroup_id "" \
                      created "" \
                      created_by $user_id \

@@ -51,10 +51,10 @@ aa_register_case -cats {api smoke} qal_entities_check {
                     if { $key in [list time_start time_end created] } {
                         # compare epochs
                         if { $actual ne "" } {
-                            set actual [qf_clock_scan $actual]
+                            set actual [qf_clock_scan_from_db $actual]
                         }
                         if { $expected ne "" } {
-                            set expected [qf_clock_scan $expected]
+                            set expected [qf_clock_scan_from_db $expected]
                         }
                     } 
                     aa_equals "Contact read/write test key ${key}" $actual $expected
@@ -64,13 +64,41 @@ aa_register_case -cats {api smoke} qal_entities_check {
             set cu_v2_list [qal_customer_read $cu_id]
             set cu_keys_list [qal_customer_keys]
             foreach key $cu_keys_list {
-                aa_equals "Customer read/write test key ${key}" [dict get $cu_v2_list $key] $customer_arr(${key})
+                if { $key ne "id" && $key ne "rev_id" } {
+                    set actual [dict get $cu_v2_list $key] 
+                    set expected $customer_arr(${key})
+
+                    if { $key in [list time_start time_end created] } {
+                        # compare epochs
+                        if { $actual ne "" } {
+                            set actual [qf_clock_scan_from_db $actual]
+                        }
+                        if { $expected ne "" } {
+                            set expected [qf_clock_scan_from_db $expected]
+                        }
+                    } 
+                    aa_equals "Customer read/write test key ${key}" $actual $expected
+                }
             }
 
             set ve_v2_list [qal_vendor_read $ve_id]
             set ve_keys_list [qal_vendor_keys]
             foreach key $ve_keys_list {
-                aa_equals "Vendor read/write test key ${key}" [dict get $ve_v2_list $key] $vendor_arr(${key})
+                if { $key ne "id" && $key ne "rev_id" } {
+                    set actual [dict get $ve_v2_list $key] 
+                    set expected $vendor_arr(${key})
+
+                    if { $key in [list time_start time_end created] } {
+                        # compare epochs
+                        if { $actual ne "" } {
+                            set actual [qf_clock_scan_from_db $actual]
+                        }
+                        if { $expected ne "" } {
+                            set expected [qf_clock_scan_from_db $expected]
+                        }
+                    } 
+                    aa_equals "Vendor read/write test key ${key}" $actual $expected
+                }
             }
 
             aa_log "Change/update each value"

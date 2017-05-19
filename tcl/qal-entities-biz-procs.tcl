@@ -145,9 +145,6 @@ ad_proc -public qal_contact_write {
     }
 
     set created_s [qf_clock_scan $created]
-    if { $created_s eq "" } {
-        set created_s [clock seconds]
-    }
     set created [qf_clock_format $created_s ]
     # insert into db
     if { ![qf_is_natural_number $id] } {
@@ -179,7 +176,7 @@ ad_proc -public qal_contact_write {
     } else {
 
         set rev_id [db_nextval qal_id]
-        set created [clock format [clock seconds] -format "%Y%m%d %H%M%S"]
+
         if { [ns_conn isconnected] } {
             set created_by [ad_conn user_id]
         } else {
@@ -368,9 +365,6 @@ ad_proc -public qal_customer_write {
     }
 
     set created_s [qf_clock_scan $created]
-    if { $created_s eq "" } {
-        set created_s [clock seconds]
-    }
     set created [qf_clock_format $created_s ]
     # insert into db
     if { ![qf_is_natural_number $id] } {
@@ -403,7 +397,6 @@ ad_proc -public qal_customer_write {
     } else {
 
         set rev_id [db_nextval qal_id]
-        set created [clock format [clock seconds] -format "%Y%m%d %H%M%S"]
         if { [ns_conn isconnected] } {
             set created_by [ad_conn user_id]
         } else {
@@ -589,9 +582,6 @@ ad_proc -public qal_vendor_write {
     }
 
     set created_s [qf_clock_scan $created]
-    if { $created_s eq "" } {
-        set created_s [clock seconds]
-    }
     set created [qf_clock_format $created_s ]
     # insert into db
     if { ![qf_is_natural_number $id] } {
@@ -621,7 +611,7 @@ ad_proc -public qal_vendor_write {
     } else {
 
         set rev_id [db_nextval qal_id]
-        set created [clock format [clock seconds] -format "%Y%m%d %H%M%S"]
+
         if { [ns_conn isconnected] } {
             set created_by [ad_conn user_id]
         } else {
@@ -859,9 +849,6 @@ ad_proc -public qal_address_write {
     }
     
     set created_s [qf_clock_scan $created]
-    if { $created_s eq "" } {
-        set created_s [clock seconds]
-    }
     set created [qf_clock_format $created_s ]
     if { [ns_conn isconnected] } {
         set created_by [ad_conn user_id]

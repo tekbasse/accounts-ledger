@@ -14,7 +14,7 @@ ad_proc -private qal_contact_defaults {
 } {
     upvar 1 instance_id instance_id
     upvar 1 $arr_name c_arr
-    set nowts [dt_systime -gmt 1]
+
     set c_list [list \
                     id "" \
                     rev_id "" \
@@ -38,7 +38,7 @@ ad_proc -private qal_contact_defaults {
                     time_end "" \
                     url "" \
                     user_id "" \
-                    created $nowts \
+                    created [qf_clock_format] \
                     created_by "" \
                     trashed_p "0" \
                     trashed_by "" \
@@ -68,12 +68,12 @@ ad_proc -private qal_contact_user_map_defaults {
 } {
     upvar 1 instance_id instance_id
     upvar 1 $arr_name c_arr
-    set nowts [dt_systime -gmt 1]
+
     set c_list [list \
                     instance_id $instance_id \
                     contact_id "" \
                     user_id "" \
-                    created $nowts \
+                    created [qf_clock_format] \
                     created_by "" \
                     trashed_p "0" \
                     trashed_by "" \
@@ -106,7 +106,7 @@ ad_proc -private qal_customer_defaults {
 } {
     upvar 1 instance_id instance_id
     upvar 1 $arr_name c_arr
-    set nowts [dt_systime -gmt 1]
+
     set c_list [list \
                     id "" \
                     rev_id "" \
@@ -120,7 +120,7 @@ ad_proc -private qal_customer_defaults {
                     annual_value "" \
                     customer_number "" \
                     pricegroup_id "" \
-                    created $nowts \
+                    created [qf_clock_format] \
                     created_by "" \
                     trashed_p "0" \
                     trashed_by "" \
@@ -151,13 +151,30 @@ ad_proc -private qal_vendor_defaults {
 } {
     upvar 1 instance_id instance_id
     upvar 1 $arr_name v_arr
-    set nowts [dt_systime -gmt 1]
-    set v_list [list instance_id $instance_id \
-                   ns_id "" \
-                   active_p "0" \
-                   name_record "" \
-                   time_trashed "" \
-                   time_created $nowts]
+
+    set v_list [list \
+                    id "" \
+                    instance_id $instance_id \
+                    rev_id "" \
+                    contact_id "" \
+                    terms "" \
+                    terms_unit "" \
+                    tax_included "" \
+                    vendor_code "" \
+                    gifi_accno "" \
+                    discount "" \
+                    credit_limit "" \
+                    pricegroup_id "" \
+                    created [qf_clock_format] \
+                    created_by "" \
+                    trashed_p "0" \
+                    trashed_by "" \
+                    trashed_ts "" \
+                    area_market "" \
+                    purchase_policy "" \
+                    return_policy "" \
+                    price_guar_policy "" \
+                    installation_policy ""]
     set v2_list [list ]
     foreach {key value} $v_list {
         lappend v2_list $key
@@ -183,7 +200,7 @@ ad_proc -private qal_other_address_map_defaults {
 } {
     upvar 1 instance_id instance_id
     upvar 1 $arr_name v_arr
-    set nowts [dt_systime -gmt 1]
+
     set v_list [list \
                     contact_id "" \
                     instance_id $instance_id \
@@ -222,7 +239,7 @@ ad_proc -private qal_address_defaults {
 } {
     upvar 1 instance_id instance_id
     upvar 1 $arr_name v_arr
-    set nowts [dt_systime -gmt 1]
+
     set v_list [list \
                     id "" \
                     instance_id $instance_id \
