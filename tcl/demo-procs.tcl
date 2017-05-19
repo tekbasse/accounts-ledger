@@ -347,7 +347,7 @@ ad_proc qal_demo_contact_create {
                      language_code [ad_generate_random_string [randomRange 5]] \
                      currency [ad_generate_random_string [randomRange 2]] \
                      timezone [ad_generate_random_string [randomRange 2]] \
-                     time_start [qf_clock_format] \
+                     time_start "" \
                      time_end "" \
                      url "http://[ad_generate_random_string [randomRange 20]].[ad_generate_random_string [randomRange 20]]/[qal_namelur 1]" \
                      user_id $user_id \

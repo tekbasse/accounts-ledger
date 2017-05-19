@@ -111,9 +111,6 @@ ad_proc -public qal_contact_write {
     }
     
     set time_start_s [qf_clock_scan $time_start]
-    if { $time_start_s eq "" } {
-        set time_start_s [clock seconds]
-    }
     set time_start [qf_clock_format $time_start_s ]
 
     if { $time_end ne "" } {
@@ -167,7 +164,7 @@ ad_proc -public qal_contact_write {
 
         #  now_yyyymmdd_hhmmss
         set create_p 1
-        set time_start [clock format [clock seconds] -format "%Y%m%d %H%M%S"]
+
     } else {
         set create_p 0
     }
@@ -386,7 +383,7 @@ ad_proc -public qal_customer_write {
         set id [db_nextval acs_object_id_seq]
 
         #  now_yyyymmdd_hhmmss
-        set time_start [clock format [clock seconds] -format "%Y%m%d %H%M%S"]
+
         set create_p 1
     } else {
         set create_p 0
@@ -600,7 +597,7 @@ ad_proc -public qal_vendor_write {
         set id [db_nextval acs_object_id_seq]
 
         #  now_yyyymmdd_hhmmss
-        set time_start [clock format [clock seconds] -format "%Y%m%d %H%M%S"]
+
         set create_p 1
     } else {
         set create_p 0
