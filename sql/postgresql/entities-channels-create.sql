@@ -105,7 +105,7 @@ CREATE TABLE qal_contact (
        -- in case conventional openacs group permissions are used.
        -- set id group::new -context_id $instance_id -group_name $label -pretty_name $name
        -- aka contact_id
-       id                  integer unique not null,
+       id                  integer not null,
        -- revision_id. Updates create new record and trash old
        -- same id, new rev_id 
        rev_id              integer default nextval('qal_id'),

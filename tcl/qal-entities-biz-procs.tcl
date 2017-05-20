@@ -24,7 +24,7 @@ ad_proc -public qal_contact_create {
 } {
     upvar 1 instance_id instance_id
     upvar 1 $arr_name c_arr
-    if { $contact_id ne "" } {
+    if { [qf_is_natural_number $contact_id] } {
         set c_arr(contact_id) $contact_id
     }
     # at a minimum, object_id needs to be used to prevent id collision with other packages:
@@ -52,7 +52,15 @@ ad_proc -public qal_contact_write {
     qal_contact_defaults a_arr
     qf_array_to_vars a_arr [qal_contact_keys]
 
+    set a_arr(contact_id) ""
+
     # validations etc
+    if { [qf_is_natural_number $contact_id] } {
+        set a_arr(contact_id) $contact_id
+        # enforce reference sanity
+        set id $a_arr(contact_id)
+    }
+
     if { ![qf_is_natural_number $parent_id] } {
         set parent_id ""
     }
@@ -140,6 +148,8 @@ ad_proc -public qal_contact_write {
             set user_id $instance_id
         }
     }
+
+
     # insert into db
     if { ![qf_is_natural_number $id] } {
         # record revision/new
@@ -159,12 +169,13 @@ ad_proc -public qal_contact_write {
         ##code later. Must make contact_grp_id a member of id for OpenACS permissions
         set id [db_nextval acs_object_id_seq]
 
-        #  now_yyyymmdd_hhmmss
+        # Not write, create
         set create_p 1
 
     } else {
         set create_p 0
     }
+
     if { $error_p } {
         ns_log Warning "qal_contact_write: rejected '[array get a_arr]'"
     } else {
@@ -313,7 +324,7 @@ ad_proc -public qal_customer_create {
 } {
     upvar 1 instance_id instance_id
     upvar 1 $arr_name a_arr
-    if { $contact_id ne "" } {
+    if { [qf_is_natural_number $contact_id ]} {
         set a_arr(contact_id) $contact_id
     }
     # at a minimum, object_id needs to be used to prevent id collision with other packages:
@@ -337,17 +348,19 @@ ad_proc -public qal_customer_write {
 } {
     upvar 1 instance_id instance_id
     upvar 1 $arr_name a_arr
-    if { $contact_id ne ""} {
+
+    if { [qf_is_natural_number $contact_id] } {
         set a_arr(contact_id) $contact_id
+    } else {
+        set contact_id ""
     }
+
     set error_p 0
     qal_customer_defaults a_arr
     qf_array_to_vars a_arr [qal_customer_keys]
 
     # validations etc
-    if { ![qf_is_natural_number $contact_id] } {
-        set contact_id ""
-    }
+
     if { ![qf_is_decimal $discount] } {
         set discount ""
     }
@@ -394,15 +407,23 @@ ad_proc -public qal_customer_write {
         ##code later. Make this group id a member of customer_id for OpenACS permissions
         set id [db_nextval acs_object_id_seq]
 
-        #  now_yyyymmdd_hhmmss
-
         set create_p 1
     } else {
         set create_p 0
+        # reference sanity check
+        set contact_id_from_db [qal_contact_id_from_customer_id $id]
+        if { $contact_id_from_db ne $contact_id } {
+            if { $contact_id ne "" } {
+                set error_p 1
+                ns_log Warning "qal_customer_write.419: contact_id '${contact_id}' contact_id_from_db '${contact_id_from_db}' " 
+            } else {
+                set contact_id $contact_id_from_db
+            }
+        }
     }
 
     if { $error_p } {
-        ns_log Warning "qal_customer_write: rejected '[array get a_arr]'"
+        ns_log Warning "qal_customer_write.425: rejected '[array get a_arr]'"
     } else {
 
         set rev_id [db_nextval qal_id]
@@ -564,9 +585,12 @@ ad_proc -public qal_vendor_write {
 } {
     upvar 1 instance_id instance_id
     upvar 1 $arr_name a_arr
-    if { $contact_id ne "" } {
-        set arr_name(contact_id) $contact_id
+    if { [qf_is_natural_number $contact_id] } {
+        set a_arr(contact_id) $contact_id
+    } else {
+        set contact_id ""
     }
+
     set error_p 0
     qal_vendor_defaults a_arr
     qf_array_to_vars a_arr [qal_vendor_keys]
@@ -617,15 +641,23 @@ ad_proc -public qal_vendor_write {
         ##code later. Must make this id a member of vendor_id
         set id [db_nextval acs_object_id_seq]
 
-        #  now_yyyymmdd_hhmmss
-
         set create_p 1
     } else {
         set create_p 0
+        # reference sanity check
+        set contact_id_from_db [qal_contact_id_from_vendor_id $id]
+        if { $contact_id_from_db ne $contact_id } {
+            if { $contact_id ne "" } {
+                set error_p 1
+                ns_log Warning "qal_vendor_write.652: contact_id '${contact_id}' contact_id_from_db '${contact_id_from_db}' " 
+            } else {
+                set contact_id $contact_id_from_db
+            }
+        }
     }
 
     if { $error_p } {
-        ns_log Warning "qal_vendor_write: rejected '[array get a_arr]'"
+        ns_log Warning "qal_vendor_write.660: rejected '[array get a_arr]'"
     } else {
 
         set rev_id [db_nextval qal_id]
