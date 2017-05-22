@@ -55,7 +55,7 @@ aa_register_case -cats {api smoke} qal_entities_check {
                                     set expected $contact_arr(${key})
                                     if { $key in [list time_start time_end created] } {
                                         # compare epochs
-                                        aa_log "B1-0 actual from db: '${actual}', expected from var cache: '${expected}'"
+                                        aa_log "B1-0 ${key} field actual from db: '${actual}', expected from var cache: '${expected}'"
                                         if { $actual ne "" } {
                                             set actual [qf_clock_scan_from_db $actual]
                                         }
@@ -161,19 +161,88 @@ aa_register_case -cats {api smoke} qal_entities_check {
                         aa_log "D0  Read and verify each updated value"
 
                         set co_v3_list [qal_contact_read $co_id]
+                        set co_v3_list_len [llength $co_v3_list]
+                        set co_keys_list [qal_contact_keys]
+                        set co_v3_list_keys [dict keys $co_v3_list]
                         foreach key $co_keys_list {
-                            aa_equals "D1  Contact read/write test key ${key}" [dict get $co_v3_list $key] $contact_arr(${key})
+                            if { $key ne "id" && $key ne "rev_id" } {
+                                if { $co_v3_list_len > 0 } {
+                                    set actual [dict get $co_v3_list $key] 
+                                    set expected $contact_arr(${key})
+                                    if { $key in [list time_start time_end created] } {
+                                        # compare epochs
+                                        aa_log "D1-0 ${key} field actual from db: '${actual}', expected from var cache: '${expected}'"
+                                        if { $actual ne "" } {
+                                            set actual [qf_clock_scan_from_db $actual]
+                                        }
+                                        if { $expected ne "" } {
+                                            set expected [qf_clock_scan $expected]
+                                        } else {
+                                            if { $key eq "created" } {
+                                                set expected $create_start_cs
+                                            }
+                                        }
+                                    }
+                                } 
+                                aa_equals "D1 Contact read/write test key ${key}" $actual $expected
+                            } else {
+                                set is_nn_p 0
+                                if { $key in $co_v3_list_keys } {
+                                    set is_nn_p [qf_is_natural_number [dict get $co_v3_list $key ]]
+                                }
+                                aa_true "D1 Contact read/write test key ${key}'s value is natural number" $is_nn_p
+                            }
                         }
 
                         set cu_v3_list [qal_customer_read $cu_id]
+                        set cu_keys_list [qal_customer_keys]
                         foreach key $cu_keys_list {
-                            aa_equals "D2  Customer read/write test key ${key}" [dict get $cu_v3_list $key] $customer_arr(${key})
+                            if { $key ne "id" && $key ne "rev_id" } {
+                                set actual [dict get $cu_v3_list $key] 
+                                set expected $customer_arr(${key})
+
+                                if { $key in [list time_start time_end created] } {
+                                    # compare epochs
+                                    if { $actual ne "" } {
+                                        set actual [qf_clock_scan_from_db $actual]
+                                    }
+                                    if { $expected ne "" } {
+                                        set expected [qf_clock_scan $expected]
+                                    } else {
+                                        if { $key eq "created" } {
+                                            set expected $create_end_cs
+                                        }
+                                    }
+                                } 
+                                aa_equals "D2  Customer read/write test key ${key}" $actual $expected
+                            }
                         }
 
+
                         set ve_v3_list [qal_vendor_read $ve_id]
+                        set ve_keys_list [qal_vendor_keys]
                         foreach key $ve_keys_list {
-                            aa_equals "D3  Vendor read/write test key ${key}" [dict get $ve_v3_list $key] $vendor_arr(${key})
+                            if { $key ne "id" && $key ne "rev_id" } {
+                                set actual [dict get $ve_v3_list $key] 
+                                set expected $vendor_arr(${key})
+
+                                if { $key in [list time_start time_end created] } {
+                                    # compare epochs
+                                    if { $actual ne "" } {
+                                        set actual [qf_clock_scan_from_db $actual]
+                                    }
+                                    if { $expected ne "" } {
+                                        set expected [qf_clock_scan $expected]
+                                    } else {
+                                        if { $key eq "created" } {
+                                            set expected $create_end_cs
+                                        }
+                                    }
+                                } 
+                                aa_equals "D3  Vendor read/write test key ${key}" $actual $expected
+                            }
                         }
+
 
 
                         # Iterate through creating contact, customer, and vendor to test more trash/delete cases
