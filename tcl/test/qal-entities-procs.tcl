@@ -246,7 +246,81 @@ aa_register_case -cats {api smoke} qal_entities_check {
 
 
                         # Iterate through creating contact, customer, and vendor to test more trash/delete cases
+                        # Build the permutations randomly to help flush out any business logic idiosyncracies
 
+                        # ico = iterating contact_id list 
+                        # icu = iterating customer_id list
+                        # ive = iterating vendor_id list
+                        # deleted_p_arr(id) = has been deleted?
+                        # trashed_p_arr(id) = has been trashed?
+                        # ico_p_arr(id) = is a contact?
+                        # icu_p_arr(id) = is a customer?
+                        # ive_p_arr(id) = is a vendor?
+                        # perm_ids_larr(type) = list of permutations of this type.
+                        # permutations:
+                        set permutations_list [list co co-cu co-ve co-cu-ve ]
+                        # Careful: co-cu-ve  includes cases of co-ve-cu..
+                        # Make 4 x 3 of each type
+                        # which means 4 x 3 x 4 contacts.
+                        for {set i 0} {$i < 4} {
+                            append types_list $permutations_list
+                        }
+                        # Randomize the types in an evolving way, kind of like how it will be used.
+                        # 
+                        # acc_fin::shuffle_list is defined in a package not required. So, using its code:
+                        set len [llength $types_list]
+                        while { $len > 0 } {
+                            set n_idx [expr { int( $len * [random] ) } ]
+                            set tmp [lindex $types_list $n_idx]
+                            lset types_list $n_idx [lindex $types_list [incr len -1]]
+                            lset types_list $len $tmp
+                        }
+
+##code.. very rough draft..
+                        # There must be:
+                        # At least 16 contacts
+                        set min_arr(co) 16
+                        # of which 8 become customers at some point,
+                        set min_arr(co-cu) 8
+                        # 8 become vendors, and
+                        set min_arr(co-ve) 8
+                        # 4 become customers and vendors
+                        set min_arr(co-cu-ve) 4
+                        
+                        set permutations_met_p 0
+                        while { !$permutations_met_p && i < 2000 } {
+                            set type [lindex $permutations_list [randomRange 4]]
+                            switch -- $type {
+                                co {
+                                    lappend perm_ids_larr(co) [qal_demo_contact_create co_arr "" $user_id]
+                                }
+                                co-cu {
+                                    lappend perm_ids_larr(co) [qal_demo_contact_create co_arr "" $user_id]
+                                    # choose any existing co-only to convert to co-cu
+
+                                    lappend id [qal_demo_contact_create co_arr "" $user_id]
+                                    
+                                }
+                                default {
+                                    ns_log Warning "qal-entities-procs.tcl.294. Switch should not be provided type '${type}'"
+                            }
+
+                            set permutations_met_p 1
+                            foreach p $permutations_list {
+                                if { [llength $perm_ids_larr(${p})] >= $min_arr(${p}) } {
+                                    set perms_met_for_this_type_p 1
+                                } else {
+                                    set perms_met_for_this_type_p 0
+                                }
+                                set permutations_met_p [expr { $permutations_met_p && $perms_met_for_this_type_p } ]
+                            }
+                        }
+
+                        # for each type, choose one of trash, or delete (or do nothing)
+
+                        # verify status using  qal_contact_id_exists_q qal_customer_id_exists_q qal_vendor_id_exists_q
+
+                        # Also verify does not exist works for random integers.
 
                         # Trash customer or vendor, see if other and contact remains
                         # Trash other, see if contact remains
