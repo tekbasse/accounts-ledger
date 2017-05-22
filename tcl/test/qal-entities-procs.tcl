@@ -29,16 +29,16 @@ aa_register_case -cats {api smoke} qal_entities_check {
 
                         aa_true "A1 Created a contact" $co_created_p
 
-                        set cu_id [qal_demo_customer_create customer_arr "" $user_id]
+                        set cu_id [qal_demo_customer_create customer_arr $co_id $user_id]
                         set cu_created_p [qf_is_natural_number $cu_id] 
 
                         aa_true "A2 Created a customer" $cu_created_p
 
-                        set ve_id [qal_demo_vendor_create vendor_arr "" $user_id]
+                        set ve_id [qal_demo_vendor_create vendor_arr $co_id $user_id]
                         set ve_created_p [qf_is_natural_number $ve_id] 
                         set create_end_cs [clock seconds]
                         if { $create_end_cs ne $create_start_cs } {
-                            aa_log "Expect a timing error with 'created' field."
+                            aa_log "Created field may have a timing error of 1 second."
                         }
                         aa_true "A3 Created a vendor" $ve_created_p
 

@@ -339,25 +339,28 @@ ad_proc -public qal_customer_write {
     {contact_id ""}
 } {
     Writes a new revision to an existing qal_customer record.
-    If id is empty, creates a new record and returns new id.
+    If contact_id doesn't have a customer_id, a new customer record is created and returns new id (customer_id).
+    If contact_id or id is provided, record is updated.
     Otherwise empty string is returned.
     If contact_id is supplied, sets arr_name(contact_id) to contact_id's value.
 
-    @param array_name
+    @param arr_name
+    @param contact_id arr_name(contact_id) or arr_name(id) (id customer_id)
     @return id or ""
 } {
     upvar 1 instance_id instance_id
     upvar 1 $arr_name a_arr
 
+    set error_p 0
+    qal_customer_defaults a_arr
+    qf_array_to_vars a_arr [qal_customer_keys]
+
+    ns_log Notice "qal_customer_write.351 contact_id '${contact_id}'"
     if { [qf_is_natural_number $contact_id] } {
         set a_arr(contact_id) $contact_id
     } else {
         set contact_id ""
     }
-
-    set error_p 0
-    qal_customer_defaults a_arr
-    qf_array_to_vars a_arr [qal_customer_keys]
 
     # validations etc
 
@@ -602,23 +605,28 @@ ad_proc -public qal_vendor_write {
     {contact_id ""}
 } {
     Writes a new revision to an existing qal_vendor record.
-    If id is empty, creates a new record.
-    A new id is returned if successful.
+    If contact_id doesn't have a vendor_id, a new vendor record is created and returns new id (vendor_id).
+    If contact_id or id is provided, record is updated.
     Otherwise empty string is returned.
-    @param array_name
+    If contact_id is supplied, sets arr_name(contact_id) to contact_id's value.
+
+    @param arr_name
+    @param contact_id arr_name(contact_id) or arr_name(id) (id vendor_id)
     @return id or ""
 } {
     upvar 1 instance_id instance_id
     upvar 1 $arr_name a_arr
+
+    set error_p 0
+    qal_vendor_defaults a_arr
+    qf_array_to_vars a_arr [qal_vendor_keys]
+
+    ns_log Notice "qal_vendor_write.624 contact_id '${contact_id}'"
     if { [qf_is_natural_number $contact_id] } {
         set a_arr(contact_id) $contact_id
     } else {
         set contact_id ""
     }
-
-    set error_p 0
-    qal_vendor_defaults a_arr
-    qf_array_to_vars a_arr [qal_vendor_keys]
 
     # validations etc
     if { ![qf_is_natural_number $contact_id] } {
@@ -650,39 +658,63 @@ ad_proc -public qal_vendor_write {
 
     set created_s [qf_clock_scan $created]
     set created [qf_clock_format $created_s ]
-    # insert into db
-    if { ![qf_is_natural_number $id] } {
-        # record revision/new
-        set vendor_label "qal_vendor "
-        append vendor_label $contact_id
-
-        # Create an OpenACS group for party_id vendors
-        # Having a vendor group for the contact party makes it easier to manage user memberships in bulk
-        # In any case, id must be an object_id to avoid id collisions
-        #  set id group::new -context_id $instance_id -group_name $vendor_label -pretty_name $name qal_grp_vendors
-        #  set group_arr(join_policy) "closed"
-        #  set group_arr(group_name) $vendor_label
-        #  group::update -group_id $id -array group_arr
-        ##code later. Must make this id a member of vendor_id
-        set id [db_nextval acs_object_id_seq]
-
-        set create_p 1
+    # Sanity check refrences id and contact_id
+    # Contact_id takes presedence because of possible association with permissions
+    ns_log Notice "qal_vendor_write.394. contact_id '${contact_id}' id '${id}' "
+    if { [qf_is_natural_number $contact_id ] } {
+        set contact_id_exists_p [qal_contact_id_exists_q $contact_id]
     } else {
-        set create_p 0
-        # reference sanity check
-        set contact_id_from_db [qal_contact_id_from_vendor_id $id]
-        if { $contact_id_from_db ne $contact_id } {
-            if { $contact_id ne "" } {
-                set error_p 1
-                ns_log Warning "qal_vendor_write.652: contact_id '${contact_id}' contact_id_from_db '${contact_id_from_db}' " 
-            } else {
-                set contact_id $contact_id_from_db
-            }
+        set contact_id ""
+        set contact_id_exists_p 0
+    }
+    ns_log Notice "qal_vendor_write.401. contact_id '${contact_id}' id '${id}' contact_id_exists_p '${contact_id_exists_p}'"
+    if { [qf_is_natural_number $id] } {
+        set contact_id_from_ve_id [qal_contact_id_from_vendor_id $id]
+    } else {
+        set id ""
+        set contact_id_from_ve_id ""
+    }
+    ns_log Notice "qal_vendor_write.408. contact_id '${contact_id}' id '${id}' contact_id_exists_p '${contact_id_exists_p}' contact_id_from_ve_id '${contact_id_from_ve_id}'"
+    if { $contact_id_exists_p } {
+        if { $contact_id_from_ve_id ne $contact_id } {
+            set id ""
+            set contact_id_from_ve_id $contact_id
+        }
+    } else {
+        # contact_id does not exist
+        if { $id eq "" } {
+            set error_p 1
+            ns_log Warning "qal_vendor_write.412: Unable to write. reference issue contact_id '${contact_id}' (vendor) id '${id}' instance_id '${instance_id}' vendor_code '${vendor_code}'"
+        } else {
+            set contact_id $contact_id_from_ve_id
         }
     }
+    ns_log Notice "qal_vendor_write.423. contact_id '${contact_id}' id '${id}' contact_id_exists_p '${contact_id_exists_p}' contact_id_from_ve_id '${contact_id_from_ve_id}' error_p '${error_p}'"
+    if { !$error_p } {
+        
+        # insert into db
+        if { $id eq "" } {
+            # record revision/new
+            set vendor_label "qal_vendor "
+            append vendor_label $contact_id
 
+            # Create an OpenACS group for party_id vendors
+            # Having a vendor group for the contact party makes it easier to manage user memberships in bulk
+            # In any case, id must be an object_id to avoid id collisions
+            #  set id group::new -context_id $instance_id -group_name $vendor_label -pretty_name $name qal_grp_vendors
+            #  set group_arr(join_policy) "closed"
+            #  set group_arr(group_name) $vendor_label
+            #  group::update -group_id $id -array group_arr
+            ##code later. Must make this id a member of vendor_id
+            set id [db_nextval acs_object_id_seq]
+
+            set create_p 1
+        } else {
+            set create_p 0
+        }
+    }
     if { $error_p } {
-        ns_log Warning "qal_vendor_write.660: rejected '[array get a_arr]'"
+        ns_log Warning "qal_vendor_write.660: error '[array get a_arr]'"
     } else {
 
         set rev_id [db_nextval qal_id]
