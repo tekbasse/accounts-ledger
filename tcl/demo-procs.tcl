@@ -383,10 +383,19 @@ ad_proc qal_demo_customer_create {
     set maxint 6531464675862196
     set pg_maxint 2147483647
     incr maxint -1
+    if { $contact_id ne "" } {
+        set customer_arr(contact_id) $contact_id
+    }
+    if { ![info exists customer_arr(contact_id)] } {
+        set customer_arr(contact_id) $contact_id
+    }
+    if { ![info exists customer_arr(id)] } {
+        set customer_arr(id) ""
+    }
     set cu_list [list \
-                     id "" \
+                     id $customer_arr(id) \
                      instance_id $instance_id \
-                     contact_id $contact_id \
+                     contact_id $customer_arr(contact_id) \
                      discount [random] \
                      tax_included [randomRange 1] \
                      credit_limit [lindex [list "" [expr { [random] * [randomRange $maxint] } ]] [randomRange 2]] \

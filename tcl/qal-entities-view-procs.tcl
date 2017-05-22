@@ -114,7 +114,11 @@ ad_proc qal_customers_read {
     set customer_ids_list [hf_list_filter_by_natural_number $customer_id_list]
     set allowed_customer_ids [qal_customer_ids_of_user_id $user_id]
     set intersect_ids [set_intersection $customer_ids_list $allowed_customer_ids]
-    set rows_lists [db_list_of_lists qal_customer_get "select [qal_customer_keys ","] from qal_customer where instance_id=:instance_id and trashed_p!='1' and id in ([template::util::tcl_to_sql_list $customer_ids_list])" ]
+    if { [llength $customer_ids_list ] > 0 } {
+        set rows_lists [db_list_of_lists qal_customer_get "select [qal_customer_keys ","] from qal_customer where instance_id=:instance_id and trashed_p!='1' and id in ([template::util::tcl_to_sql_list $customer_ids_list])" ]
+    } else {
+        set rows_lists [list ]
+    }
     return $rows_lists
 }
 
@@ -164,7 +168,11 @@ ad_proc qal_vendors_read {
     set vendor_ids_list [hf_list_filter_by_natural_number $vendor_id_list]
     set allowed_vendor_ids [qal_vendor_ids_of_user_id $user_id]
     set intersect_ids [set_intersection $vendor_ids_list $allowed_vendor_ids]
-    set rows_lists [db_list_of_lists qal_vendor_get "select [qal_vendor_keys ","] from qal_vendor where instance_id=:instance_id and trashed_p!='1' and id in ([template::util::tcl_to_sql_list $vendor_ids_list])" ]
+    if { [llength $vendor_ids_list] > 0 } {
+        set rows_lists [db_list_of_lists qal_vendor_get "select [qal_vendor_keys ","] from qal_vendor where instance_id=:instance_id and trashed_p!='1' and id in ([template::util::tcl_to_sql_list $vendor_ids_list])" ]
+    } else {
+        set rows_lists [list ]
+    }
     return $rows_lists
 }
 

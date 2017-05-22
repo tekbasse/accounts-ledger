@@ -388,42 +388,68 @@ ad_proc -public qal_customer_write {
 
     set created_s [qf_clock_scan $created]
     set created [qf_clock_format $created_s ]
-    # insert into db
-    if { ![qf_is_natural_number $id] } {
-        # record revision/new
 
-        set customer_label "qal_customer "
-        # Use contact_id instead of contact_id's label, because id is static.
-        append customer_label $contact_id
-
-        # Create an OpenACS group for party_id customers
-        # Having a customer group for the contact party makes it easier to manage user memberships in bulk
-        # In any case, id must be an object_id to avoid id collisions
-        # Here is an outline of code to implement OpenACS permissions. Incomplete and with errors.
-        #  set id group::new -context_id $instance_id -group_name $customer_label -pretty_name $name qal_grp_customers
-        #  set group_arr(join_policy) "closed"
-        #  set group_arr(group_name) $customer_label
-        #  group::update -group_id $id -array group_arr
-        ##code later. Make this group id a member of customer_id for OpenACS permissions
-        set id [db_nextval acs_object_id_seq]
-
-        set create_p 1
+    # Sanity check refrences id and contact_id
+    # Contact_id takes presedence because of possible association with permissions
+    ns_log Notice "qal_customer_write.394. contact_id '${contact_id}' id '${id}' "
+    if { [qf_is_natural_number $contact_id ] } {
+        set contact_id_exists_p [qal_contact_id_exists_q $contact_id]
     } else {
-        set create_p 0
-        # reference sanity check
-        set contact_id_from_db [qal_contact_id_from_customer_id $id]
-        if { $contact_id_from_db ne $contact_id } {
-            if { $contact_id ne "" } {
-                set error_p 1
-                ns_log Warning "qal_customer_write.419: contact_id '${contact_id}' contact_id_from_db '${contact_id_from_db}' " 
-            } else {
-                set contact_id $contact_id_from_db
-            }
+        set contact_id ""
+        set contact_id_exists_p 0
+    }
+    ns_log Notice "qal_customer_write.401. contact_id '${contact_id}' id '${id}' contact_id_exists_p '${contact_id_exists_p}'"
+    if { [qf_is_natural_number $id] } {
+        set contact_id_from_cu_id [qal_contact_id_from_customer_id $id]
+    } else {
+        set id ""
+        set contact_id_from_cu_id ""
+    }
+    ns_log Notice "qal_customer_write.408. contact_id '${contact_id}' id '${id}' contact_id_exists_p '${contact_id_exists_p}' contact_id_from_cu_id '${contact_id_from_cu_id}'"
+    if { $contact_id_exists_p } {
+        if { $contact_id_from_cu_id ne $contact_id } {
+            set id ""
+            set contact_id_from_cu_id $contact_id
+        }
+    } else {
+        # contact_id does not exist
+        if { $id eq "" } {
+            set error_p 1
+            ns_log Warning "qal_customer_write.412: Unable to write. reference issue contact_id '${contact_id}' (customer) id '${id}' instance_id '${instance_id}' customer_code '${customer_code}'"
+        } else {
+            set contact_id $contact_id_from_cu_id
+        }
+    }
+    ns_log Notice "qal_customer_write.423. contact_id '${contact_id}' id '${id}' contact_id_exists_p '${contact_id_exists_p}' contact_id_from_cu_id '${contact_id_from_cu_id}' error_p '${error_p}'"
+    if { !$error_p } {
+        
+        # insert into db
+        if { $id eq "" } {
+            # record revision/new
+            
+            set customer_label "qal_customer "
+            # Use contact_id instead of contact_id's label, because id is static.
+            append customer_label $contact_id
+            
+            # Create an OpenACS group for party_id customers
+            # Having a customer group for the contact party makes it easier to manage user memberships in bulk
+            # In any case, id must be an object_id to avoid id collisions
+            # Here is an outline of code to implement OpenACS permissions. Incomplete and with errors.
+            #  set id group::new -context_id $instance_id -group_name $customer_label -pretty_name $name qal_grp_customers
+            #  set group_arr(join_policy) "closed"
+            #  set group_arr(group_name) $customer_label
+            #  group::update -group_id $id -array group_arr
+            ##code later. Make this group id a member of customer_id for OpenACS permissions
+            set id [db_nextval acs_object_id_seq]
+            
+            set create_p 1
+        } else {
+            set create_p 0
         }
     }
 
     if { $error_p } {
-        ns_log Warning "qal_customer_write.425: rejected '[array get a_arr]'"
+        ns_log Warning "qal_customer_write.425: error '[array get a_arr]'"
     } else {
 
         set rev_id [db_nextval qal_id]
@@ -466,7 +492,6 @@ ad_proc -public qal_customer_write {
         }
     }
     return $id
-
 }
 
 ad_proc -public qal_customer_delete {
