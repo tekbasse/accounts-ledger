@@ -47,6 +47,7 @@ aa_register_case -cats {api smoke} qal_entities_check {
                         set co_v2_list [qal_contact_read $co_id]
                         set co_v2_list_len [llength $co_v2_list]
                         set co_keys_list [qal_contact_keys]
+                        set co_v2_list_keys [dict keys $co_v2_list]
                         foreach key $co_keys_list {
                             if { $key ne "id" && $key ne "rev_id" } {
                                 if { $co_v2_list_len > 0 } {
@@ -69,7 +70,11 @@ aa_register_case -cats {api smoke} qal_entities_check {
                                 } 
                                 aa_equals "B1 Contact read/write test key ${key}" $actual $expected
                             } else {
-                                aa_true "B1 Contact read/write test key ${key} not found" 0
+                                set is_nn_p 0
+                                if { $key in $co_v2_list_keys } {
+                                    set is_nn_p [qf_is_natural_number [dict get $co_v2_list $key ]]
+                                }
+                                aa_true "B1 Contact read/write test key ${key}'s value is natural number" $is_nn_p
                             }
                         }
 

@@ -355,7 +355,7 @@ ad_proc -public qal_customer_write {
     qal_customer_defaults a_arr
     qf_array_to_vars a_arr [qal_customer_keys]
 
-    ns_log Notice "qal_customer_write.351 contact_id '${contact_id}'"
+    ns_log Notice "qal_customer_write.351 contact_id '${contact_id}' id '${id}'"
     if { [qf_is_natural_number $contact_id] } {
         set a_arr(contact_id) $contact_id
     } else {
@@ -411,7 +411,11 @@ ad_proc -public qal_customer_write {
     ns_log Notice "qal_customer_write.408. contact_id '${contact_id}' id '${id}' contact_id_exists_p '${contact_id_exists_p}' contact_id_from_cu_id '${contact_id_from_cu_id}'"
     if { $contact_id_exists_p } {
         if { $contact_id_from_cu_id ne $contact_id } {
-            set id ""
+            db_0or1row qal_customer_id_r1_qcw { select id from qal_customer
+                where contact_id=:contact_id
+                and instance_id=:instance_id
+                and trashed_p!='1'
+            }
             set contact_id_from_cu_id $contact_id
         }
     } else {
@@ -457,11 +461,11 @@ ad_proc -public qal_customer_write {
 
         set rev_id [db_nextval qal_id]
         if { [ns_conn isconnected] } {
-            set created_by [ad_conn user_id]
+            set user_id [ad_conn user_id]
         } else {
-            set created_by $user_id
+            set user_id $instance_id
         } 
-
+        set created_by $user_id
         set trashed_p 0
         set trashed_by ""
         set trashed_ts ""
@@ -493,6 +497,8 @@ ad_proc -public qal_customer_write {
             db_dml qal_customer_create_1 "insert into qal_customer \
  ([qal_customer_keys ","]) values ([qal_customer_keys ",:"])"
         }
+        # If we wanted the original array to return any changed values, add here:
+        # qf_vars_to_array qal_customer_keys a_arr
     }
     return $id
 }
@@ -677,7 +683,11 @@ ad_proc -public qal_vendor_write {
     ns_log Notice "qal_vendor_write.408. contact_id '${contact_id}' id '${id}' contact_id_exists_p '${contact_id_exists_p}' contact_id_from_ve_id '${contact_id_from_ve_id}'"
     if { $contact_id_exists_p } {
         if { $contact_id_from_ve_id ne $contact_id } {
-            set id ""
+            db_0or1row qal_vendor_id_r1_qvw { select id from qal_vendor
+                where contact_id=:contact_id
+                and instance_id=:instance_id
+                and trashed_p!='1'
+            }
             set contact_id_from_ve_id $contact_id
         }
     } else {
@@ -718,13 +728,12 @@ ad_proc -public qal_vendor_write {
     } else {
 
         set rev_id [db_nextval qal_id]
-
         if { [ns_conn isconnected] } {
-            set created_by [ad_conn user_id]
+            set user_id [ad_conn user_id]
         } else {
-            set created_by $user_id
+            set user_id $instance_id
         } 
-
+        set created_by $user_id
         set trashed_p 0
         set trashed_by ""
         set trashed_ts ""
