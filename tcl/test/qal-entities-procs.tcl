@@ -503,7 +503,11 @@ aa_register_case -cats {api smoke} qal_entities_check {
                         }
 
 ##code
-                        # verify status using  qal_contact_id_exists_q qal_customer_id_exists_q qal_vendor_id_exists_q
+                        foreach p $permutations_list {
+                            foreach co_id $permu_larr(${p} {
+                                # verify status using  qal_contact_id_exists_q qal_customer_id_exists_q qal_vendor_id_exists_q
+                            }
+                        }
                         # deleted_p_arr(id) = has been deleted?
                         # trashed_p_arr(id) = has been trashed?
 

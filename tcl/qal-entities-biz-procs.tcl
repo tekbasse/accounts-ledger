@@ -283,7 +283,7 @@ ad_proc -public qal_contact_delete {
 ad_proc -public qal_contact_trash {
     contact_id_list
 } {
-    Trash a contact record.
+    Trash a contact record. Also trashes corresponding qal_customer, qal_vendor and qal_address records.
     May be one or a list
     Must have write permission for instance or contact_id (via q-control package).
 } {
