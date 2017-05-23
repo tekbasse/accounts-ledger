@@ -253,9 +253,9 @@ aa_register_case -cats {api smoke} qal_entities_check {
                         # ive = iterating vendor_id list
                         # deleted_p_arr(id) = has been deleted?
                         # trashed_p_arr(id) = has been trashed?
-                        # ico_p_arr(id) = is a contact?
-                        # icu_p_arr(id) = is a customer?
-                        # ive_p_arr(id) = is a vendor?
+                        # is_co_p_arr(id) = is a contact?
+                        # is_cu_p_arr(id) = is a customer?
+                        # is_ve_p_arr(id) = is a vendor?
                         # permu_ids_larr(type) = list of permutations of this type.
                         # permutations:
                         set permutations_list [list co co-cu co-ve co-cu-ve ]
@@ -279,7 +279,6 @@ aa_register_case -cats {api smoke} qal_entities_check {
                             lset types_list $len $tmp
                         }
 
-##code.. very rough draft..
                         # There must be:
                         # At least 16 contacts of which 4 are not customers or vendors
                         set min_arr(co) 4
@@ -297,6 +296,12 @@ aa_register_case -cats {api smoke} qal_entities_check {
                             switch -- $type {
                                 co {
                                     set co_id [qal_demo_contact_create dco_arr "" $user_id]
+                                    set deleted_p_arr(${co_id}) 0
+                                    set trashed_p_arr(${co_id}) 0
+                                    set is_co_p_arr(${co_id}) 1
+                                    set is_cu_p_arr(${co_id}) 0
+                                    set is_ve_p_arr(${co_id}) 0
+
                                     unset dco_arr
                                     if { $co_id ne "" } {
                                         lappend permu_ids_larr(co) $co_id
@@ -306,6 +311,12 @@ aa_register_case -cats {api smoke} qal_entities_check {
                                 }
                                 co-cu {
                                     set co_id [qal_demo_contact_create dco_arr "" $user_id]
+                                    set deleted_p_arr(${co_id}) 0
+                                    set trashed_p_arr(${co_id}) 0
+                                    set is_co_p_arr(${co_id}) 1
+                                    set is_cu_p_arr(${co_id}) 0
+                                    set is_ve_p_arr(${co_id}) 0
+
                                     unset dco_arr
                                     if { $co_id ne "" } {
                                         lappend permu_ids_larr(co) $co_id
@@ -322,6 +333,7 @@ aa_register_case -cats {api smoke} qal_entities_check {
                                         set permu_ids_larr(co) [lreplace $permu_ids_larr(co) $idx $idx]
                                         
                                         set cu_id [qal_demo_customer_create dcu_arr $co_id $user_id]
+                                        set is_cu_p_arr(${co_id}) 1
                                         unset dcu_arr
                                         if { $cu_id ne "" } {
                                             lappend permu_ids_larr(co-cu) $co_id
@@ -332,6 +344,12 @@ aa_register_case -cats {api smoke} qal_entities_check {
                                 }
                                 co-ve {
                                     set co_id [qal_demo_contact_create dco_arr "" $user_id]
+                                    set deleted_p_arr(${co_id}) 0
+                                    set trashed_p_arr(${co_id}) 0
+                                    set is_co_p_arr(${co_id}) 1
+                                    set is_cu_p_arr(${co_id}) 0
+                                    set is_ve_p_arr(${co_id}) 0
+
                                     unset dco_arr
                                     if { $co_id ne "" } {
                                         lappend permu_ids_larr(co) $co_id
@@ -348,6 +366,7 @@ aa_register_case -cats {api smoke} qal_entities_check {
                                         set permu_ids_larr(co) [lreplace $permu_ids_larr(co) $idx $idx]
                                         
                                         set ve_id [qal_demo_vendor_create dve_arr $co_id $user_id]
+                                        set is_ve_p_arr(${co_id}) 1
                                         unset dve_arr
                                         if { $ve_id ne "" } {
                                             lappend permu_ids_larr(co-ve) $co_id
@@ -358,6 +377,12 @@ aa_register_case -cats {api smoke} qal_entities_check {
                                 }
                                 co-cu-ve {
                                     set co_id [qal_demo_contact_create dco_arr "" $user_id]
+                                    set deleted_p_arr(${co_id}) 0
+                                    set trashed_p_arr(${co_id}) 0
+                                    set is_co_p_arr(${co_id}) 1
+                                    set is_cu_p_arr(${co_id}) 0
+                                    set is_ve_p_arr(${co_id}) 0
+
                                     unset dco_arr
                                     if { $co_id ne "" } {
                                         lappend permu_ids_larr(co) $co_id
@@ -379,6 +404,8 @@ aa_register_case -cats {api smoke} qal_entities_check {
                                             unset dcu_arr
                                             if { $cu_id eq "" } {
                                                 set success_p 0
+                                            } else {
+                                                set is_cu_p_arr(${co_id}) 1
                                             }
                                         }
                                         if { ![string match "*ve*" $choice] } {
@@ -386,6 +413,8 @@ aa_register_case -cats {api smoke} qal_entities_check {
                                             unset dve_arr
                                             if { $ve_id eq "" } {
                                                 set success_p 0
+                                            } else {
+                                                set is_ve_p_arr(${co_id})
                                             }
                                         }
                                         if { $success_p } {
@@ -414,7 +443,24 @@ aa_register_case -cats {api smoke} qal_entities_check {
                             incr i
                         }
 
-                        # for each type, choose one of trash, or delete (or do nothing)
+                        # for each permutation, choose one of co, cu, or ve and trash, or delete
+                        foreach type $permutations_list {
+##code
+                            # trash one
+                            set trashed_p_arr(${co_id}) 1
+
+                            # delete one
+                            set deleted_p_arr(${co_id}) 1
+
+                        }
+
+
+                        # deleted_p_arr(id) = has been deleted?
+                        # trashed_p_arr(id) = has been trashed?
+                        # is_co_p_arr(id) = is a contact?
+                        # is_cu_p_arr(id) = is a customer?
+                        # is_ve_p_arr(id) = is a vendor?
+
 
                         # verify status using  qal_contact_id_exists_q qal_customer_id_exists_q qal_vendor_id_exists_q
 
