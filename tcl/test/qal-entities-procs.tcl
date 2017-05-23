@@ -299,6 +299,7 @@ aa_register_case -cats {api smoke} qal_entities_check {
                         set i 0
                         while { !$permutations_met_p && $i < 2000 } {
                             set type [lindex $permutations_list [randomRange 3]]
+                            ns_log Notice "qal_entitites-procs.tcl.302 i '${i}' type '${type}' id count: [llength $permu_ids_larr(${type})]"
                             switch -- $type {
                                 co {
                                     set co_id [qal_demo_contact_create dco_arr "" $user_id]
@@ -435,10 +436,12 @@ aa_register_case -cats {api smoke} qal_entities_check {
                                     aa_true "E.399. Switch should not be provided type '${type}'" 0
                                 }
                             }
-                            set i_gt_2k_p [expr { $i > 1999 } ]
-                            aa_false "E.439 'Permutation count is over 2000.' If true and repeatable, there's an error somewhere in loop." $i_gt_2k_p
-
+                            if { $i > 1999 } {
+                                set i_gt_2k_p 1
+                                aa_false "E.439 'Permutation count is over 2000.' If true and repeatable, there's an error somewhere in loop." $i_gt_2k_p
+                            }
                             set permutations_met_p 1
+
                             foreach p $permutations_list {
                                 if { [llength $permu_ids_larr(${p})] >= $min_arr(${p}) } {
                                     set perms_met_for_this_type_p 1
@@ -446,14 +449,14 @@ aa_register_case -cats {api smoke} qal_entities_check {
                                     set perms_met_for_this_type_p 0
                                 }
                                 set permutations_met_p [expr { $permutations_met_p && $perms_met_for_this_type_p } ]
-                            }
+                           }
                             incr i
                         }
 
                         # For each permutation, choose one of each type it is (co, cu, and ve)
                         # and trash, or delete.
+
                         set type_list [list co cu ve]
-                        
                         foreach p $permutations_list {
                             set p_id_list $permu_ids_larr(${p}) 
                             set p_idx_max [llength $p_id_list]
@@ -464,7 +467,8 @@ aa_register_case -cats {api smoke} qal_entities_check {
                                         set p_idx [randomRange $p_idx_max]
                                         set co_id [lindex $p_id_list $p_idx]
                                         set p_id_list [lreplace $p_id_list $p_idx $p_idx]
-                                        set toggle $t
+                                        incr p_idx_max -1
+                                        set toggle $action
                                         append toggle "-" $t
                                         switch -- $toggle {
                                             trash-co {
@@ -478,22 +482,25 @@ aa_register_case -cats {api smoke} qal_entities_check {
                                             trash-cu {
                                                 set cu_id [qal_customer_id_from_contact_id $co_id]
                                                 set r [qal_customer_trash $cu_id]
-                                                set trashed_p_arr(${co_id}) $r
+                                                set is_cu_p_arr(${co_id}) $r
                                             }
                                             del-cu {
                                                 set cu_id [qal_customer_id_from_contact_id $co_id]
                                                 set r [qal_customer_delete $cu_id]
-                                                set deleted_p_arr(${co_id}) $r
+                                                set is_cu_p_arr(${co_id}) $r
                                             }
                                             trash-ve {
                                                 set ve_id [qal_vendor_id_from_contact_id $co_id]
                                                 set r [qal_contact_trash $ve_id]
-                                                set trashed_p_arr(${co_id}) $r
+                                                set is_ve_p_arr(${co_id}) $r
                                             }
                                             del-ve {
                                                 set ve_id [qal_vendor_id_from_contact_id $co_id]
                                                 set r [qal_contact_delete $ve_id]
-                                                set deleted_p_arr(${co_id}) $r
+                                                set is_ve_p_arr(${co_id}) $r
+                                            }
+                                            default {
+                                                ns_log Warning "qal_entities_procs.tcl.499 toggle '${toggle}' not found for switch."
                                             }
                                         }
                                         aa_true "E.500 action '${action}' on type '${t}' with contact_id '${co_id}' reports succeeded." $r
@@ -504,26 +511,27 @@ aa_register_case -cats {api smoke} qal_entities_check {
 
 ##code
                         foreach p $permutations_list {
-                            foreach co_id $permu_larr(${p} {
+                            foreach co_id $permu_ids_larr(${p}) {
                                 # verify status using  qal_contact_id_exists_q qal_customer_id_exists_q qal_vendor_id_exists_q
+                                # type co
+                                set actual [qal_contact_id_exists_q $co_id]
+                                set expected [expr { !( $deleted_p_arr(${co_id}) || $trashed_p_arr(${co_id}) )}] 
+                                aa_equals "E. Permutation '${p}' contact_id '${co_id}' exists?" $actual $expected
+
+                                # type ce
+                                set cu_id [qal_customer_id_from_contact_id $co_id]
+                                set actual [qal_customer_id_exists_q $cu_id]
+                                set expected $is_cu_p_arr(${co_id})
+                                aa_equals "E. Permutation '${p}' customer_id '${cu_id}' of contact_id '${co_id}' exists?" $actual $expected
+
+                                # type ve
+                                set ve_id [qal_vendor_id_from_contact_id $co_id]
+                                set actual [qal_vendor_id_exists_q $ve_id]
+                                set expected $is_ve_p_arr(${co_id})
+                                aa_equals "E. Permutation '${p}' vendor_id '${ve_id}' of contact_id '${co_id}' exists?" $actual $expected
+
                             }
                         }
-                        # deleted_p_arr(id) = has been deleted?
-                        # trashed_p_arr(id) = has been trashed?
-
-
-
-
-                        # Also verify does not exist works for random integers.
-
-                        # Trash customer or vendor, see if other and contact remains
-                        # Trash other, see if contact remains
-                        # Trash contact, verify customer and vendor trashed
-                        
-                        # Delete customer or vendor, see if other and contact remains
-                        # Delete other, see if contact remains
-                        # Delete contact, verify customer and vendor deleted
-                        
 
                         ns_log Notice "tcl/test/q-control-procs.tcl.429 end"
 

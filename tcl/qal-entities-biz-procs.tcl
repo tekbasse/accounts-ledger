@@ -256,7 +256,7 @@ ad_proc -public qal_contact_delete {
                         where id in (select address_id from qal_other_address_map \
                         where instance_id=:instance_id and contact_id in \
                         ([template::util::tcl_to_sql_list $contact_id_list]) ) "
-                    d_dml qal_other_address_map_delete " \
+                    db_dml qal_other_address_map_delete " \
                         delete from qal_other_address_map \
                         where instance_id=:instance_id and contact_id in \
                         ([template::util::tcl_to_sql_list $contact_id_list]) "
@@ -315,7 +315,7 @@ ad_proc -public qal_contact_trash {
                 set success_p 1
 
                 db_transaction {
-                    d_dml qal_other_address_map_trash " \
+                    db_dml qal_other_address_map_trash " \
                         update qal_other_address_map \
                         set trashed_p='1',trashed_by=:user_id,trashed_ts=now() \
                         where instance_id=:instance_id and contact_id in \

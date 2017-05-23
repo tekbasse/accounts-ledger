@@ -569,7 +569,7 @@ ad_proc -public qal_field_name_of_address_type {
 
 
 ad_proc -private qal_customer_id_from_contact_id {
-    customer_id
+    contact_id
 } {
     Returns customer_id of contact_id
     Returns an empty string if customer_id not found.
@@ -580,12 +580,11 @@ ad_proc -private qal_customer_id_from_contact_id {
         where contact_id=:contact_id
         and instance_id=:instance_id
         and trashed_p!='1'}
-    }
     return $id
 }
 
 ad_proc -private qal_vendor_id_from_contact_id {
-    vendor_id
+    contact_id
 } {
     Returns vendor_id of customer_id. 
     Returns an empty string if vendor_id not found.
@@ -596,6 +595,5 @@ ad_proc -private qal_vendor_id_from_contact_id {
         where contact_id=:contact_id
         and instance_id=:instance_id
         and trashed_p!='1'}
-    }
-    return $id
+return $id
 }
