@@ -411,11 +411,7 @@ ad_proc -public qal_customer_write {
     ns_log Notice "qal_customer_write.408. contact_id '${contact_id}' id '${id}' contact_id_exists_p '${contact_id_exists_p}' contact_id_from_cu_id '${contact_id_from_cu_id}'"
     if { $contact_id_exists_p } {
         if { $contact_id_from_cu_id ne $contact_id } {
-            db_0or1row qal_customer_id_r1_qcw { select id from qal_customer
-                where contact_id=:contact_id
-                and instance_id=:instance_id
-                and trashed_p!='1'
-            }
+            set id [qal_customer_id_from_contact_id $contact_id]
             set contact_id_from_cu_id $contact_id
         }
     } else {
@@ -683,11 +679,7 @@ ad_proc -public qal_vendor_write {
     ns_log Notice "qal_vendor_write.408. contact_id '${contact_id}' id '${id}' contact_id_exists_p '${contact_id_exists_p}' contact_id_from_ve_id '${contact_id_from_ve_id}'"
     if { $contact_id_exists_p } {
         if { $contact_id_from_ve_id ne $contact_id } {
-            db_0or1row qal_vendor_id_r1_qvw { select id from qal_vendor
-                where contact_id=:contact_id
-                and instance_id=:instance_id
-                and trashed_p!='1'
-            }
+            set id [qal_vendor_id_from_contact_id $contact_id]
             set contact_id_from_ve_id $contact_id
         }
     } else {

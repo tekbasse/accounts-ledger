@@ -20,6 +20,7 @@ ad_proc -public qal_contact_label_from_id {
 } {
     Returns contact label if it exists, otherwise returns ""
 } {
+    upvar 1 instance_id instance_id
     set label ""
     db_0or1row qal_contact_label_exists_q {select label from qal_contact where instance_id=:instance_id and id=:contact_id and trashed_p!='1'}
     return $label
@@ -42,13 +43,16 @@ ad_proc -public qal_contact_id_from_customer_id {
     Returns contact_id(s) of customer_id(s). If supplied 1, returns a scalar, otherwise returns a list.
     Returns an empty string if customer_id not found.
 } {
+    upvar 1 instance_id instance_id
     if { [llength $customer_id] > 1 } {
         set contact_ids [db_list qal_customer_read_c_id_n "select contact_id from qal_customer \
  where customer_id in ([template::util::tcl_to_sql_list $customer_id]) and trashed_p!='1' and instance_id=:instance_id"]
     } else {
         set contact_ids ""
         db_0or1row qal_customer_read_customer_id_1 {select contact_id as contact_ids from qal_customer
-            where customer_id=:customer_id}
+            where id=:customer_id
+            and instance_id=:instance_id
+            and trashed_p!='1'}
     }
     return $contact_ids
 }
@@ -59,13 +63,16 @@ ad_proc -public qal_contact_id_from_vendor_id {
     Returns contact_id(s) of vendor_id(s). If supplied 1, returns a scalar, otherwise returns a list.
     Returns an empty string if vendor_id not found.
 } {
+    upvar 1 instance_id instance_id
     if { [llength $vendor_id] > 1 } {
         set contact_ids [db_list qal_vendor_read_c_id_n "select contact_id from qal_vendor \
  where vendor_id in ([template::util::tcl_to_sql_list $vendor_id]) and trashed_p!='1' and instance_id=:instance_id"]
     } else {
         set contact_ids ""
         db_0or1row qal_vendor_read_vendor_id_1 {select contact_id as contact_ids from qal_vendor
-            where vendor_id=:vendor_id}
+            where id=:vendor_id
+            and instance_id=:instance_id
+            and trashed_p!='1'}
     }
     return $vendor_ids
 }
@@ -558,4 +565,37 @@ ad_proc -public qal_field_name_of_address_type {
     set type_idx [lsearch -exact $type_list $address_type]
     set field_name [lindex $name_list $type_idx]
     return $field_name
+}
+
+
+ad_proc -private qal_customer_id_from_contact_id {
+    customer_id
+} {
+    Returns customer_id of contact_id
+    Returns an empty string if customer_id not found.
+} {
+    upvar 1 instance_id instance_id
+    set id ""
+    db_0or1row qal_customer_read_contact_id_1 {select id from qal_customer
+        where contact_id=:contact_id
+        and instance_id=:instance_id
+        and trashed_p!='1'}
+    }
+    return $id
+}
+
+ad_proc -private qal_vendor_id_from_contact_id {
+    vendor_id
+} {
+    Returns vendor_id of customer_id. 
+    Returns an empty string if vendor_id not found.
+} {
+    upvar 1 instance_id instance_id
+    set id ""
+    db_0or1row qal_vendor_read_contact_id_1 {select id from qal_vendor
+        where contact_id=:contact_id
+        and instance_id=:instance_id
+        and trashed_p!='1'}
+    }
+    return $id
 }
