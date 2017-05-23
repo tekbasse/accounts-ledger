@@ -256,7 +256,7 @@ aa_register_case -cats {api smoke} qal_entities_check {
                         # ico_p_arr(id) = is a contact?
                         # icu_p_arr(id) = is a customer?
                         # ive_p_arr(id) = is a vendor?
-                        # perm_ids_larr(type) = list of permutations of this type.
+                        # permu_ids_larr(type) = list of permutations of this type.
                         # permutations:
                         set permutations_list [list co co-cu co-ve co-cu-ve ]
                         # Careful: co-cu-ve  includes cases of co-ve-cu..
@@ -278,12 +278,12 @@ aa_register_case -cats {api smoke} qal_entities_check {
 
 ##code.. very rough draft..
                         # There must be:
-                        # At least 16 contacts
-                        set min_arr(co) 16
-                        # of which 8 become customers at some point,
-                        set min_arr(co-cu) 8
-                        # 8 become vendors, and
-                        set min_arr(co-ve) 8
+                        # At least 16 contacts of which 4 are not customers or vendors
+                        set min_arr(co) 4
+                        # of which 8 become customers at some point, and 4 customers only (not vendors)
+                        set min_arr(co-cu) 4
+                        # 8 become vendors (4 only vendors not customers), and
+                        set min_arr(co-ve) 4
                         # 4 become customers and vendors
                         set min_arr(co-cu-ve) 4
                         
@@ -292,22 +292,112 @@ aa_register_case -cats {api smoke} qal_entities_check {
                             set type [lindex $permutations_list [randomRange 4]]
                             switch -- $type {
                                 co {
-                                    lappend perm_ids_larr(co) [qal_demo_contact_create co_arr "" $user_id]
+                                    set co_id [qal_demo_contact_create dco_arr "" $user_id]
+                                    unset dco_arr
+                                    if { $co_id ne "" } {
+                                        lappend permu_ids_larr(co) $co_id
+                                    } else {
+                                        ns_log Warning "qal-entitites-procs.tcl.299: qal_demo_contact_create failed unexpectedly"
+                                    }
                                 }
                                 co-cu {
-                                    lappend perm_ids_larr(co) [qal_demo_contact_create co_arr "" $user_id]
-                                    # choose any existing co-only to convert to co-cu
-
-                                    lappend id [qal_demo_contact_create co_arr "" $user_id]
+                                    set co_id [qal_demo_contact_create dco_arr "" $user_id]
+                                    unset dco_arr
+                                    if { $co_id ne "" } {
+                                        lappend permu_ids_larr(co) $co_id
+                                    } else {
+                                        ns_log Warning "qal-entitites-procs.tcl.307: qal_demo_contact_create failed unexpectedly"
+                                    }
                                     
+                                    # choose any existing co-only to convert to co-cu
+                                    set idx_max [llength $permu_ids_larr(co)]
+                                    incr idx_max -1
+                                    set idx [randomRange $idx_max]
+                                    set co_id [lindex $permu_idx_larr(co) $idx]
+                                    set permu_ids_larr(co) [lreplace $permu_ids_larr(co) $idx $idx]
+                                    
+                                    set cu_id [qal_demo_customer_create dcu_arr $co_id $user_id]
+                                    unset dcu_arr
+                                    if { $cu_id ne "" } {
+                                        lappend permu_ids_larr(co-cu) $co_id
+                                    } else {
+                                        ns_log Warning "qal-entitites-procs.tcl.321: qal_demo_customer_create for co_id '${co_id}' failed unexpectedly"
+                                    }
                                 }
                                 default {
                                     ns_log Warning "qal-entities-procs.tcl.294. Switch should not be provided type '${type}'"
+                                }
+                                co-ve {
+                                    set co_id [qal_demo_contact_create dco_arr "" $user_id]
+                                    unset dco_arr
+                                    if { $co_id ne "" } {
+                                        lappend permu_ids_larr(co) $co_id
+                                    } else {
+                                        ns_log Warning "qal-entitites-procs.tcl.307: qal_demo_contact_create failed unexpectedly"
+                                    }
+                                    
+                                    # choose any existing co-only to convert to co-ve
+                                    set idx_max [llength $permu_ids_larr(co)]
+                                    incr idx_max -1
+                                    set idx [randomRange $idx_max]
+                                    set co_id [lindex $permu_idx_larr(co) $idx]
+                                    set permu_ids_larr(co) [lreplace $permu_ids_larr(co) $idx $idx]
+                                    
+                                    set ve_id [qal_demo_vendor_create dve_arr $co_id $user_id]
+                                    unset dve_arr
+                                    if { $ve_id ne "" } {
+                                        lappend permu_ids_larr(co-ve) $co_id
+                                    } else {
+                                        ns_log Warning "qal-entitites-procs.tcl.321: qal_demo_vendor_create for co_id '${co_id}' failed unexpectedly"
+                                    }
+                                }
+                                co-cu-ve {
+                                    set co_id [qal_demo_contact_create dco_arr "" $user_id]
+                                    unset dco_arr
+                                    if { $co_id ne "" } {
+                                        lappend permu_ids_larr(co) $co_id
+                                    } else {
+                                        ns_log Warning "qal-entitites-procs.tcl.354: qal_demo_contact_create failed unexpectedly"
+                                    }
+                                    
+                                    # choose any existing co-only, co-cu or co-cv to convert to co-cu-ve
+                                    set idx_choice [randomRange 2]
+                                    set choice [lindex [list co co-cu co-ve] $idx_choice]
+                                    set success_p 1
+                                    set idx_max [llength $permu_ids_larr(${choice})]
+                                    incr idx_max -1
+                                    set idx [randomRange $idx_max]
+                                    set co_id [lindex $permu_idx_larr(${choice}) $idx]
+                                    if { ![string match "*cu*" $choice] } {
+                                        set cu_id [qal_demo_customer_create dcu_arr $co_id $user_id]
+                                        unset dcu_arr
+                                        if { $cu_id eq "" } {
+                                            set success_p 0
+                                        }
+                                    }
+                                    if { ![string match "*ve*" $choice] } {
+                                        set ve_id [qal_demo_vendor_create dve_arr $co_id $user_id]
+                                        unset dve_arr
+                                        if { $ve_id eq "" } {
+                                            set success_p 0
+                                        }
+                                    }
+                                    if { $success_p } {
+                                        set permu_ids_larr(${choice}) [lreplace $permu_ids_larr(${choice}) $idx $idx]
+                                        lappend permu_ids_larr(co-cu-ve) $co_id
+                                    } else {
+                                        ns_log Warning "qal-entitites-procs.tcl.388: co_id '${co_id}' type '${choice}' failed to convert to co-xu-ve unexpectedly"
+                                    }
+                                }
+                                default {
+                                    ns_log Warning "qal-entities-procs.tcl.399. Switch should not be provided type '${type}'"
+                                }
                             }
+
 
                             set permutations_met_p 1
                             foreach p $permutations_list {
-                                if { [llength $perm_ids_larr(${p})] >= $min_arr(${p}) } {
+                                if { [llength $permu_ids_larr(${p})] >= $min_arr(${p}) } {
                                     set perms_met_for_this_type_p 1
                                 } else {
                                     set perms_met_for_this_type_p 0
