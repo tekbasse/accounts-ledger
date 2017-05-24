@@ -207,7 +207,7 @@ ad_proc -public qal_contact_write {
                         and trashed_p!='1'
                         and instance_id=:instance_id }
                 }
-                db_dml qal_contact_trash { update qal_contact set trashed_p='1',trashed_by=:user_id,trashed_ts=now() where id=:id
+                db_dml qal_contact_trash_c { update qal_contact set trashed_p='1',trashed_by=:user_id,trashed_ts=now() where id=:id
                 }
             } 
             # Make sure label is unique
