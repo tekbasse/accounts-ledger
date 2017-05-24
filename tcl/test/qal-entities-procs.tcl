@@ -304,7 +304,7 @@ aa_register_case -cats {api smoke} qal_entities_check {
                         while { !$permutations_met_p && $i < 2000 } {
                             set type [lindex $permutations_list [randomRange 3]]
                             ns_log Notice "qal_entitites-procs.tcl.302 i '${i}' type '${type}' id count: [llength $permu_ids_larr(${type})]"
-                            switch -- $type {
+                            switch -exact -- $type {
                                 co {
                                     set co_id [qal_demo_contact_create dco_arr "" $user_id]
                                     set deleted_p_arr(${co_id}) 0
@@ -468,7 +468,7 @@ aa_register_case -cats {api smoke} qal_entities_check {
 
                         # For each permutation, choose one of each type it is (co, cu, and ve)
                         # and trash, or delete.
-
+                        set j 0
                         set type_list [list co cu ve]
                         foreach p $permutations_list {
                             set p_id_list $permu_ids_larr(${p}) 
@@ -482,23 +482,31 @@ aa_register_case -cats {api smoke} qal_entities_check {
                                         set p_id_list [lreplace $p_id_list $p_idx $p_idx]
                                         incr p_idx_max -1
                                         set toggle $action
-                                        append toggle "-" $t
-                                        switch -- $toggle {
-                                            trash-co {
+                                        append toggle "_" $t
+                                        incr j
+                                        ns_log Notice "qal_entitites-procs.tcl.486 j '${j}' p '${p}' type '${t}' action '${action}' toggle '${toggle}' id count: $p_idx_max"
+                                        switch -exact -- $toggle {
+                                            trash_co {
                                                 set r [qal_contact_trash $co_id]
-                                                set trashed_p_arr(${co_id}) $r
-                                                if { !$r } {
+                                                if { $r } {
+                                                    set trashed_p_arr(${co_id}) $r
+                                                    set is_ve_p_arr(${co_id}) 0
+                                                    set is_cu_p_arr(${co_id}) 0
+                                                } else {
                                                     ns_log Warning "qal-entities-procs.tcl.491: co_id ${co_id}"
                                                 }
                                             }
-                                            del-co {
+                                            del_co {
                                                 set r [qal_contact_delete $co_id]
-                                                set deleted_p_arr(${co_id}) $r
-                                                if { !$r } {
+                                                if { $r } {
+                                                    set deleted_p_arr(${co_id}) $r
+                                                    set is_ve_p_arr(${co_id}) 0
+                                                    set is_cu_p_arr(${co_id}) 0
+                                                } else {
                                                     ns_log Warning "qal-entities-procs.tcl.495: co_id ${co_id}"
                                                 }
                                             }
-                                            trash-cu {
+                                            trash_cu {
                                                 set cu_id [qal_customer_id_from_contact_id $co_id]
                                                 set r [qal_customer_trash $cu_id]
                                                 set is_cu_p_arr(${co_id}) [expr { !$r } ]
@@ -506,7 +514,7 @@ aa_register_case -cats {api smoke} qal_entities_check {
                                                     ns_log Warning "qal-entities-procs.tcl.503: co_id ${co_id}"
                                                 }
                                             }
-                                            del-cu {
+                                            del_cu {
                                                 set cu_id [qal_customer_id_from_contact_id $co_id]
                                                 set r [qal_customer_delete $cu_id]
                                                 set is_cu_p_arr(${co_id}) [expr { !$r } ]
@@ -514,7 +522,7 @@ aa_register_case -cats {api smoke} qal_entities_check {
                                                     ns_log Warning "qal-entities-procs.tcl.511: co_id ${co_id}"
                                                 }
                                             }
-                                            trash-ve {
+                                            trash_ve {
                                                 set ve_id [qal_vendor_id_from_contact_id $co_id]
                                                 set r [qal_contact_trash $ve_id]
                                                 set is_ve_p_arr(${co_id}) [expr { !$r } ]
@@ -522,7 +530,7 @@ aa_register_case -cats {api smoke} qal_entities_check {
                                                     ns_log Warning "qal-entities-procs.tcl.519: co_id ${co_id}"
                                                 }
                                             }
-                                            del-ve {
+                                            del_ve {
                                                 set ve_id [qal_vendor_id_from_contact_id $co_id]
                                                 set r [qal_contact_delete $ve_id]
                                                 set is_ve_p_arr(${co_id}) [expr { !$r } ]

@@ -551,8 +551,8 @@ ad_proc -public qal_customer_delete {
                 set validated_p 0
             }
             if { $validated_p } {
+                ns_log Notice "qal_customer_delete id in '${customer_id_list}'"
                 db_transaction {
-                    ns_log Notice "qal_customer_delete id in '${filtered_vendor_id_list}'"
                     db_dml qal_customer_ids_delete "delete from qal_customer \
                             where instance_id=:instance_id and id in \
                             ([template::util::tcl_to_sql_list $customer_id_list]) "
@@ -601,8 +601,8 @@ ad_proc -public qal_customer_trash {
             } 
             if { $instance_write_p || $at_least_one_write_p } {
                 set success_p 1
+                ns_log Notice "qal_customer_trash id in '${filtered_customer_id_list}'"
                 db_transaction {
-                    ns_log Notice "qal_customer_trash id in '${filtered_vendor_id_list}'"
                     db_dml qal_customer_ids_trash "update qal_customer \
                         set trashed_p='1',trashed_by=:user_id,trashed_ts=now() \
                         where instance_id=:instance_id and trashed_p!='1' and id in \
@@ -823,8 +823,8 @@ ad_proc -public qal_vendor_delete {
                 set validated_p 0
             }
             if { $validated_p } {
+                ns_log Notice "qal_vendor_delete id in '${vendor_id_list}'"
                 db_transaction {
-                    ns_log Notice "qal_vendor_delete id in '${vendor_id_list}'"
                     db_dml qal_vendor_ids_delete "delete from qal_vendor \
                             where instance_id=:instance_id and id in \
                             ([template::util::tcl_to_sql_list $vendor_id_list])"
