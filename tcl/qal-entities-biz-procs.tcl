@@ -537,13 +537,12 @@ ad_proc -public qal_customer_delete {
     customer_id_list may be a one or a list.
     User must be a package admin.
 } {
-    set success_p 1
+    set success_p 0
     if { $customer_id_list ne "" } {
         set user_id [ad_conn user_id]
         set instance_id [qc_set_instance_id]
         set admin_p [permission::permission_p -party_id $user_id \
                          -object_id [ad_conn package_id] -privilege admin]
-        set success_p $admin_p
         if { $admin_p } {
             if { [llength $customer_id_list] > 0 } {
                 set validated_p [hf_natural_number_list_validate $customer_id_list]
@@ -551,7 +550,8 @@ ad_proc -public qal_customer_delete {
                 set validated_p 0
             }
             if { $validated_p } {
-                ns_log Notice "qal_customer_delete id in '${customer_id_list}'"
+                set success_p 1
+                ns_log Notice "qal_customer_delete.554: id in '${customer_id_list}'"
                 db_transaction {
                     db_dml qal_customer_ids_delete "delete from qal_customer \
                             where instance_id=:instance_id and id in \
@@ -560,7 +560,6 @@ ad_proc -public qal_customer_delete {
                     set success_p 0
                 }
             } else {
-                set success_p 0
                 ns_log Notice "qal_customer_delete.564: not allowed. user_id '${user_id}' customer_id_list '${customer_id_list}'"
             }
         }
@@ -809,13 +808,12 @@ ad_proc -public qal_vendor_delete {
     vendor_id_list may be a one or a list.
     User must be a package admin.
 } {
-    set success_p 1
+    set success_p 0
     if { $vendor_id_list ne "" } {
         set user_id [ad_conn user_id]
         set instance_id [qc_set_instance_id]
         set admin_p [permission::permission_p -party_id $user_id \
                          -object_id [ad_conn package_id] -privilege admin]
-        set success_p $admin_p
         if { $admin_p } {
             if { [llength $vendor_id_list] > 0 } {
                 set validated_p [hf_natural_number_list_validate $vendor_id_list]
@@ -823,7 +821,8 @@ ad_proc -public qal_vendor_delete {
                 set validated_p 0
             }
             if { $validated_p } {
-                ns_log Notice "qal_vendor_delete id in '${vendor_id_list}'"
+                set success_p 1
+                ns_log Notice "qal_vendor_delete.826: id in '${vendor_id_list}'"
                 db_transaction {
                     db_dml qal_vendor_ids_delete "delete from qal_vendor \
                             where instance_id=:instance_id and id in \
@@ -832,8 +831,7 @@ ad_proc -public qal_vendor_delete {
                     set success_p 0
                 }
             } else {
-                set success_p 0
-                ns_log Notice "qal_vendor_delete.564: not allowed. user_id '${user_id}' vendor_id_list '${vendor_id_list}'"
+                ns_log Notice "qal_vendor_delete.836: not allowed. user_id '${user_id}' vendor_id_list '${vendor_id_list}'"
             }
         }
     }

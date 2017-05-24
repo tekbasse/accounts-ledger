@@ -262,11 +262,11 @@ aa_register_case -cats {api smoke} qal_entities_check {
                         # is_ve_p_arr(id) = is a vendor?
                         # permu_ids_larr(type) = list of permutations of this type.
                         # permutations:
-                        set permutations_list [list co co-cu co-ve co-cu-ve ]
+                        set permutations_list [list co co_cu co_ve co_cu_ve ]
                         foreach p $permutations_list {
                             set permu_ids_larr(${p}) [list ]
                         }
-                        # Careful: co-cu-ve  includes cases of co-ve-cu..
+                        # Careful: co_cu_ve  includes cases of co_ve-cu..
                         # Make 4 x 3 of each type
                         # which means 4 x 3 x 4 contacts.
                         for {set i 0} {$i < 4} {incr i} {
@@ -291,13 +291,13 @@ aa_register_case -cats {api smoke} qal_entities_check {
                         set min_arr(co) 3
                         # of which 8 become customers at some point, and 4 customers only (not vendors)
                         # 3 x 2 
-                        set min_arr(co-cu) 6
+                        set min_arr(co_cu) 6
                         # 8 become vendors (4 only vendors not customers), and
                         # 3 x 2
-                        set min_arr(co-ve) 6
+                        set min_arr(co_ve) 6
                         # 4 become customers and vendors
                         # 3 x 3
-                        set min_arr(co-cu-ve) 9
+                        set min_arr(co_cu_ve) 9
                         
                         set permutations_met_p 0
                         set i 0
@@ -322,7 +322,7 @@ aa_register_case -cats {api smoke} qal_entities_check {
                                         aa_true "E.299: qal_demo_contact_create failed unexpectedly" 0
                                     }
                                 }
-                                co-cu {
+                                co_cu {
                                     set co_id [qal_demo_contact_create dco_arr "" $user_id]
                                     set deleted_p_arr(${co_id}) 0
                                     set trashed_p_arr(${co_id}) 0
@@ -338,7 +338,7 @@ aa_register_case -cats {api smoke} qal_entities_check {
                                         aa_true "E.307: qal_demo_contact_create failed unexpectedly" 0
                                     }
                                     
-                                    # choose any existing co-only to convert to co-cu
+                                    # choose any existing co_only to convert to co_cu
                                     set idx_max [llength $permu_ids_larr(co)]
                                     incr idx_max -1
                                     if { $idx_max > 0 } {
@@ -350,14 +350,14 @@ aa_register_case -cats {api smoke} qal_entities_check {
                                         unset dcu_arr
                                         if { $cu_id ne "" } {
                                             set is_cu_p_arr(${co_id}) 1
-                                            lappend permu_ids_larr(co-cu) $co_id
+                                            lappend permu_ids_larr(co_cu) $co_id
                                             set p_granted_p [qc_user_role_add $co_id $this_user_id $org_admin_id $instance_id]
                                         } else {
                                             aa_true "E.321: qal_demo_customer_create for co_id '${co_id}' failed unexpectedly" 0
                                         }
                                     }
                                 }
-                                co-ve {
+                                co_ve {
                                     set co_id [qal_demo_contact_create dco_arr "" $user_id]
                                     set deleted_p_arr(${co_id}) 0
                                     set trashed_p_arr(${co_id}) 0
@@ -373,7 +373,7 @@ aa_register_case -cats {api smoke} qal_entities_check {
                                         aa_true "E.307: qal_demo_contact_create failed unexpectedly" 0
                                     }
                                     
-                                    # choose any existing co-only to convert to co-ve
+                                    # choose any existing co_only to convert to co_ve
                                     set idx_max [llength $permu_ids_larr(co)]
                                     incr idx_max -1
                                     if { $idx_max > 0 } {
@@ -385,13 +385,13 @@ aa_register_case -cats {api smoke} qal_entities_check {
                                         unset dve_arr
                                         if { $ve_id ne "" } {
                                             set is_ve_p_arr(${co_id}) 1
-                                            lappend permu_ids_larr(co-ve) $co_id
+                                            lappend permu_ids_larr(co_ve) $co_id
                                         } else {
                                             aa_true "E.321: qal_demo_vendor_create for co_id '${co_id}' failed unexpectedly" 0
                                         }
                                     }
                                 }
-                                co-cu-ve {
+                                co_cu_ve {
                                     set co_id [qal_demo_contact_create dco_arr "" $user_id]
                                     set p_granted_p [qc_user_role_add $co_id $this_user_id $org_admin_id $instance_id]
                                     set deleted_p_arr(${co_id}) 0
@@ -408,9 +408,9 @@ aa_register_case -cats {api smoke} qal_entities_check {
                                         aa_true "E.354: qal_demo_contact_create failed unexpectedly" 0
                                     }
                                     
-                                    # choose any existing co-only, co-cu or co-cv to convert to co-cu-ve
+                                    # choose any existing co_only, co_cu or co_ve to convert to co_cu_ve
                                     set idx_choice [randomRange 2]
-                                    set choice [lindex [list co co-cu co-ve] $idx_choice]
+                                    set choice [lindex [list co co_cu co_ve] $idx_choice]
                                     set success_p 1
                                     set idx_max [llength $permu_ids_larr(${choice})]
                                     incr idx_max -1
@@ -439,9 +439,9 @@ aa_register_case -cats {api smoke} qal_entities_check {
                                         }
                                         if { $success_p } {
                                             set permu_ids_larr(${choice}) [lreplace $permu_ids_larr(${choice}) $idx $idx]
-                                            lappend permu_ids_larr(co-cu-ve) $co_id
+                                            lappend permu_ids_larr(co_cu_ve) $co_id
                                         } else {
-                                            aa_true "E.388: co_id '${co_id}' type '${choice}' failed to convert to co-xu-ve unexpectedly" 0
+                                            aa_true "E.388: co_id '${co_id}' type '${choice}' failed to convert to co_xu-ve unexpectedly" 0
                                         }
                                     }
                                 }
@@ -462,7 +462,7 @@ aa_register_case -cats {api smoke} qal_entities_check {
                                     set perms_met_for_this_type_p 0
                                 }
                                 set permutations_met_p [expr { $permutations_met_p && $perms_met_for_this_type_p } ]
-                           }
+                            }
                             incr i
                         }
 
@@ -484,7 +484,7 @@ aa_register_case -cats {api smoke} qal_entities_check {
                                         set toggle $action
                                         append toggle "_" $t
                                         incr j
-                                        ns_log Notice "qal_entitites-procs.tcl.486 j '${j}' p '${p}' type '${t}' action '${action}' toggle '${toggle}' id count: $p_idx_max"
+                                        ns_log Notice "qal_entitites-procs.tcl.486 j '${j}' p '${p}' type '${t}' action '${action}' co_id '${co_id}' toggle '${toggle}' id count: $p_idx_max"
                                         switch -exact -- $toggle {
                                             trash_co {
                                                 set r [qal_contact_trash $co_id]
@@ -499,7 +499,7 @@ aa_register_case -cats {api smoke} qal_entities_check {
                                             del_co {
                                                 set r [qal_contact_delete $co_id]
                                                 if { $r } {
-                                                    set deleted_p_arr(${co_id}) $r
+                                                    set deleted_p_arr(${co_id}) 1
                                                     set is_ve_p_arr(${co_id}) 0
                                                     set is_cu_p_arr(${co_id}) 0
                                                 } else {
@@ -509,32 +509,36 @@ aa_register_case -cats {api smoke} qal_entities_check {
                                             trash_cu {
                                                 set cu_id [qal_customer_id_from_contact_id $co_id]
                                                 set r [qal_customer_trash $cu_id]
-                                                set is_cu_p_arr(${co_id}) [expr { !$r } ]
-                                                if { !$r } {
+                                                if { $r } {
+                                                    set is_cu_p_arr(${co_id}) 0
+                                                } else {
                                                     ns_log Warning "qal-entities-procs.tcl.503: co_id ${co_id}"
                                                 }
                                             }
                                             del_cu {
                                                 set cu_id [qal_customer_id_from_contact_id $co_id]
                                                 set r [qal_customer_delete $cu_id]
-                                                set is_cu_p_arr(${co_id}) [expr { !$r } ]
-                                                if { !$r } {
+                                                if { $r } {
+                                                    set is_cu_p_arr(${co_id}) 0
+                                                } else {
                                                     ns_log Warning "qal-entities-procs.tcl.511: co_id ${co_id}"
                                                 }
                                             }
                                             trash_ve {
                                                 set ve_id [qal_vendor_id_from_contact_id $co_id]
-                                                set r [qal_contact_trash $ve_id]
-                                                set is_ve_p_arr(${co_id}) [expr { !$r } ]
-                                                if { !$r } {
+                                                set r [qal_vendor_trash $ve_id]
+                                                if { $r } {
+                                                    set is_ve_p_arr(${co_id}) 0
+                                                } else {
                                                     ns_log Warning "qal-entities-procs.tcl.519: co_id ${co_id}"
                                                 }
                                             }
                                             del_ve {
                                                 set ve_id [qal_vendor_id_from_contact_id $co_id]
-                                                set r [qal_contact_delete $ve_id]
-                                                set is_ve_p_arr(${co_id}) [expr { !$r } ]
-                                                if { !$r } {
+                                                set r [qal_vendor_delete $ve_id]
+                                                if { $r } {
+                                                    set is_ve_p_arr(${co_id}) 0
+                                                } else {
                                                     ns_log Warning "qal-entities-procs.tcl.527: co_id ${co_id}"
                                                 }
                                             }
@@ -548,7 +552,7 @@ aa_register_case -cats {api smoke} qal_entities_check {
                             }
                         }
 
-##code
+                        ##code
                         foreach p $permutations_list {
                             foreach co_id $permu_ids_larr(${p}) {
                                 # verify status using  qal_contact_id_exists_q qal_customer_id_exists_q qal_vendor_id_exists_q
