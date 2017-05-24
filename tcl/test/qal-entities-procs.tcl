@@ -16,8 +16,10 @@ aa_register_case -cats {api smoke} qal_entities_check {
                         set sysowner_email [ad_system_owner]
                         set sysowner_user_id [party::get_by_email -email $sysowner_email]
                         set user_id $sysowner_user_id
+                        set this_user_id [ad_conn user_id]
+                        set org_admin_id [qc_role_id_of_label org_admin $instance_id]
+                        ns_log Notice "qal-entities-procs.tcl.21: this_user_id ${this_user_id}' org_admin_id '${org_admin_id}' user_id '${user_id}' instance_id '${instance_id}'"
 
-                        #
                         # CRURTRDR tests for contact, customer, vendor
                         #    C=Create, R=Read, U=Update T=Trash D=Delete
                         #
@@ -26,7 +28,9 @@ aa_register_case -cats {api smoke} qal_entities_check {
                         set create_start_cs [clock seconds]
                         set co_id [qal_demo_contact_create contact_arr "" $user_id]
                         set co_created_p [qf_is_natural_number $co_id] 
-
+                        if { $co_created_p } {
+                            set perm_granted_p [qc_user_role_add $co_id $this_user_id $org_admin_id $instance_id]
+                        }
                         aa_true "A1 Created a contact" $co_created_p
 
                         set cu_id [qal_demo_customer_create customer_arr $co_id $user_id]
@@ -312,6 +316,8 @@ aa_register_case -cats {api smoke} qal_entities_check {
                                     unset dco_arr
                                     if { $co_id ne "" } {
                                         lappend permu_ids_larr(co) $co_id
+                                        set p_granted_p [qc_user_role_add $co_id $this_user_id $org_admin_id $instance_id]
+
                                     } else {
                                         aa_true "E.299: qal_demo_contact_create failed unexpectedly" 0
                                     }
@@ -327,6 +333,7 @@ aa_register_case -cats {api smoke} qal_entities_check {
                                     unset dco_arr
                                     if { $co_id ne "" } {
                                         lappend permu_ids_larr(co) $co_id
+                                        set p_granted_p [qc_user_role_add $co_id $this_user_id $org_admin_id $instance_id]
                                     } else {
                                         aa_true "E.307: qal_demo_contact_create failed unexpectedly" 0
                                     }
@@ -344,6 +351,7 @@ aa_register_case -cats {api smoke} qal_entities_check {
                                         unset dcu_arr
                                         if { $cu_id ne "" } {
                                             lappend permu_ids_larr(co-cu) $co_id
+                                            set p_granted_p [qc_user_role_add $co_id $this_user_id $org_admin_id $instance_id]
                                         } else {
                                             aa_true "E.321: qal_demo_customer_create for co_id '${co_id}' failed unexpectedly" 0
                                         }
@@ -360,6 +368,7 @@ aa_register_case -cats {api smoke} qal_entities_check {
                                     unset dco_arr
                                     if { $co_id ne "" } {
                                         lappend permu_ids_larr(co) $co_id
+                                        set p_granted_p [qc_user_role_add $co_id $this_user_id $org_admin_id $instance_id]
                                     } else {
                                         aa_true "E.307: qal_demo_contact_create failed unexpectedly" 0
                                     }
@@ -384,6 +393,7 @@ aa_register_case -cats {api smoke} qal_entities_check {
                                 }
                                 co-cu-ve {
                                     set co_id [qal_demo_contact_create dco_arr "" $user_id]
+                                    set p_granted_p [qc_user_role_add $co_id $this_user_id $org_admin_id $instance_id]
                                     set deleted_p_arr(${co_id}) 0
                                     set trashed_p_arr(${co_id}) 0
                                     set is_co_p_arr(${co_id}) 1
@@ -393,6 +403,7 @@ aa_register_case -cats {api smoke} qal_entities_check {
                                     unset dco_arr
                                     if { $co_id ne "" } {
                                         lappend permu_ids_larr(co) $co_id
+                                        set p_granted_p [qc_user_role_add $co_id $this_user_id $org_admin_id $instance_id]
                                     } else {
                                         aa_true "E.354: qal_demo_contact_create failed unexpectedly" 0
                                     }

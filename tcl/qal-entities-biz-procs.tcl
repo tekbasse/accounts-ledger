@@ -267,7 +267,7 @@ ad_proc -public qal_contact_delete {
                         where instance_id=:instance_id and contact_id in \
                         ([template::util::tcl_to_sql_list $contact_id_list]) "
                     db_dml qal_contact_ids_delete "delete from qal_contact \
-                            where instance_id=:instance_id and contact_id in \
+                            where instance_id=:instance_id and id in \
                             ([template::util::tcl_to_sql_list $contact_id_list]) "
                 } on_error {
                     set success_p 0
@@ -330,7 +330,7 @@ ad_proc -public qal_contact_trash {
                         ([template::util::tcl_to_sql_list $contact_id_list]) "
                     db_dml qal_contact_ids_trash "update qal_contact \
                         set trashed_p='1',trashed_by=:user_id,trashed_ts=now() \
-                        where instance_id=:instance_id and trashed_p!='1' and contact_id in \
+                        where instance_id=:instance_id and trashed_p!='1' and id in \
                         ([template::util::tcl_to_sql_list $filtered_contact_id_list])"
                 } on_error {
                     set success_p 0
@@ -503,7 +503,11 @@ ad_proc -public qal_customer_write {
                         and trashed_p!='1'
                         and instance_id=:instance_id }
                 }
-                db_dml qal_customer_trash { update qal_customer set trashed_p='1',trashed_by=:user_id,trashed_ts=now() where id=:id
+                db_dml qal_customer_trash { update qal_customer 
+                    set trashed_p='1',trashed_by=:user_id,trashed_ts=now() 
+                    where id=:id 
+                    and instance_id=:instance_id 
+                    and trashed_p!='1'
                 }
             }
             # Make sure customer_code is unique
@@ -549,7 +553,7 @@ ad_proc -public qal_customer_delete {
             if { $validated_p } {
                 db_transaction {
                     db_dml qal_customer_ids_delete "delete from qal_customer \
-                            where instance_id=:instance_id and customer_id in \
+                            where instance_id=:instance_id and id in \
                             ([template::util::tcl_to_sql_list $customer_id_list]) "
                 } on_error {
                     set success_p 0
@@ -597,7 +601,7 @@ ad_proc -public qal_customer_trash {
                 db_transaction {
                     db_dml qal_customer_ids_trash "update qal_customer \
                             set trashed_p='1',trashed_by=:user_id,trashed_ts=now() \
-                            where instance_id=:instance_id and trashed_p!='1' and customer_id in \
+                            where instance_id=:instance_id and trashed_p!='1' and id in \
                             ([template::util::tcl_to_sql_list $filtered_customer_id_list])"
                 } on_error {
                     set success_p 0
@@ -767,7 +771,11 @@ ad_proc -public qal_vendor_write {
                         and trashed_p!='1'
                         and instance_id=:instance_id }
                 }
-                db_dml qal_vendor_trash { update qal_vendor set trashed_p='1',trashed_by=:user_id,trashed_ts=now() where id=:id
+                db_dml qal_vendor_trash { update qal_vendor 
+                    set trashed_p='1',trashed_by=:user_id,trashed_ts=now() 
+                    where id=:id
+                    and instance_id=:instance_id
+                    and trashed_p!='1'
                 }
             }
             # Make sure vendor_code is unique
@@ -811,7 +819,7 @@ ad_proc -public qal_vendor_delete {
             if { $validated_p } {
                 db_transaction {
                     db_dml qal_vendor_ids_delete "delete from qal_vendor \
-                            where instance_id=:instance_id and vendor_id in \
+                            where instance_id=:instance_id and id in \
                             ([template::util::tcl_to_sql_list $vendor_id_list])"
                 } on_error {
                     set success_p 0
@@ -859,7 +867,7 @@ ad_proc -public qal_vendor_trash {
                 db_transaction {
                     db_dml qal_vendor_ids_trash "update qal_vendor \
                             set trashed_p='1',trashed_by=:user_id,trashed_ts=now() \
-                            where instance_id=:instance_id and trashed_p!='1' and vendor_id in \
+                            where instance_id=:instance_id and trashed_p!='1' and id in \
                             ([template::util::tcl_to_sql_list $filtered_vendor_id_list])"
                 } on_error {
                     set success_p 0
