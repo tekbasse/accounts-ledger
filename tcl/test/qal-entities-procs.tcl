@@ -347,9 +347,9 @@ aa_register_case -cats {api smoke} qal_entities_check {
                                         set permu_ids_larr(co) [lreplace $permu_ids_larr(co) $idx $idx]
                                         
                                         set cu_id [qal_demo_customer_create dcu_arr $co_id $user_id]
-                                        set is_cu_p_arr(${co_id}) 1
                                         unset dcu_arr
                                         if { $cu_id ne "" } {
+                                            set is_cu_p_arr(${co_id}) 1
                                             lappend permu_ids_larr(co-cu) $co_id
                                             set p_granted_p [qc_user_role_add $co_id $this_user_id $org_admin_id $instance_id]
                                         } else {
@@ -382,9 +382,9 @@ aa_register_case -cats {api smoke} qal_entities_check {
                                         set permu_ids_larr(co) [lreplace $permu_ids_larr(co) $idx $idx]
                                         
                                         set ve_id [qal_demo_vendor_create dve_arr $co_id $user_id]
-                                        set is_ve_p_arr(${co_id}) 1
                                         unset dve_arr
                                         if { $ve_id ne "" } {
+                                            set is_ve_p_arr(${co_id}) 1
                                             lappend permu_ids_larr(co-ve) $co_id
                                         } else {
                                             aa_true "E.321: qal_demo_vendor_create for co_id '${co_id}' failed unexpectedly" 0
@@ -493,22 +493,22 @@ aa_register_case -cats {api smoke} qal_entities_check {
                                             trash-cu {
                                                 set cu_id [qal_customer_id_from_contact_id $co_id]
                                                 set r [qal_customer_trash $cu_id]
-                                                set is_cu_p_arr(${co_id}) $r
+                                                set is_cu_p_arr(${co_id}) [expr { !$r } ]
                                             }
                                             del-cu {
                                                 set cu_id [qal_customer_id_from_contact_id $co_id]
                                                 set r [qal_customer_delete $cu_id]
-                                                set is_cu_p_arr(${co_id}) $r
+                                                set is_cu_p_arr(${co_id}) [expr { !$r } ]
                                             }
                                             trash-ve {
                                                 set ve_id [qal_vendor_id_from_contact_id $co_id]
                                                 set r [qal_contact_trash $ve_id]
-                                                set is_ve_p_arr(${co_id}) $r
+                                                set is_ve_p_arr(${co_id}) [expr { !$r } ]
                                             }
                                             del-ve {
                                                 set ve_id [qal_vendor_id_from_contact_id $co_id]
                                                 set r [qal_contact_delete $ve_id]
-                                                set is_ve_p_arr(${co_id}) $r
+                                                set is_ve_p_arr(${co_id}) [expr { !$r } ]
                                             }
                                             default {
                                                 ns_log Warning "qal_entities_procs.tcl.499 toggle '${toggle}' not found for switch."
@@ -526,19 +526,19 @@ aa_register_case -cats {api smoke} qal_entities_check {
                                 # verify status using  qal_contact_id_exists_q qal_customer_id_exists_q qal_vendor_id_exists_q
                                 # type co
                                 set actual [qal_contact_id_exists_q $co_id]
-                                set expected [expr { !( $deleted_p_arr(${co_id}) || $trashed_p_arr(${co_id}) )}] 
-                                aa_equals "E. Permutation '${p}' contact_id '${co_id}' exists?" $actual $expected
+                                set expected_co [expr { !( $deleted_p_arr(${co_id}) || $trashed_p_arr(${co_id}) )}] 
+                                aa_equals "E. Permutation '${p}' contact_id '${co_id}' exists?" $actual $expected_co
 
                                 # type ce
                                 set cu_id [qal_customer_id_from_contact_id $co_id]
                                 set actual [qal_customer_id_exists_q $cu_id]
-                                set expected $is_cu_p_arr(${co_id})
+                                set expected [expr {$is_cu_p_arr(${co_id}) && $expected_co } ]
                                 aa_equals "E. Permutation '${p}' customer_id '${cu_id}' of contact_id '${co_id}' exists?" $actual $expected
 
                                 # type ve
                                 set ve_id [qal_vendor_id_from_contact_id $co_id]
                                 set actual [qal_vendor_id_exists_q $ve_id]
-                                set expected $is_ve_p_arr(${co_id})
+                                set expected [expr { $is_ve_p_arr(${co_id}) && $expected_co } ]
                                 aa_equals "E. Permutation '${p}' vendor_id '${ve_id}' of contact_id '${co_id}' exists?" $actual $expected
 
                             }
