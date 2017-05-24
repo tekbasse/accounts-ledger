@@ -503,7 +503,7 @@ ad_proc -public qal_customer_write {
                         and trashed_p!='1'
                         and instance_id=:instance_id }
                 }
-                db_dml qal_customer_trash { update qal_customer 
+                db_dml qal_customer_trash_1 { update qal_customer 
                     set trashed_p='1',trashed_by=:user_id,trashed_ts=now() 
                     where id=:id 
                     and instance_id=:instance_id 
@@ -552,6 +552,7 @@ ad_proc -public qal_customer_delete {
             }
             if { $validated_p } {
                 db_transaction {
+                    ns_log Notice "qal_customer_delete id in '${filtered_vendor_id_list}'"
                     db_dml qal_customer_ids_delete "delete from qal_customer \
                             where instance_id=:instance_id and id in \
                             ([template::util::tcl_to_sql_list $customer_id_list]) "
@@ -560,6 +561,7 @@ ad_proc -public qal_customer_delete {
                 }
             } else {
                 set success_p 0
+                ns_log Notice "qal_customer_delete.564: not allowed. user_id '${user_id}' customer_id_list '${customer_id_list}'"
             }
         }
     }
@@ -581,6 +583,7 @@ ad_proc -public qal_customer_trash {
             set validated_p [hf_natural_number_list_validate $customer_id_list]
         } else {
             set validated_p 0
+            ns_log Notice "qal_customer_trash.853 validation error. customer_id_list '${customer_id_list}'"
         }
         if { $validated_p } {
             set instance_write_p [qc_permission_p $user_id $instance_id non_assets write $instance_id]
@@ -599,13 +602,16 @@ ad_proc -public qal_customer_trash {
             if { $instance_write_p || $at_least_one_write_p } {
                 set success_p 1
                 db_transaction {
+                    ns_log Notice "qal_customer_trash id in '${filtered_vendor_id_list}'"
                     db_dml qal_customer_ids_trash "update qal_customer \
-                            set trashed_p='1',trashed_by=:user_id,trashed_ts=now() \
-                            where instance_id=:instance_id and trashed_p!='1' and id in \
-                            ([template::util::tcl_to_sql_list $filtered_customer_id_list])"
+                        set trashed_p='1',trashed_by=:user_id,trashed_ts=now() \
+                        where instance_id=:instance_id and trashed_p!='1' and id in \
+                        ([template::util::tcl_to_sql_list $filtered_customer_id_list])"
                 } on_error {
                     set success_p 0
                 }
+            } else {
+                ns_log Notice "qal_customer_trash.613: not allowed. user_id '${user_id}' customer_id_list '${filtered_customer_id_list}'"
             }
         }
     }
@@ -700,14 +706,14 @@ ad_proc -public qal_vendor_write {
         set contact_id ""
         set contact_id_exists_p 0
     }
-    ns_log Notice "qal_vendor_write.401. contact_id '${contact_id}' id '${id}' contact_id_exists_p '${contact_id_exists_p}'"
+    ns_log Notice "qal_vendor_write.703: contact_id '${contact_id}' id '${id}' contact_id_exists_p '${contact_id_exists_p}'"
     if { [qf_is_natural_number $id] } {
         set contact_id_from_ve_id [qal_contact_id_from_vendor_id $id]
     } else {
         set id ""
         set contact_id_from_ve_id ""
     }
-    ns_log Notice "qal_vendor_write.408. contact_id '${contact_id}' id '${id}' contact_id_exists_p '${contact_id_exists_p}' contact_id_from_ve_id '${contact_id_from_ve_id}'"
+    ns_log Notice "qal_vendor_write.710: contact_id '${contact_id}' id '${id}' contact_id_exists_p '${contact_id_exists_p}' contact_id_from_ve_id '${contact_id_from_ve_id}'"
     if { $contact_id_exists_p } {
         if { $contact_id_from_ve_id ne $contact_id } {
             set id [qal_vendor_id_from_contact_id $contact_id]
@@ -717,12 +723,12 @@ ad_proc -public qal_vendor_write {
         # contact_id does not exist
         if { $id eq "" } {
             set error_p 1
-            ns_log Warning "qal_vendor_write.412: Unable to write. reference issue contact_id '${contact_id}' (vendor) id '${id}' instance_id '${instance_id}' vendor_code '${vendor_code}'"
+            ns_log Warning "qal_vendor_write.720: Unable to write. reference issue contact_id '${contact_id}' (vendor) id '${id}' instance_id '${instance_id}' vendor_code '${vendor_code}'"
         } else {
             set contact_id $contact_id_from_ve_id
         }
     }
-    ns_log Notice "qal_vendor_write.423. contact_id '${contact_id}' id '${id}' contact_id_exists_p '${contact_id_exists_p}' contact_id_from_ve_id '${contact_id_from_ve_id}' error_p '${error_p}'"
+    ns_log Notice "qal_vendor_write.725: contact_id '${contact_id}' id '${id}' contact_id_exists_p '${contact_id_exists_p}' contact_id_from_ve_id '${contact_id_from_ve_id}' error_p '${error_p}'"
     if { !$error_p } {
         
         # insert into db
@@ -747,7 +753,7 @@ ad_proc -public qal_vendor_write {
         }
     }
     if { $error_p } {
-        ns_log Warning "qal_vendor_write.660: error '[array get a_arr]'"
+        ns_log Warning "qal_vendor_write.750: error '[array get a_arr]'"
     } else {
 
         set rev_id [db_nextval qal_id]
@@ -771,7 +777,7 @@ ad_proc -public qal_vendor_write {
                         and trashed_p!='1'
                         and instance_id=:instance_id }
                 }
-                db_dml qal_vendor_trash { update qal_vendor 
+                db_dml qal_vendor_trash_1 { update qal_vendor 
                     set trashed_p='1',trashed_by=:user_id,trashed_ts=now() 
                     where id=:id
                     and instance_id=:instance_id
@@ -818,6 +824,7 @@ ad_proc -public qal_vendor_delete {
             }
             if { $validated_p } {
                 db_transaction {
+                    ns_log Notice "qal_vendor_delete id in '${vendor_id_list}'"
                     db_dml qal_vendor_ids_delete "delete from qal_vendor \
                             where instance_id=:instance_id and id in \
                             ([template::util::tcl_to_sql_list $vendor_id_list])"
@@ -826,6 +833,7 @@ ad_proc -public qal_vendor_delete {
                 }
             } else {
                 set success_p 0
+                ns_log Notice "qal_vendor_delete.564: not allowed. user_id '${user_id}' vendor_id_list '${vendor_id_list}'"
             }
         }
     }
@@ -847,6 +855,7 @@ ad_proc -public qal_vendor_trash {
             set validated_p [hf_natural_number_list_validate $vendor_id_list]
         } else {
             set validated_p 0
+            ns_log Notice "qal_vendor_trash.853 validation error. vendor_id_list '${vendor_id_list}'"
         }
         if { $validated_p } {
             set instance_write_p [qc_permission_p $user_id $instance_id non_assets write $instance_id]
@@ -864,6 +873,7 @@ ad_proc -public qal_vendor_trash {
             } 
             if { $instance_write_p || $at_least_one_write_p } {
                 set success_p 1
+                ns_log Notice "qal_vendor_trash id.871: in '${filtered_vendor_id_list}'"
                 db_transaction {
                     db_dml qal_vendor_ids_trash "update qal_vendor \
                             set trashed_p='1',trashed_by=:user_id,trashed_ts=now() \
@@ -872,6 +882,8 @@ ad_proc -public qal_vendor_trash {
                 } on_error {
                     set success_p 0
                 }
+            } else {
+                ns_log Notice "qal_vendor_trash.886: not allowed. user_id '${user_id}' filtered_vendor_id_list '${filtered_vendor_id_list}'"
             }
         }
     }

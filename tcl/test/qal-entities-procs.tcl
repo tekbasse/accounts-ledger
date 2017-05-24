@@ -422,6 +422,7 @@ aa_register_case -cats {api smoke} qal_entities_check {
                                             unset dcu_arr
                                             if { $cu_id eq "" } {
                                                 set success_p 0
+                                                ns_log Warning "qal-entities-procs.tcl.425: co_id ${co_id}"
                                             } else {
                                                 set is_cu_p_arr(${co_id}) 1
                                             }
@@ -431,6 +432,7 @@ aa_register_case -cats {api smoke} qal_entities_check {
                                             unset dve_arr
                                             if { $ve_id eq "" } {
                                                 set success_p 0
+                                                ns_log Warning "qal-entities-procs.tcl.435: co_id ${co_id}"
                                             } else {
                                                 set is_ve_p_arr(${co_id})
                                             }
@@ -485,36 +487,54 @@ aa_register_case -cats {api smoke} qal_entities_check {
                                             trash-co {
                                                 set r [qal_contact_trash $co_id]
                                                 set trashed_p_arr(${co_id}) $r
+                                                if { !$r } {
+                                                    ns_log Warning "qal-entities-procs.tcl.491: co_id ${co_id}"
+                                                }
                                             }
                                             del-co {
                                                 set r [qal_contact_delete $co_id]
                                                 set deleted_p_arr(${co_id}) $r
+                                                if { !$r } {
+                                                    ns_log Warning "qal-entities-procs.tcl.495: co_id ${co_id}"
+                                                }
                                             }
                                             trash-cu {
                                                 set cu_id [qal_customer_id_from_contact_id $co_id]
                                                 set r [qal_customer_trash $cu_id]
                                                 set is_cu_p_arr(${co_id}) [expr { !$r } ]
+                                                if { !$r } {
+                                                    ns_log Warning "qal-entities-procs.tcl.503: co_id ${co_id}"
+                                                }
                                             }
                                             del-cu {
                                                 set cu_id [qal_customer_id_from_contact_id $co_id]
                                                 set r [qal_customer_delete $cu_id]
                                                 set is_cu_p_arr(${co_id}) [expr { !$r } ]
+                                                if { !$r } {
+                                                    ns_log Warning "qal-entities-procs.tcl.511: co_id ${co_id}"
+                                                }
                                             }
                                             trash-ve {
                                                 set ve_id [qal_vendor_id_from_contact_id $co_id]
                                                 set r [qal_contact_trash $ve_id]
                                                 set is_ve_p_arr(${co_id}) [expr { !$r } ]
+                                                if { !$r } {
+                                                    ns_log Warning "qal-entities-procs.tcl.519: co_id ${co_id}"
+                                                }
                                             }
                                             del-ve {
                                                 set ve_id [qal_vendor_id_from_contact_id $co_id]
                                                 set r [qal_contact_delete $ve_id]
                                                 set is_ve_p_arr(${co_id}) [expr { !$r } ]
+                                                if { !$r } {
+                                                    ns_log Warning "qal-entities-procs.tcl.527: co_id ${co_id}"
+                                                }
                                             }
                                             default {
-                                                ns_log Warning "qal_entities_procs.tcl.499 toggle '${toggle}' not found for switch."
+                                                ns_log Warning "qal_entities_procs.tcl.531 toggle '${toggle}' not found for switch."
                                             }
                                         }
-                                        aa_true "E.500 action '${action}' on type '${t}' with contact_id '${co_id}' reports succeeded." $r
+                                        aa_true "E.550 action '${action}' on type '${t}' with contact_id '${co_id}' reports succeeded." $r
                                     }
                                 }
                             }
