@@ -474,8 +474,32 @@ ad_proc -public qal_demo_address_write {
     If addrs_id is empty string, a new address is created.
     If contact_id or addrs_id is not supplied, the value is assumed to be in address_name_arr(). 
     Returns populated array of address_name_arr and address_id, or empty string if unsuccessful.
+    <br/>
+    <br/>
+    This demo uses these possible address_type(s):
+                    street_address \
+                     mailing_address \
+                     billing_address \
+                     sms \
+                     skype \
+                     whatsapp \
+                     snapchat \
+                     facebook \
+                     googleplus \
+                     twitter \
+                     linkedin \
+                     xing \
+                     makerbase \
+                     hackaday \
+                     etsy \
+                     ebay \
+                     myspace \
+                     secondlife \
+                     SCaN \
+                     IDSN.
 
     @see qal_address_write
+    @see qal_address_type_keys
 } {
     upvar 1 instance_id instance_id
     upvar 1 $address_name_arr a_arr

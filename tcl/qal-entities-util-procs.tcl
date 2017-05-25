@@ -532,7 +532,13 @@ ad_proc -public qal_address_type {
 
 ad_proc -public qal_address_type_keys {
 } {
-    Returns postal address_type keys
+    Returns postal address_type keys in a list: mailing_address billing_address street_address
+    <br/>
+    Other address_type can be most anything: twitter, phone, etc.
+    <br/>
+    For other address_type keys, see qal_demo_address_write
+
+    @see qal_demo_address_write
 } {
     return [list mailing_address billing_address street_address]
 }
