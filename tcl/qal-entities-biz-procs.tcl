@@ -968,7 +968,7 @@ ad_proc -public qal_address_write {
     record_type sort_order address_type address0 address1 address2 city state postal_code country_code attn phone phone_time fax email cc bcc
     <br/><br/>
     If postal address is contact's first street_address, mailing_address, or billing address, then automatically maps to contact record via qal_contact.street_addrs_id etc.
-    </br>For other cases, app should change via qal_set_primary_address
+    </br>For other cases, app should change via qal_address_postal_set_primary
 
     <br/><br/>
     Other addresses can be most anything: twitter, phone, etc.
@@ -981,7 +981,7 @@ ad_proc -public qal_address_write {
     @param array_name
     @return qal_other_address_map.id or ""
 
-    @see qal_set_primary_address
+    @see qal_address_postal_set_primary
 } {
     upvar 1 instance_id instance_id
     upvar 1 $arr_name a_arr
