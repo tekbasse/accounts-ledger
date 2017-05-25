@@ -935,6 +935,32 @@ ad_proc -public qal_address_create {
 } {
     Creates a new qal_address record. 
     If contact_id is not supplied, the value is assumed to be in arr_name(contact_id).
+    If there is an error, such as contact_id not found, an empty string is returned.
+    <br/><br/>
+    If address_type matches "*address*" then type is assumed to be a postal address.
+    <br/><br/>
+    Postal address_types: 
+    street_address, mailing_address, billing_address and anything that matches *address*.
+    <br/><br/>
+    Postal address fields: 
+    record_type sort_order address_type address0 address1 address2 city state postal_code country_code attn phone phone_time fax email cc bcc
+    <br/><br/>
+    If postal address is contact's first street_address, mailing_address, or billing address, then automatically maps to contact record via qal_contact.street_addrs_id etc.
+    </br>For other cases, app should change via qal_address_postal_set_primary
+
+    <br/><br/>
+    Other addresses can be most anything: twitter, phone, etc.
+    <br/><br/>
+    Other address fields: 
+    record_type sort_order account_name notes
+    <br/><br/>
+
+
+    @param array_name
+    @return qal_other_address_map.id or ""
+
+    @see qal_address_postal_set_primary
+
 } {
     upvar 1 instance_id instance_id
     upvar 1 $arr_name a_arr
@@ -956,7 +982,7 @@ ad_proc -public qal_address_write {
 } {
     Writes a new revision to an existing qal_address record.
     If id is empty, creates a new record and returns the new id.
-    Otherwise empty string is returned.
+    If there is an error, such as id not found, an empty string is returned.
     If contact_id is not supplied, the value is assumed to be in arr_name(contact_id).
     <br/><br/>
     If address_type matches "*address*" then type is assumed to be a postal address.
@@ -982,6 +1008,8 @@ ad_proc -public qal_address_write {
     @return qal_other_address_map.id or ""
 
     @see qal_address_postal_set_primary
+    @see qal_address_keys
+    @see qal_other_address_map_keys
 } {
     upvar 1 instance_id instance_id
     upvar 1 $arr_name a_arr

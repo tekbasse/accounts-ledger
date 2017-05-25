@@ -403,6 +403,7 @@ ad_proc -public qal_other_address_map_keys {
     account_name 
     notes 
 
+    @see qal_address_keys
 } {
     set keys_list [list \
                        contact_id \
@@ -455,6 +456,8 @@ ad_proc -public qal_addresses_keys {
         email \
         cc \
         bcc
+    @see qal_address_keys
+    @see qal_other_address_map_keys
 } {
     # This only works to read from the database and a extract data from an ordered list.
     # To write to database, use qal_address_keys and qal_other_address_map_keys.
@@ -505,6 +508,8 @@ ad_proc -public qal_address_type {
 } {
     Returns address type (ie qal_other_address_map.record_type ) or empty string if not found.
     If contact_id is nonempty, constrains query to contact_id.
+    <br/>
+    @see qal_other_address_map_keys
 } {
     upvar 1 instance_id instance_id
     set record_type ""
@@ -559,6 +564,9 @@ ad_proc -public qal_field_name_of_address_type {
 } {
     Returns field name in table qal_other_address_map of record_type,
     or empty string if address_type not in table.
+    <br/>
+    Field names are: mailing_addrs_id billing_addrs_id street_addrs_id (in table qal_contact)
+    @see qal_other_address_map_keys
 } {
     set type_list [qal_address_type_keys]
     set name_list [qal_address_type_fields]
