@@ -315,7 +315,7 @@ ad_proc -public qal_namelur {
 }
 
 
-ad_proc qal_demo_contact_create {
+ad_proc -public qal_demo_contact_create {
     {contact_arr_name "contact_arr"}
     {contact_id ""}
     {user_id ""}
@@ -366,7 +366,7 @@ ad_proc qal_demo_contact_create {
     return $co_id
 }
 
-ad_proc qal_demo_customer_create {
+ad_proc -public qal_demo_customer_create {
     {customer_arr_name "customer_arr"}
     {contact_id ""}
     {user_id ""}
@@ -418,7 +418,7 @@ ad_proc qal_demo_customer_create {
     return $cu_id
 }
 
-ad_proc qal_demo_vendor_create {
+ad_proc -public qal_demo_vendor_create {
     {vendor_arr_name "vendor_arr"}
     {contact_id ""}
     {user_id ""}
@@ -464,7 +464,7 @@ ad_proc qal_demo_vendor_create {
     return $ve_id
 }
 
-ad_proc qal_demo_address_write {
+ad_proc -public qal_demo_address_write {
     {address_name_arr "address_arr"}
     {contact_id ""}
     {addrs_id ""}

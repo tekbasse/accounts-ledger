@@ -5,7 +5,7 @@ ad_library {
 
 }
 
-ad_proc qal_pretty_bytes_iec {
+ad_proc -public qal_pretty_bytes_iec {
     number
     {unit "B"}
     {significand "3"}
@@ -44,7 +44,7 @@ ad_proc qal_pretty_bytes_iec {
     return $pretty_bytes
 }
  
-ad_proc qal_pretty_bytes_dec {
+ad_proc -public qal_pretty_bytes_dec {
     number
     {unit "B"}
     {significand "3"}
@@ -81,7 +81,7 @@ ad_proc qal_pretty_bytes_dec {
     return $pretty_bytes
 }
 
-ad_proc qal_pretty_metric {
+ad_proc -public qal_pretty_metric {
     number
     {unit ""}
     {significand "1"}
@@ -144,7 +144,7 @@ ad_proc qal_pretty_metric {
     return $pretty_metric
 }
 
-ad_proc qal_first_nonempty_in_list {
+ad_proc -public qal_first_nonempty_in_list {
     some_list
 } {
     Returns the value of the first nonempty element in list, or an empty string if none found.
