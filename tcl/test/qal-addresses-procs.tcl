@@ -33,26 +33,141 @@ aa_register_case -cats {api smoke} qal_addresses_check {
                         }
                         aa_true "A1 Created a contact" $co_created_p
 
+                        # plan is to loop through:
+                        # make/save an address
+                        #  verify
+                        # do one of edit, trash or delete: 
+                        # one of the existing addresses
+                        #  verify
+                        # 
+                        # continue loop until all tests have been performed:
+                        # 1 address delete of postal and nonpostal types
+                        # 1 address trash of postal and nonpostal types
+                        # 1 address edit of postal and nonpostal types
+
+
                         set record_type_list [qal_address_type_keys]
                         # An empty type tells demo to make one up..
                         lappend record_type_list ""
 
-                        set a_idx [randomRange 3]
-                        set addrs_arr(record_type) [lindex $record_type_list $a_idx]
-                        set addrs_id [qal_demo_address_write addrs_arr $co_id]
-                        set addrs_id_is_nbr_p [qal_is_natural_number $addrs_id]
-                        aa_true "A1.1 qal_demo_address_write returns a valid address_id" $addrs_id_is_nbr_p
+                        # apt = address postal type
+                        # ant = address nonpostal type
+                        set apt_delete_p 1
+                        set apt_trash_p 1
+                        set apt_edit_p 1
+                        set ant_delete_p 1
+                        set ant_trash_p 1
+                        set ant_edit_p 1
+                        set more_to_test_p [expr { $apt_delete_p \
+                                                       || $apt_trash_p \
+                                                       || $apt_edit_p \
+                                                       || $ant_delete_p \
+                                                       || $ant_trash_p \
+                                                       || $ant_edit_p } ]
+                        set actions_list [create delete trash edit]
+                        set actions_list_len_1 [llength $actions_list]
+                        incr actions_list_len -1
+                        set i 0
+                        while { $more_to_test_p && $i < 1000 } {
+                            set a_idx [randomRange 3]
+                            set addrs_arr(record_type) [lindex $record_type_list $a_idx]
+                            set addrs_id [qal_demo_address_write addrs_arr $co_id]
+                            set addrs_id_is_nbr_p [qal_is_natural_number $addrs_id]
+                            aa_true "A1.1 qal_demo_address_write returns a valid address_id" $addrs_id_is_nbr_p
+                            
+                            set record_type [qal_address_type $addrs_id ]
+                            set record_type2 [qal_address_type $addrs_id $co_id]
+                            aa_equals "A1.2 qal_address_type calls to db match each other" $record_type $record_type2
+                         if { $addrs_arr(record_type) ne "" } {
+                                
+                                aa_equals "A1.3 qal_address_type from db matches expected/requested" $record_type $addrs_arr(record_type)
+                            } 
+                            
+                            set addrs2_arr [qal_address_read $addrs_id]
+                            # compare i/o
+                            set addrs2_keys_list [array names addrs2_arr]
+                            foreach key $addrs2_keys_list {
+                                aa_equals "A1.4 qal_address_read returns same as written with qal_address_write for key '${key}'" $addrs2_arr(${key}) $addrs_arr(${key})
+                                
+                            }
+                            
+                            # set sets of addresses for retesting
+                            if { $addrs_id_is_nbr_p } {
+                                set addrs_id_is_apt_p_arr(${addrs_id}) [qal_address_type_is_postal_q $record_type] 
+                                lappend addrs_ids_list $addrs_id
+                                set deleted_p_arr(${addrs_id}) 0
+                                set trashed_p_arr(${addrs_id}) 0
+                            }
 
-                        set record_type [qal_address_type $addrs_id ]
-                        set record_type2 [qal_address_type $addrs_id $co_id]
-                        aa_equals "A1.2 qal_address_type calls to db match each other" $record_type $record_type2
-                        if { $addrs_arr(record_type) ne "" } {
-                            aa_equals "A1.3 qal_address_type from db matches expected/requested" $record_type $addrs_arr(record_type)
-                        } 
+   
+                            #
+                            #  Choose one test
+                            #
+                            set addrs_ids_list_len_1 [llength $addrs_ids_list]
+                            incr addrs_ids_list_len_1 -1
+                            set co_id [lindex $addrs_ids_list [randomRange $addrs_ids_list_len_1]]
+                            
+                            if { [qal_address_type_is_postal_q $record_type] } {
+                                set do "apt"
+                            } else {
+                                set do "ant"
+                            }
+                            set action [lindex $actions_list [randomRange $actions_list_len_1]]
+                            append do "_" $action
+                            switch -exact -- $do {
+                                apt_edit {
+                                    set addrs_id [qal_demo_address_write addrs_arr $co_id]
+                                    set addrs_id_is_nbr_p [qal_is_natural_number $addrs_id]
+                                    aa_true "A1.1 qal_demo_address_write returns a valid address_id" $addrs_id_is_nbr_p
+                                    
+                                    set record_type [qal_address_type $addrs_id ]
+                                    set record_type2 [qal_address_type $addrs_id $co_id]
+                                    aa_equals "A1.2 qal_address_type calls to db match each other" $record_type $record_type2
+                                    if { $addrs_arr(record_type) ne "" } {
+                                        
+                                        aa_equals "A1.3 qal_address_type from db matches expected/requested" $record_type $addrs_arr(record_type)
+                                    } 
+                                    
+                                    set addrs2_arr [qal_address_read $addrs_id]
+                                    # compare i/o
+                                    set addrs2_keys_list [array names addrs2_arr]
+                                    foreach key $addrs2_keys_list {
+                                        aa_equals "A1.4 qal_address_read returns same as written with qal_address_write for key '${key}'" $addrs2_arr(${key}) $addrs_arr(${key})
+                                        
+                                    }
 
-                        set addrs2_arr [qal_address_read $addrs_id]
+                                    set apt_edit_p 0
+                                }
+                                apt_trash {
+                                    set apt_trash_p 0
+                                }
+                                apt_delete {
+                                    set apt_delete_p 0
+                                }
+                                ant_edit {
+                                    set ant_edit_p 0
+                                }
+                                ant_trash {
+                                    set ant_trash_p 0
+                                }
+                                ant_delete {
+                                    set ant_delete_p 0
+                                }
+                                default {
+                                    # ie. create..
+                                    # do nothing this time
+                                }
+                            }
 
-
+                            # finish while loop
+                            set more_to_test_p [expr { $apt_delete_p \
+                                                           || $apt_trash_p \
+                                                           || $apt_edit_p \
+                                                           || $ant_delete_p \
+                                                           || $ant_trash_p \
+                                                           || $ant_edit_p } ]
+                            incr i
+                        }
 
                         
 
