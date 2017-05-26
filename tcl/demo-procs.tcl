@@ -476,7 +476,7 @@ ad_proc -public qal_demo_address_write {
     Returns populated array of address_name_arr and address_id, or empty string if unsuccessful.
     <br/>
     <br/>
-    This demo uses these possible address <pre>record_type</pre>(s):
+    This demo uses these possible address <code>record_type</code>(s):
                      street_address \
                      mailing_address \
                      billing_address \
@@ -496,7 +496,7 @@ ad_proc -public qal_demo_address_write {
                      myspace \
                      secondlife \
                      SCaN \
-                     IDSN.
+                     IDSN
 
     @see qal_address_write
     @see qal_address_type_keys

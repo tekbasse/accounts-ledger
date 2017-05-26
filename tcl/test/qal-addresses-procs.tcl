@@ -33,15 +33,28 @@ aa_register_case -cats {api smoke} qal_addresses_check {
                         }
                         aa_true "A1 Created a contact" $co_created_p
 
-                        set a_idx [randomRange 2]
-                        set addrs_arr(address_type) [lindex $qal
+                        set record_type_list [qal_address_type_keys]
+                        # An empty type tells demo to make one up..
+                        lappend record_type_list ""
+
+                        set a_idx [randomRange 3]
+                        set addrs_arr(record_type) [lindex $record_type_list $a_idx]
+                        set addrs_id [qal_demo_address_write addrs_arr $co_id]
+                        set addrs_id_is_nbr_p [qal_is_natural_number $addrs_id]
+                        aa_true "A1.1 qal_demo_address_write returns a valid address_id" $addrs_id_is_nbr_p
+
+                        set record_type [qal_address_type $addrs_id ]
+                        set record_type2 [qal_address_type $addrs_id $co_id]
+                        aa_equals "A1.2 qal_address_type calls to db match each other" $record_type $record_type2
+                        if { $addrs_arr(record_type) ne "" } {
+                            aa_equals "A1.3 qal_address_type from db matches expected/requested" $record_type $addrs_arr(record_type)
+                        } 
+
+                        set addrs2_arr [qal_address_read $addrs_id]
 
 
-                        qal_demo_address_write addrs_arr $co_id
+
                         
-
-
-
 
 
 
