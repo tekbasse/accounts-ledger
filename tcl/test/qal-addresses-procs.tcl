@@ -35,6 +35,8 @@ aa_register_case -cats {api smoke} qal_addresses_check {
 
                         set a_idx [randomRange 2]
                         set addrs_arr(address_type) [lindex $qal
+
+
                         qal_demo_address_write addrs_arr $co_id
                         
 
