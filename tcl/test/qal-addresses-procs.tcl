@@ -105,7 +105,7 @@ aa_register_case -cats {api smoke} qal_addresses_check {
                             #
                             set addrs_ids_list_len_1 [llength $addrs_ids_list]
                             incr addrs_ids_list_len_1 -1
-                            set co_id [lindex $addrs_ids_list [randomRange $addrs_ids_list_len_1]]
+                            set addrs_id [lindex $addrs_ids_list [randomRange $addrs_ids_list_len_1]]
                             
                             if { [qal_address_type_is_postal_q $record_type] } {
                                 set do "apt"
@@ -114,25 +114,26 @@ aa_register_case -cats {api smoke} qal_addresses_check {
                             }
                             set action [lindex $actions_list [randomRange $actions_list_len_1]]
                             append do "_" $action
+                            # params: action co_id addrs_id
                             switch -exact -- $do {
                                 apt_edit {
-                                    set addrs_id [qal_demo_address_write addrs_arr $co_id]
-                                    set addrs_id_is_nbr_p [qal_is_natural_number $addrs_id]
-                                    aa_true "A1.1 qal_demo_address_write returns a valid address_id" $addrs_id_is_nbr_p
+                                    set addrs_arr [qal_address_read $addrs_id]
+                                    set addrs_id2 [qal_demo_address_write addrs_arr $co_id $addrs_id]
+                                    aa_equals "A1.${do}-1 qal_demo_address_write  returns same address_id" $addrs_id $addrs_id2
                                     
                                     set record_type [qal_address_type $addrs_id ]
                                     set record_type2 [qal_address_type $addrs_id $co_id]
-                                    aa_equals "A1.2 qal_address_type calls to db match each other" $record_type $record_type2
+                                    aa_equals "A1.${do}-2 qal_address_type calls to db match each other" $record_type $record_type2
                                     if { $addrs_arr(record_type) ne "" } {
                                         
-                                        aa_equals "A1.3 qal_address_type from db matches expected/requested" $record_type $addrs_arr(record_type)
+                                        aa_equals "A1.${do}-3 qal_address_type from db matches expected/requested" $record_type $addrs_arr(record_type)
                                     } 
                                     
                                     set addrs2_arr [qal_address_read $addrs_id]
                                     # compare i/o
                                     set addrs2_keys_list [array names addrs2_arr]
                                     foreach key $addrs2_keys_list {
-                                        aa_equals "A1.4 qal_address_read returns same as written with qal_address_write for key '${key}'" $addrs2_arr(${key}) $addrs_arr(${key})
+                                        aa_equals "A1.${do}-4 qal_address_read returns same as written with qal_address_write for key '${key}'" $addrs2_arr(${key}) $addrs_arr(${key})
                                         
                                     }
 
