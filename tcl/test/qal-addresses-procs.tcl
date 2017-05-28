@@ -64,7 +64,7 @@ aa_register_case -cats {api smoke} qal_addresses_check {
                                                        || $ant_delete_p \
                                                        || $ant_trash_p \
                                                        || $ant_edit_p } ]
-                        set actions_list [create edit trash delete]
+                        set actions_list [list create edit trash delete]
                         set actions_list_len_1 [llength $actions_list]
                         incr actions_list_len -1
                         set i 0
