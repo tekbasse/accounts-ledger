@@ -427,7 +427,7 @@ ad_proc -public qal_other_address_map_keys {
 ad_proc -public qal_addresses_keys {
     {separator ""}
 } {
-    Returns an ordered list of keys for the combined tables of qal_address and qal_other_address_map as qal_addresses_read: \
+    Special case of *_keys api for use with db api. Returns an ordered list of keys for the combined tables of qal_address and qal_other_address_map as qal_addresses_read: \
         contact_id \
         instance_id \
         addrs_id \

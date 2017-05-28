@@ -1014,16 +1014,17 @@ ad_proc -public qal_address_write {
 } {
     upvar 1 instance_id instance_id
     upvar 1 $arr_name a_arr
-    qal_other_address_map_defaults a_arr
-    qf_array_to_vars a_arr [qal_other_address_map_keys]
 
-    if { [qf_is_natural_number $contact_id] } {
+    if { $contact_id ne "" } {
         set a_arr(contact_id) $contact_id
     }
-    if { [qf_is_natural_number $addrs_id] } {
+    if { $addrs_id ne "" } {
         set a_arr(addrs_id) $addrs_id
     }
-
+    ns_log Notice "qal_address_write.1024. contact_id '${contact_id}' instance_id '${instance_id} notes '$a_arr(notes)'"
+    qal_other_address_map_defaults a_arr
+    qf_array_to_vars a_arr [qal_other_address_map_keys]
+    ns_log Notice "qal_address_write.1027. contact_id '${contact_id}' instance_id '${instance_id} notes '$notes'"
     # validations etc
     if { ![qf_is_natural_number $contact_id] } {
         set contact_id ""
@@ -1036,11 +1037,26 @@ ad_proc -public qal_address_write {
     }
 
     set record_type [string range $record_type 0 29]
+    if { $record_type eq "" } {
+        ns_log Warning "qal_address_write.1041: record_type '' is unexpected."
+        if { !$create_p } {
+            set record_type [qal_record_type $addrs_id]
+            if { $record_type ne "" } {
+                ns_log Warning "qal_address_write.1402: using record_type from existing addrs_id '${addrs_id}'"
+            } else {
+                ns_log Warning "qal_address_write.1403: Existing addrs_id '${addrs_id}' does not have a record_type"
+            }
+        } else {
+            set record_type "other"
+            ns_log Warning "qal_address_write.1404: Changing record_type to 'other' for addrs_id '${addrs_id}'"
+        }
+    }
     if { ![qf_is_natural_number $address_id] } {
         set address_id ""
     }
     if { ![qf_is_natural_number $sort_order] } {
         db_1row qal_other_address_map_c_recs_ct {select count(*) as addrs_id_ct from qal_other_address_map where instance_id=:instance_id and contact_id=:contact_id}
+        set sort_order [expr { $addrs_id_ct + 20 } ]
     }
     
     set created_s [qf_clock_scan $created]
@@ -1078,6 +1094,7 @@ ad_proc -public qal_address_write {
         if { $postal_address_p } {
             set address_id [qal_postal_address_postal_write a_arr]
         }
+        ns_log Notice "qal_address_write.1097. contact_id '${contact_id}' instance_id '${instance_id} notes '$notes'"
         db_dml qal_address_create_1 "insert into qal_other_address_map \
  ([qal_other_address_map_keys ","]) values ([qal_other_address_map_keys ",:"])"
     }

@@ -66,31 +66,36 @@ aa_register_case -cats {api smoke} qal_addresses_check {
                                                        || $ant_edit_p } ]
                         set actions_list [list create edit trash delete]
                         set actions_list_len_1 [llength $actions_list]
-                        incr ctions_list_len -1
+                        incr actions_list_len -1
                         set i 0
-                        while { $more_to_test_p && $i < 100 } {
+                        while { $more_to_test_p && $i < 50 } {
                             set a_idx [randomRange 3]
                             set addrs_arr(record_type) [lindex $record_type_list $a_idx]
                             set addrs_id [qal_demo_address_write addrs_arr $co_id]
                             set addrs_id_is_nbr_p [qf_is_natural_number $addrs_id]
-                            aa_true "A1.1 qal_demo_address_write returns a valid address_id" $addrs_id_is_nbr_p
+                            aa_true "A1.1 qal_demo_address_write returns a valid addrs_id '${addrs_id}'" $addrs_id_is_nbr_p
                             
                             set record_type [qal_address_type $addrs_id ]
                             set record_type2 [qal_address_type $addrs_id $co_id]
-                            aa_equals "A1.2 qal_address_type calls to db match each other" $record_type $record_type2
+                            aa_equals "A1.2 qal_address_type calls are consistent record_type '${record_type}' record_type2 '${record_type2}'" $record_type $record_type2
                             if { $addrs_arr(record_type) ne "" } {
-                                
-                                aa_equals "A1.3 qal_address_type from db matches expected/requested" $record_type $addrs_arr(record_type)
-                            } 
-                            
+                                # filter out cases that we leave to qal_demo_address_write to make
+                                aa_equals "A1.3 qal_address_type from db matches expected/specified type" $record_type $addrs_arr(record_type)
+                            } else {
+                                aa_true "A1.3.b qal_address_type returns a record_type" 0
+                            }
                             set addrs2_list [qal_address_read $addrs_id]
                             array unset addrs2_arr
                             array set addrs2_arr $addrs2_list
                             # compare i/o
                             set addrs2_keys_list [array names addrs2_arr]
-                            foreach key $addrs2_keys_list {
-                                aa_equals "A1.4 qal_address_read returns same as written with qal_address_write for key '${key}'" $addrs2_arr(${key}) $addrs_arr(${key})
-                                
+                            if { [llength $addrs2_keys_list] > 0 } {
+                                foreach key $addrs2_keys_list {
+                                    aa_equals "A1.4 qal_address_read returns same as written with qal_address_write for key '${key}'" $addrs2_arr(${key}) $addrs_arr(${key})
+                                    
+                                }
+                            } else {
+                                aa_true "A1.4b qal_address_read returns a full address record" 0
                             }
                             
                             # set sets of addresses for retesting
