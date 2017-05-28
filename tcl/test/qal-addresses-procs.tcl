@@ -66,9 +66,9 @@ aa_register_case -cats {api smoke} qal_addresses_check {
                                                        || $ant_edit_p } ]
                         set actions_list [list create edit trash delete]
                         set actions_list_len_1 [llength $actions_list]
-                        incr actions_list_len -1
+                        incr ctions_list_len -1
                         set i 0
-                        while { $more_to_test_p && $i < 1000 } {
+                        while { $more_to_test_p && $i < 100 } {
                             set a_idx [randomRange 3]
                             set addrs_arr(record_type) [lindex $record_type_list $a_idx]
                             set addrs_id [qal_demo_address_write addrs_arr $co_id]
@@ -114,7 +114,7 @@ aa_register_case -cats {api smoke} qal_addresses_check {
                             } else {
                                 set do "ant"
                             }
-                            set action [lindex $actions_list [randomRange $action_list_len_1]]
+                            set action [lindex $actions_list [randomRange $actions_list_len_1]]
                             append do "_" $action
 
                             # params: action co_id addrs_id
@@ -159,7 +159,7 @@ aa_register_case -cats {api smoke} qal_addresses_check {
                                     }
                                     aa_true "A1.${do}-2 qal_address_read '${addrs_id}' returns empty list" $verified_p
                                     set t_idx [lsearch -exact $addrs_ids_list $addrs_id]
-                                    set addrs_ids_list [lreplace $addrs_ids_list $t_idx $t_idx
+                                    set addrs_ids_list [lreplace $addrs_ids_list $t_idx $t_idx]
                                     set apt_trash_p 0
                                     set trashed_p_arr(${addrs_id}) 1
                                 }
@@ -174,7 +174,7 @@ aa_register_case -cats {api smoke} qal_addresses_check {
                                     }
                                     aa_true "A1.${do}-2 qal_address_read '${addrs_id}' returns empty list" $verified_p
                                     set t_idx [lsearch -exact $addrs_ids_list $addrs_id]
-                                    set addrs_ids_list [lreplace $addrs_ids_list $t_idx $t_idx
+                                    set addrs_ids_list [lreplace $addrs_ids_list $t_idx $t_idx]
                                     set deleted_p_arr(${addrs_id}) 1
                                     set apt_delete_p 0
                                 }
@@ -216,7 +216,7 @@ aa_register_case -cats {api smoke} qal_addresses_check {
                                     }
                                     aa_true "A1.${do}-2 qal_address_read '${addrs_id}' returns empty list" $verified_p
                                     set t_idx [lsearch -exact $addrs_ids_list $addrs_id]
-                                    set addrs_ids_list [lreplace $addrs_ids_list $t_idx $t_idx
+                                    set addrs_ids_list [lreplace $addrs_ids_list $t_idx $t_idx]
                                     set trashed_p_arr(${addrs_id}) 1
                                     set ant_trash_p 0
                                 }
@@ -231,7 +231,7 @@ aa_register_case -cats {api smoke} qal_addresses_check {
                                     }
                                     aa_true "A1.${do}-2 qal_address_read '${addrs_id}' returns empty list" $verified_p
                                     set t_idx [lsearch -exact $addrs_ids_list $addrs_id]
-                                    set addrs_ids_list [lreplace $addrs_ids_list $t_idx $t_idx
+                                    set addrs_ids_list [lreplace $addrs_ids_list $t_idx $t_idx]
                                     set deleted_p_arr(${addrs_id}) 1
                                     set ant_delete_p 0
                                 }

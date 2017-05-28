@@ -184,7 +184,7 @@ ad_proc -public qal_address_read {
     Returns a name value list of one address record for a contact. 
     Returns an empty list if none found.
 } {
-    upvar 1 instance_id instance_i
+    upvar 1 instance_id instance_id
     upvar 1 user_id user_id
     set return_lists [qal_addresses_read [list $addrs_id]]
     # list is in order of qal_address_keys
@@ -217,7 +217,7 @@ ad_proc -public qal_addresses_read {
     @see qal_other_address_map_keys for order of field (key) values..
 } {
     # Note that address_id is different than addrs_id.
-    # address_id is for internal references to postal addresses only.
+    # Do not use address_id. It is for internal references to postal addresses only.
 
     upvar 1 instance_id instance_id
     upvar 1 user_id user_id
@@ -229,17 +229,15 @@ ad_proc -public qal_addresses_read {
         }
     }
     set addrs_ids_list [hf_list_filter_by_natural_number $addrs_id_list]
-    set allowed_addrs_ids [qal_address_ids_of_user_id $user_id]
-    set intersect_ids [set_intersection $addrs_ids_list $allowed_addrs_ids]
-
-    # If this query doesn't return all types of addresses, 
-    # consider making two queries: qal_addresses_read for non postal addresses
-    # and a qal_contact_address_postal_read addrs_id 
-
-    set rows_lists [db_list_of_lists qal_address_get "select [qal_addresses_keys ","] \
+    set allowed_contact_ids [qal_contact_ids_of_user_id $user_id]
+    set rows_lists [list ]
+    if { [llength $allowed_contact_ids] > 0 && [llength $addrs_ids_list ] > 0 } {
+        set rows_lists [db_list_of_lists qal_address_get "select [qal_addresses_keys ","] \
         from qal_other_address_map om, qal_address ad \
         where om.addrs_id=ad.id and om.instance_id=ad.instance_id \
         and om.instance_id=:instance_id and trashed_p!='1' \
-        and om.addrs_id in ([template::util::tcl_to_sql_list $intersect_ids_list])" ]
+        and om.contact_id in ([template::util::tcl_to_sql_list $allowed_contact_ids]) \
+        and om.addrs_id in ([template::util::tcl_to_sql_list $addrs_ids_list])" ]
+    }
     return $rows_lists
 }

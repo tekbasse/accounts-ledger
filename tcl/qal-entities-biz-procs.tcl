@@ -1093,32 +1093,33 @@ ad_proc -public qal_address_delete {
     User must be a package admin.
 } {
     set success_p 1
-    if { $address_id_list ne "" } {
+    if { $addrs_id_list ne "" } {
         set user_id [ad_conn user_id]
         set instance_id [qc_set_instance_id]
         set admin_p [permission::permission_p -party_id $user_id \
                          -object_id [ad_conn package_id] -privilege admin]
         set success_p $admin_p
         if { $admin_p } {
-            if { [llength $address_id_list] > 0 } {
-                set validated_p [hf_natural_number_list_validate $address_id_list]
+            if { [llength $addrs_id_list] > 0 } {
+                set validated_p [hf_natural_number_list_validate $addrs_id_list]
             } else {
                 set validated_p 0
             }
             if { $validated_p } {
+                set address_id_list [db_list qal_address_id_2_d "\
+                    select address_id from qal_other_address_map \
+                    where instance_id=:instance_id \
+                    and addrs_id in ([template::util::tcl_to_sql_list $addrs_id_list])"]
+                
                 db_transaction {
-                    set address_id_list [db_list qal_address_id_2_d \
-                                             "select address_id from qal_other_address_map \
-                         where instance_id=:instance_id \
-                         and addrs_id in ([template::util::tcl_to_sql_list $addrs_id_list])"]
                     if { [string length $address_id_list ] > 0 } {
                         db_dml qal_address_ids_delete "delete from qal_address \
-                            where instance_id=:instance_id and address_id in \
-                             ([template::util::tcl_to_sql_list $address_id_list])"
+                            where instance_id=:instance_id \
+                            and address_id in ([template::util::tcl_to_sql_list $address_id_list])"
                     }
-                    db_dml qal_addrs_ids_delete "delete from qal_address \
-                            where instance_id=:instance_id and addrs_id in \
-                            ([template::util::tcl_to_sql_list $addrs_id_list])"
+                    db_dml qal_addrs_ids_delete "delete from qal_other_address_map \
+                        where instance_id=:instance_id \
+                        and addrs_id in ([template::util::tcl_to_sql_list $addrs_id_list])"
                 } on_error {
                     set success_p 0
                 }
@@ -1137,26 +1138,26 @@ ad_proc -public qal_address_trash {
     Trash one or more qal_contact.*_addrs_id address records, where * is street, mailing or billing.
 } {
     set success_p 0
-    if { $address_id_list ne "" } {
+    if { $addrs_id_list ne "" } {
         set user_id [ad_conn user_id]
         set instance_id [qc_set_instance_id]
-        set address_id_list_len [llength $address_id_list]
-        if { $address_id_list_len > 0 } {
-            set validated_p [hf_natural_number_list_validate $address_id_list]
+        set addrs_id_list_len [llength $addrs_id_list]
+        if { $addrs_id_list_len > 0 } {
+            set validated_p [hf_natural_number_list_validate $addrs_id_list]
         } else {
             set validated_p 0
         }
         if { $validated_p } {
             set instance_write_p [qc_permission_p $user_id $instance_id non_assets write $instance_id]
             if { $instance_write_p } {
-                set filtered_address_id_list $address_id_list
+                set filtered_addrs_id_list $addrs_id_list
             } else {
-                set filtered_address_id_list [list ]
+                set filtered_addrs_id_list [list ]
                 set at_least_one_write_p 0
-                foreach address_id $address_id_list {
-                    if { [qc_permission_p $user_id $address_id non_assets write $instance_id] } {
+                foreach addrs_id $addrs_id_list {
+                    if { [qc_permission_p $user_id $addrs_id non_assets write $instance_id] } {
                         set at_least_one_write_p 1
-                        lappend filtered_address_id_list $address_id
+                        lappend filtered_addrs_id_list $addrs_id
                     }
                 }
             } 
@@ -1167,19 +1168,19 @@ ad_proc -public qal_address_trash {
                     db_dml qal_addrs_ids_trash "update qal_other_address_map \
                             set trashed_p='1',trashed_by=:user_id,trashed_ts=now() \
                             where instance_id=:instance_id and trashed_p!='1' and addrs_id in \
-                            ([template::util::tcl_to_sql_list $filtered_address_id_list])"
+                            ([template::util::tcl_to_sql_list $filtered_addrs_id_list])"
                     db_dml qal_street_addrs_ids_trash "update qal_contact \
                             set street_addrs_id=:null
                              where instance_id=:instance_id and trashed_p!='1' and street_addrs_id in \
-                            ([template::util::tcl_to_sql_list $filtered_address_id_list])"
+                            ([template::util::tcl_to_sql_list $filtered_addrs_id_list])"
                     db_dml qal_mailing_addrs_ids_trash "update qal_contact \
                             set mailing_addrs_id=:null
                              where instance_id=:instance_id and trashed_p!='1' and mailing_addrs_id in \
-                            ([template::util::tcl_to_sql_list $filtered_address_id_list])"
+                            ([template::util::tcl_to_sql_list $filtered_addrs_id_list])"
                     db_dml qal_billing_addrs_ids_trash "update qal_contact \
                             set billing_addrs_id=:null
                              where instance_id=:instance_id and trashed_p!='1' and billing_addrs_id in \
-                            ([template::util::tcl_to_sql_list $filtered_address_id_list])"
+                            ([template::util::tcl_to_sql_list $filtered_addrs_id_list])"
                 } on_error {
                     set success_p 0
                 }
@@ -1206,7 +1207,7 @@ ad_proc -public qal_address_postal_set_primary {
     the contact's primary postal address.
     Returns 1 if successful, otherwise returns 0.
 } {
-    upvar1 instance_id instance_id
+    upvar 1 instance_id instance_id
     # supplied address_type is target address type
     set success_p 0
     set address_type_new ""
