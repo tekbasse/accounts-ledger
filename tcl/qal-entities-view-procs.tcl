@@ -7,7 +7,7 @@ ad_library {
 ad_proc -public qal_contact_read {
     contact_id
 } {
-    Returns a name value list of one contact record.
+    Returns a name value list of one contact record, or empty list if none found.
 } {
     upvar 1 instance_id instance_id
     upvar 1 user_id user_id
@@ -34,7 +34,7 @@ ad_proc -public qal_contact_read {
 ad_proc -public qal_contacts_read {
     contact_id_list
 } {
-    Returns list of lists; Each list is an contact record for each contact_id in contact_id_list as a list of field (key) values.
+    Returns list of lists; Each list is an contact record for each contact_id in contact_id_list as a list of field (key) values. Returns an empty list if none found.
     
     @param contact_id_list
 
@@ -73,7 +73,7 @@ ad_proc -public qal_contacts_read {
 ad_proc -public qal_customer_read {
     customer_id
 } {
-    Returns a name value list of one customer record.
+    Returns a name value list of one customer record. Returns an empty list if none found.
 } {
     upvar 1 instance_id instance_id
     upvar 1 user_id user_id
@@ -96,7 +96,7 @@ ad_proc -public qal_customer_read {
 ad_proc -public qal_customers_read {
     customer_id_list
 } {
-    Returns list of lists; Each list is an customer record for each customer_id in customer_id_list as a list of customer record values.
+    Returns list of lists; Each list is an customer record for each customer_id in customer_id_list as a list of customer record values. Returns and empty list if none found.
     
     @param customer_id_list
 
@@ -127,7 +127,7 @@ ad_proc -public qal_customers_read {
 ad_proc -public qal_vendor_read {
     vendor_id
 } {
-    Returns a name value list of one vendor record.
+    Returns a name value list of one vendor record. Returns an empty list if none found.
 } {
     upvar 1 instance_id instance_id
     upvar 1 user_id user_id
@@ -150,7 +150,8 @@ ad_proc -public qal_vendor_read {
 ad_proc -public qal_vendors_read {
     vendor_id_list
 } {
-    Returns list of lists; Each list is an vendor record for each vendor_id in vendor_id_list as a list of vendor record values.
+    Returns list of lists; Each list is an vendor record for each vendor_id in vendor_id_list as a list of vendor record values. 
+    Returns an empty list if none found.
     
     @param vendor_id_list
 
@@ -180,7 +181,8 @@ ad_proc -public qal_vendors_read {
 ad_proc -public qal_address_read {
     addrs_id
 } {
-    Returns a name value list of one address record for a contact.
+    Returns a name value list of one address record for a contact. 
+    Returns an empty list if none found.
 } {
     upvar 1 instance_id instance_i
     upvar 1 user_id user_id
@@ -205,7 +207,8 @@ ad_proc -public qal_addresses_read {
     addrs_id_list
 } {
     Returns list of lists; Each list is an address record for each address_id in address_id_list as a list of address record values. Each list contains ordered values of these ordered names from qal_other_address_map and qal_address tables: contact_id, instance_id, addrs_id, record_type, address_id, sort_order, created, created_by, trashed_p, trashed_by, trashed_ts, accounts_name, notes, address_type, address0, address1, address2, city, state, postal_code, country_code, attn, phone, phone_time, fax, email, cc, bcc
-    
+    <br/>
+    Returns an empty list if none found.
     @param address_id_list
 
     @see qal_address_keys and

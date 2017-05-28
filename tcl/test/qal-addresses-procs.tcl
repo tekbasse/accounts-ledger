@@ -64,7 +64,7 @@ aa_register_case -cats {api smoke} qal_addresses_check {
                                                        || $ant_delete_p \
                                                        || $ant_trash_p \
                                                        || $ant_edit_p } ]
-                        set actions_list [create delete trash edit]
+                        set actions_list [create edit trash delete]
                         set actions_list_len_1 [llength $actions_list]
                         incr actions_list_len -1
                         set i 0
@@ -78,12 +78,14 @@ aa_register_case -cats {api smoke} qal_addresses_check {
                             set record_type [qal_address_type $addrs_id ]
                             set record_type2 [qal_address_type $addrs_id $co_id]
                             aa_equals "A1.2 qal_address_type calls to db match each other" $record_type $record_type2
-                         if { $addrs_arr(record_type) ne "" } {
+                            if { $addrs_arr(record_type) ne "" } {
                                 
                                 aa_equals "A1.3 qal_address_type from db matches expected/requested" $record_type $addrs_arr(record_type)
                             } 
                             
-                            set addrs2_arr [qal_address_read $addrs_id]
+                            set addrs2_list [qal_address_read $addrs_id]
+                            array unset addrs2_arr
+                            array set addrs2_arr $addrs2_list
                             # compare i/o
                             set addrs2_keys_list [array names addrs2_arr]
                             foreach key $addrs2_keys_list {
@@ -112,12 +114,17 @@ aa_register_case -cats {api smoke} qal_addresses_check {
                             } else {
                                 set do "ant"
                             }
-                            set action [lindex $actions_list [randomRange $actions_list_len_1]]
+                            set action [lindex $actions_list [randomRange $action_list_len_1]]
                             append do "_" $action
+
                             # params: action co_id addrs_id
+
                             switch -exact -- $do {
                                 apt_edit {
-                                    set addrs_arr [qal_address_read $addrs_id]
+                                    array unset addrs_arr
+                                    set addrs_list [qal_address_read $addrs_id]
+                                    array unset addrs_arr
+                                    array set addrs_arr $addrs_list
                                     set addrs_id2 [qal_demo_address_write addrs_arr $co_id $addrs_id]
                                     aa_equals "A1.${do}-1 qal_demo_address_write  returns same address_id" $addrs_id $addrs_id2
                                     
@@ -129,29 +136,103 @@ aa_register_case -cats {api smoke} qal_addresses_check {
                                         aa_equals "A1.${do}-3 qal_address_type from db matches expected/requested" $record_type $addrs_arr(record_type)
                                     } 
                                     
-                                    set addrs2_arr [qal_address_read $addrs_id]
+                                    set addrs2_list [qal_address_read $addrs_id]
+                                    array unset addrs2_arr
+                                    array set addrs2_arr $addrs2_list
                                     # compare i/o
                                     set addrs2_keys_list [array names addrs2_arr]
                                     foreach key $addrs2_keys_list {
                                         aa_equals "A1.${do}-4 qal_address_read returns same as written with qal_address_write for key '${key}'" $addrs2_arr(${key}) $addrs_arr(${key})
                                         
                                     }
-
                                     set apt_edit_p 0
                                 }
                                 apt_trash {
+
+                                    set success_p [qal_address_trash $addrs_id]
+                                    aa_true "A1.${do}-1 qal_address_trash '${addrs_id}' returns success" $success_p
+                                    set addrs_list [qal_address_read $addrs_id]
+                                    if { [llength $addrs_list ] == 0 } {
+                                        set verified_p 1
+                                    } else {
+                                        set verified_p 0
+                                    }
+                                    aa_true "A1.${do}-2 qal_address_read '${addrs_id}' returns empty list" $verified_p
+                                    set t_idx [lsearch -exact $addrs_ids_list $addrs_id]
+                                    set addrs_ids_list [lreplace $addrs_ids_list $t_idx $t_idx
                                     set apt_trash_p 0
+                                    set trashed_p_arr(${addrs_id}) 1
                                 }
                                 apt_delete {
+                                    set success_p [qal_address_delete $addrs_id]
+                                    aa_true "A1.${do}-1 qal_address_delete '${addrs_id}' returns success" $success_p
+                                    set addrs_list [qal_address_read $addrs_id]
+                                    if { [llength $addrs_list ] == 0 } {
+                                        set verified_p 1
+                                    } else {
+                                        set verified_p 0
+                                    }
+                                    aa_true "A1.${do}-2 qal_address_read '${addrs_id}' returns empty list" $verified_p
+                                    set t_idx [lsearch -exact $addrs_ids_list $addrs_id]
+                                    set addrs_ids_list [lreplace $addrs_ids_list $t_idx $t_idx
+                                    set deleted_p_arr(${addrs_id}) 1
                                     set apt_delete_p 0
                                 }
-                                ant_edit {
-                                    set ant_edit_p 0
+                                ent_edit {
+                                    array unset addrs_arr
+                                    set addrs_list [qal_address_read $addrs_id]
+                                    array unset addrs_arr
+                                    array set addrs_arr $addrs_list
+                                    set addrs_id2 [qal_demo_address_write addrs_arr $co_id $addrs_id]
+                                    aa_equals "A1.${do}-1 qal_demo_address_write  returns same address_id" $addrs_id $addrs_id2
+                                    
+                                    set record_type [qal_address_type $addrs_id ]
+                                    set record_type2 [qal_address_type $addrs_id $co_id]
+                                    aa_equals "A1.${do}-2 qal_address_type calls to db match each other" $record_type $record_type2
+                                    if { $addrs_arr(record_type) ne "" } {
+                                        
+                                        aa_equals "A1.${do}-3 qal_address_type from db matches expected/requested" $record_type $addrs_arr(record_type)
+                                    } 
+                                    
+                                    set addrs2_list [qal_address_read $addrs_id]
+                                    array unset addrs2_arr
+                                    array set addrs2_arr $addrs2_list
+                                    # compare i/o
+                                    set addrs2_keys_list [array names addrs2_arr]
+                                    foreach key $addrs2_keys_list {
+                                        aa_equals "A1.${do}-4 qal_address_read returns same as written with qal_address_write for key '${key}'" $addrs2_arr(${key}) $addrs_arr(${key})
+                                        
+                                    }
+                                    set ent_edit_p 0
                                 }
                                 ant_trash {
+                                    set success_p [qal_address_trash $addrs_id]
+                                    aa_true "A1.${do}-1 qal_address_trash '${addrs_id}' returns success" $success_p
+                                    set addrs_list [qal_address_read $addrs_id]
+                                    if { [llength $addrs_list ] == 0 } {
+                                        set verified_p 1
+                                    } else {
+                                        set verified_p 0
+                                    }
+                                    aa_true "A1.${do}-2 qal_address_read '${addrs_id}' returns empty list" $verified_p
+                                    set t_idx [lsearch -exact $addrs_ids_list $addrs_id]
+                                    set addrs_ids_list [lreplace $addrs_ids_list $t_idx $t_idx
+                                    set trashed_p_arr(${addrs_id}) 1
                                     set ant_trash_p 0
                                 }
                                 ant_delete {
+                                    set success_p [qal_address_delete $addrs_id]
+                                    aa_true "A1.${do}-1 qal_address_delete '${addrs_id}' returns success" $success_p
+                                    set addrs_list [qal_address_read $addrs_id]
+                                    if { [llength $addrs_list ] == 0 } {
+                                        set verified_p 1
+                                    } else {
+                                        set verified_p 0
+                                    }
+                                    aa_true "A1.${do}-2 qal_address_read '${addrs_id}' returns empty list" $verified_p
+                                    set t_idx [lsearch -exact $addrs_ids_list $addrs_id]
+                                    set addrs_ids_list [lreplace $addrs_ids_list $t_idx $t_idx
+                                    set deleted_p_arr(${addrs_id}) 1
                                     set ant_delete_p 0
                                 }
                                 default {
