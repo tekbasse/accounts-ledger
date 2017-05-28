@@ -511,7 +511,8 @@ ad_proc -public qal_demo_address_write {
         set a_arr(addrs_id) $addrs_id
     }
 
-    qf_array_to_vars a_arr [qal_addresses_keys]
+    set a_arr(instance_id) $instance_id
+    qf_array_to_vars a_arr [qal_other_address_map_keys]
 
     if { $a_arr(record_type) eq "" } {
         # Use of any specific trademark names in text without font or logo representation 
@@ -539,13 +540,14 @@ ad_proc -public qal_demo_address_write {
                          secondlife \
                          SCaN \
                          IDSN ]
-        set rt_len [llength $rt_list]
-        incr rt_len -1
-        set record_type [lindex $rt_list [randomRange $rt_len]]
+        set rt_len_1 [llength $rt_list]
+        incr rt_len_1 -1
+        set record_type [lindex $rt_list [randomRange $rt_len_1]]
     }
     set is_postal_p [qal_address_type_is_postal_q $record_type]
+    ns_log Notice "qal_demo_address_write.547. record_type '${record_type}' is_postal '${is_postal_p}' instance_id '${instance_id}'"
     if { $is_postal_p } {
-
+        qf_array_to_vars a_arr [qal_address_keys]
         set word_count [randomRange 3]
         incr word_count
         set syllables [randomRange 3]

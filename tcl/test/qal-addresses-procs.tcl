@@ -11,7 +11,7 @@ aa_register_case -cats {api smoke} qal_addresses_check {
             # -rollback \
                         ns_log Notice "aa_register_case.13: Begin test contact_check"
 
-                        set instance_id [ad_conn package_id]
+                        set instance_id [qc_set_instance_id]
                         # use the sysadmin user, because we aren't testing permissions
                         set sysowner_email [ad_system_owner]
                         set sysowner_user_id [party::get_by_email -email $sysowner_email]
@@ -31,6 +31,7 @@ aa_register_case -cats {api smoke} qal_addresses_check {
                         if { $co_created_p } {
                             set perm_granted_p [qc_user_role_add $co_id $this_user_id $org_admin_id $instance_id]
                         }
+                        ns_log Notice "qal-entities-procs.tcl.34: this_user_id ${this_user_id}' org_admin_id '${org_admin_id}' user_id '${user_id}' instance_id '${instance_id}'"
                         aa_true "A1 Created a contact" $co_created_p
 
                         # plan is to loop through:
@@ -69,6 +70,7 @@ aa_register_case -cats {api smoke} qal_addresses_check {
                         incr actions_list_len -1
                         set i 0
                         while { $more_to_test_p && $i < 50 } {
+                            ns_log Notice "qal-entities-procs.tcl.73: this_user_id ${this_user_id}' org_admin_id '${org_admin_id}' user_id '${user_id}' instance_id '${instance_id}'"
                             set a_idx [randomRange 3]
                             set addrs_arr(record_type) [lindex $record_type_list $a_idx]
                             set addrs_id [qal_demo_address_write addrs_arr $co_id]
