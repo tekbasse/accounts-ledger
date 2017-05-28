@@ -72,7 +72,7 @@ aa_register_case -cats {api smoke} qal_addresses_check {
                             set a_idx [randomRange 3]
                             set addrs_arr(record_type) [lindex $record_type_list $a_idx]
                             set addrs_id [qal_demo_address_write addrs_arr $co_id]
-                            set addrs_id_is_nbr_p [qal_is_natural_number $addrs_id]
+                            set addrs_id_is_nbr_p [qf_is_natural_number $addrs_id]
                             aa_true "A1.1 qal_demo_address_write returns a valid address_id" $addrs_id_is_nbr_p
                             
                             set record_type [qal_address_type $addrs_id ]

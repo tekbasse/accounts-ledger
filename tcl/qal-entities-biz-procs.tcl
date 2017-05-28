@@ -979,6 +979,7 @@ ad_proc -public qal_address_create {
 ad_proc -public qal_address_write {
     arr_name
     {contact_id ""}
+    {addrs_id ""}
 } {
     Writes a new revision to an existing qal_address record.
     If id is empty, creates a new record and returns the new id.
@@ -1013,11 +1014,15 @@ ad_proc -public qal_address_write {
 } {
     upvar 1 instance_id instance_id
     upvar 1 $arr_name a_arr
-    if { $contact_id ne "" } {
-        set a_arr(contact_id) $contact_id
-    }
     qal_other_address_map_defaults a_arr
     qf_array_to_vars a_arr [qal_other_address_map_keys]
+
+    if { [qf_is_natural_number $contact_id] } {
+        set a_arr(contact_id) $contact_id
+    }
+    if { [qf_is_natural_number $addrs_id] } {
+        set a_arr(addrs_id) $addrs_id
+    }
 
     # validations etc
     if { ![qf_is_natural_number $contact_id] } {

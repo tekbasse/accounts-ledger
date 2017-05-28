@@ -186,7 +186,7 @@ ad_proc -public qal_address_read {
 } {
     upvar 1 instance_id instance_i
     upvar 1 user_id user_id
-    set return_lists [qal_addresses_read [list $address_id]]
+    set return_lists [qal_addresses_read [list $addrs_id]]
     # list is in order of qal_address_keys
     set return_val_list [lindex $return_lists 0]
     set return_list [list ]
@@ -206,14 +206,19 @@ ad_proc -public qal_address_read {
 ad_proc -public qal_addresses_read {
     addrs_id_list
 } {
-    Returns list of lists; Each list is an address record for each address_id in address_id_list as a list of address record values. Each list contains ordered values of these ordered names from qal_other_address_map and qal_address tables: contact_id, instance_id, addrs_id, record_type, address_id, sort_order, created, created_by, trashed_p, trashed_by, trashed_ts, accounts_name, notes, address_type, address0, address1, address2, city, state, postal_code, country_code, attn, phone, phone_time, fax, email, cc, bcc
+    Returns list of lists; Each list is an address record for each addrs_id in address_id_list as a list of address record values. Each list contains ordered values of these ordered names from qal_other_address_map and qal_address tables: contact_id, instance_id, addrs_id, record_type, address_id, sort_order, created, created_by, trashed_p, trashed_by, trashed_ts, accounts_name, notes, address_type, address0, address1, address2, city, state, postal_code, country_code, attn, phone, phone_time, fax, email, cc, bcc
     <br/>
     Returns an empty list if none found.
+    <br/>
+    Note that addrs_id reference is for table.field <code>qal_other_address_map.addrs_id</code> not <code>.address_id</code>.
     @param address_id_list
 
     @see qal_address_keys and
     @see qal_other_address_map_keys for order of field (key) values..
 } {
+    # Note that address_id is different than addrs_id.
+    # address_id is for internal references to postal addresses only.
+
     upvar 1 instance_id instance_id
     upvar 1 user_id user_id
     if { ![info exists user_id] } {
@@ -223,17 +228,18 @@ ad_proc -public qal_addresses_read {
             set user_id ""
         }
     }
-    set address_ids_list [hf_list_filter_by_natural_number $address_id_list]
-    set allowed_address_ids [qal_address_ids_of_user_id $user_id]
-    set intersect_ids [set_intersection $address_ids_list $allowed_address_ids]
+    set addrs_ids_list [hf_list_filter_by_natural_number $addrs_id_list]
+    set allowed_addrs_ids [qal_address_ids_of_user_id $user_id]
+    set intersect_ids [set_intersection $addrs_ids_list $allowed_addrs_ids]
 
     # If this query doesn't return all types of addresses, 
     # consider making two queries: qal_addresses_read for non postal addresses
     # and a qal_contact_address_postal_read addrs_id 
+
     set rows_lists [db_list_of_lists qal_address_get "select [qal_addresses_keys ","] \
         from qal_other_address_map om, qal_address ad \
         where om.addrs_id=ad.id and om.instance_id=ad.instance_id \
         and om.instance_id=:instance_id and trashed_p!='1' \
-        and om.addrs_id in ([template::util::tcl_to_sql_list $address_ids_list])" ]
+        and om.addrs_id in ([template::util::tcl_to_sql_list $intersect_ids_list])" ]
     return $rows_lists
 }
