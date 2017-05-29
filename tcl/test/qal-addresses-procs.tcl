@@ -84,7 +84,12 @@ aa_register_case -cats {api smoke} qal_addresses_check {
                                 # filter out cases that we leave to qal_demo_address_write to make
                                 aa_equals "A1.3 qal_address_type from db matches expected/specified type" $record_type $addrs_arr(record_type)
                             } else {
-                                aa_true "A1.3.b qal_address_type returns a record_type" 0
+                                if { $record_type eq "other" } {
+                                    set blank_to_other_p 1
+                                } else {
+                                    set blank_to_other_p 0
+                                }
+                                aa_true "A1.3.b qal_address_type returns 'other' when demo submits ''" $blank_to_other_p 
                             }
                             set addrs2_list [qal_address_read $addrs_id]
                             array unset addrs2_arr
@@ -125,7 +130,7 @@ aa_register_case -cats {api smoke} qal_addresses_check {
                             append do "_" $action
 
                             # params: action co_id addrs_id
-
+                            ns_log Notice "qal-addresses-procs.tcl.133: unit test: do '${do}'
                             switch -exact -- $do {
                                 apt_edit {
                                     array unset addrs_arr

@@ -1123,6 +1123,7 @@ ad_proc -public qal_address_delete {
                 set validated_p 0
             }
             if { $validated_p } {
+                set address_id_list [list ]
                 set address_id_list [db_list qal_address_id_2_d "\
                     select address_id from qal_other_address_map \
                     where instance_id=:instance_id \
@@ -1132,7 +1133,7 @@ ad_proc -public qal_address_delete {
                     if { [string length $address_id_list ] > 0 } {
                         db_dml qal_address_ids_delete "delete from qal_address \
                             where instance_id=:instance_id \
-                            and address_id in ([template::util::tcl_to_sql_list $address_id_list])"
+                            and id in ([template::util::tcl_to_sql_list $address_id_list])"
                     }
                     db_dml qal_addrs_ids_delete "delete from qal_other_address_map \
                         where instance_id=:instance_id \
