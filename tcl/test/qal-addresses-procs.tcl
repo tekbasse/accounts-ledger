@@ -130,7 +130,7 @@ aa_register_case -cats {api smoke} qal_addresses_check {
                             append do "_" $action
 
                             # params: action co_id addrs_id
-                            ns_log Notice "qal-addresses-procs.tcl.133: unit test: do '${do}'
+                            ns_log Notice "qal-addresses-procs.tcl.133: unit test: do '${do}'"
                             switch -exact -- $do {
                                 apt_edit {
                                     array unset addrs_arr
