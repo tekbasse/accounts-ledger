@@ -1079,9 +1079,10 @@ ad_proc -public qal_address_write {
             set created [qf_clock_format [clock seconds]]
         } else {
             if { $created eq "" } {
-                db_0or1row qal_contact_created_r1 {
+                db_0or1row qal_contact_created_r0 {
                     select created from qal_contact 
-                    where id=:id 
+                    where id=:contact_id 
+                    and addrs_id=:addrs_id
                     and trashed_p!='1'
                     and instance_id=:instance_id }
             }
