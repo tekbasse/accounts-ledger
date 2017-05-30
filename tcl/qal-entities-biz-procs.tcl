@@ -186,10 +186,11 @@ ad_proc -public qal_contact_write {
         set created [qf_clock_format $created_s ]
 
         if { [ns_conn isconnected] } {
-            set created_by [ad_conn user_id]
+            set user_id [ad_conn user_id]
         } else {
-            set created_by $user_id
-        } 
+            set user_id $instance_id
+        }
+        set created_by $user_id
 
         set trashed_p 0
         set trashed_by ""
@@ -1040,20 +1041,32 @@ ad_proc -public qal_address_write {
     }
 
     set record_type [string range $record_type 0 29]
+    set postal_address_p [qal_address_type_is_postal_q $record_type]
+    set record_type_old [qal_record_type $addrs_id]
+    set old_address_is_postal_p [qal_address_type_is_postal_q $record_type_old]
+
     if { $record_type eq "" } {
         ns_log Warning "qal_address_write.1041: record_type '' is unexpected."
-        if { !$create_p } {
-            set record_type [qal_record_type $addrs_id]
-            if { $record_type ne "" } {
-                ns_log Warning "qal_address_write.1402: using record_type from existing addrs_id '${addrs_id}'"
-            } else {
-                ns_log Warning "qal_address_write.1403: Existing addrs_id '${addrs_id}' does not have a record_type"
-            }
-        } else {
+        if { $create_p } {
             set record_type "other"
             ns_log Warning "qal_address_write.1404: Changing record_type to 'other' for addrs_id '${addrs_id}'"
+        } elseif { $record_type_old ne "" } {
+            ns_log Warning "qal_address_write.1454: Changing record_type to existing type '${record_type_old}' for addrs_id '${addrs_id}'"
+            set record_type $record_type_old
+            set postal_address_p $old_address_is_postal_p
+        }
+    } elseif { $record_type_old ne "" } {
+        # check for change of postal type in record_type 
+        if { $postal_address_p ne $old_address_is_postal_p } {
+            ns_log Warning "qal_address_write.1402: change from/to postal address is significant. Creating new addrs_id instead. record_type '${record_type}' postal_address_p '${postal_address_p}' record_type_old '${record_type_old}' old_address_is_postal_p '${old_address_is_postal_p}' addrs_id '${addrs_id}'"
+            ##code
+
         }
     }
+
+
+
+
     if { ![qf_is_natural_number $address_id] } {
         set address_id ""
     }
@@ -1065,12 +1078,12 @@ ad_proc -public qal_address_write {
     set created_s [qf_clock_scan $created]
     set created [qf_clock_format $created_s ]
     if { [ns_conn isconnected] } {
-        set created_by [ad_conn user_id]
+        set user_id [ad_conn user_id]
     } else {
-        set created_by $instance_id
+        set user_id $instance_id
     }
+    set created_by $user_id
 
-    set postal_address_p [qal_address_type_is_postal_q $record_type]
     set trashed_p 0
     set trashed_by ""
     set trashed_ts ""
@@ -1080,8 +1093,8 @@ ad_proc -public qal_address_write {
         } else {
             if { $created eq "" } {
                 db_0or1row qal_other_address_map_created_r1 {
-                    select created from qal_qal_other_address_map 
-                    where id=:contact_id 
+                    select created from qal_other_address_map 
+                    where contact_id=:contact_id 
                     and addrs_id=:addrs_id
                     and trashed_p!='1'
                     and instance_id=:instance_id }
@@ -1096,7 +1109,7 @@ ad_proc -public qal_address_write {
             set a_arr(address_type) $record_type
             set address_id [qal_address_postal_create a_arr]
         }
-        ns_log Notice "qal_address_write.1097. contact_id '${contact_id}' instance_id '${instance_id} notes '$notes'"
+        ns_log Notice "qal_address_write.1097. contact_id '${contact_id}' instance_id '${instance_id} array get a_arr '[array get a_arr]'"
         db_dml qal_address_create_1 "insert into qal_other_address_map \
  ([qal_other_address_map_keys ","]) values ([qal_other_address_map_keys ",:"])"
     }
