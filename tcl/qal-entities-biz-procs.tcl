@@ -1033,18 +1033,39 @@ ad_proc -public qal_address_write {
     if { ![qf_is_natural_number $contact_id] } {
         set contact_id ""
     }
-    if { ![qf_is_natural_number $addrs_id] } {
-        set addrs_id [db_nextval qal_id]
-        set create_p 1
-    } else {
-        set create_p 0
-    }
 
     set record_type [string range $record_type 0 29]
     set postal_address_p [qal_address_type_is_postal_q $record_type]
-    set record_type_old [qal_record_type $addrs_id]
-    set old_address_is_postal_p [qal_address_type_is_postal_q $record_type_old]
+    if { ![qf_is_natural_number $addrs_id] } {
+        set addrs_id ""
+        set create_p 1
+    } else {
+        set record_type_old [qal_address_type $addrs_id]
+        set old_address_is_postal_p [qal_address_type_is_postal_q $record_type_old]
 
+        if { $record_type_old ne "" } {
+            # check for change of postal type in record_type 
+            if { $postal_address_p ne $old_address_is_postal_p } {
+                ns_log Warning "qal_address_write.1402: change from/to postal address is significant. Creating new addrs_id instead of overwriting. "
+                set create_p 1
+            } else {
+                set create_p 0
+            } 
+        } else {
+            ns_log Warning "qal_address_write.1455: record_type_old '${record_type_old}' for addrs_id '${addrs_id}' This is not supposed to happen."
+            set create_p 1
+        }
+    }
+    
+    if { $create_p } {
+        set addrs_id [db_nextval qal_id]
+        set address_id ""
+        set created ""
+        set record_type_old ""
+        set old_address_is_postal_p 0
+    }
+
+  
     if { $record_type eq "" } {
         ns_log Warning "qal_address_write.1041: record_type '' is unexpected."
         if { $create_p } {
@@ -1055,17 +1076,7 @@ ad_proc -public qal_address_write {
             set record_type $record_type_old
             set postal_address_p $old_address_is_postal_p
         }
-    } elseif { $record_type_old ne "" } {
-        # check for change of postal type in record_type 
-        if { $postal_address_p ne $old_address_is_postal_p } {
-            ns_log Warning "qal_address_write.1402: change from/to postal address is significant. Creating new addrs_id instead. record_type '${record_type}' postal_address_p '${postal_address_p}' record_type_old '${record_type_old}' old_address_is_postal_p '${old_address_is_postal_p}' addrs_id '${addrs_id}'"
-            ##code
-
-        }
     }
-
-
-
 
     if { ![qf_is_natural_number $address_id] } {
         set address_id ""
@@ -1082,7 +1093,7 @@ ad_proc -public qal_address_write {
     } else {
         set user_id $instance_id
     }
-    set created_by $user_id
+    set created_by $created_by
 
     set trashed_p 0
     set trashed_by ""
@@ -1090,6 +1101,7 @@ ad_proc -public qal_address_write {
     db_transaction {
         if { $create_p } {
             set created [qf_clock_format [clock seconds]]
+            set created_by $user_id
         } else {
             if { $created eq "" } {
                 db_0or1row qal_other_address_map_created_r1 {

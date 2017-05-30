@@ -74,6 +74,7 @@ aa_register_case -cats {api smoke} qal_addresses_check {
                             set a_idx [randomRange 3]
                             set addrs_arr(record_type) [lindex $record_type_list $a_idx]
                             set addrs_id [qal_demo_address_write addrs_arr $co_id]
+                            # ref x0x0 start
                             set addrs_id_is_nbr_p [qf_is_natural_number $addrs_id]
                             aa_true "A1.1 qal_demo_address_write returns a valid addrs_id '${addrs_id}'" $addrs_id_is_nbr_p
                             
@@ -113,6 +114,7 @@ aa_register_case -cats {api smoke} qal_addresses_check {
                                 set trashed_p_arr(${addrs_id}) 0
                             }
 
+                            # ref x0x0 end
    
                             #
                             #  Choose one test
@@ -135,29 +137,88 @@ aa_register_case -cats {api smoke} qal_addresses_check {
                                 apt_edit {
                                     array unset addrs_arr
                                     set addrs_list [qal_address_read $addrs_id]
-                                    array unset addrs_arr
                                     array set addrs_arr $addrs_list
                                     set addrs_id2 [qal_demo_address_write addrs_arr $co_id $addrs_id]
-                                    aa_equals "A1.${do}-1 qal_demo_address_write  returns same address_id" $addrs_id $addrs_id2
-                                    
-                                    set record_type [qal_address_type $addrs_id ]
-                                    set record_type2 [qal_address_type $addrs_id $co_id]
-                                    aa_equals "A1.${do}-2 qal_address_type calls to db match each other" $record_type $record_type2
-                                    if { $addrs_arr(record_type) ne "" } {
-                                        
-                                        aa_equals "A1.${do}-3 qal_address_type from db matches expected/requested" $record_type $addrs_arr(record_type)
-                                    } 
-                                    
-                                    set addrs2_list [qal_address_read $addrs_id]
-                                    array unset addrs2_arr
-                                    array set addrs2_arr $addrs2_list
-                                    # compare i/o
-                                    set addrs2_keys_list [array names addrs2_arr]
-                                    foreach key $addrs2_keys_list {
-                                        aa_equals "A1.${do}-4 qal_address_read returns same as written with qal_address_write for key '${key}'" $addrs2_arr(${key}) $addrs_arr(${key})
-                                        
+                                    set treat_as_edit_p 1
+                                    if { $addrs_id2 ne $addrs_id } {
+                                        # did this edit result in the creation of a new address?
+                                        set record_type_id1 [qal_address_type $addrs_id]
+                                        set record_type_id2 [qal_address_type $addrs_id2]
+                                        set is_postal_id1 [qal_address_type_is_postal_q $record_type_id1]
+                                        set is_postal_id2 [qal_address_type_is_postal_q $record_type_id2]
+                                        if { $is_postal_id1 eq $is_postal_id2 } {
+                                            set treat_as_edit_p 1
+                                        } else {
+                                            set treat_as_edit_p 0
+                                            # this is a new address, not edit
+                                            
+                                        }
                                     }
-                                    set apt_edit_p 0
+                                    if { $treat_as_edit_p } {
+                                        aa_equals "A1.${do}-1 qal_demo_address_write  returns same address_id" $addrs_id $addrs_id2
+                                        
+                                        set record_type [qal_address_type $addrs_id ]
+                                        set record_type2 [qal_address_type $addrs_id $co_id]
+                                        aa_equals "A1.${do}-2 qal_address_type calls to db match each other" $record_type $record_type2
+                                        if { $addrs_arr(record_type) ne "" } {
+                                            
+                                            aa_equals "A1.${do}-3 qal_address_type from db matches expected/requested" $record_type $addrs_arr(record_type)
+                                        } 
+                                        
+                                        set addrs2_list [qal_address_read $addrs_id]
+                                        array unset addrs2_arr
+                                        array set addrs2_arr $addrs2_list
+                                        # compare i/o
+                                        set addrs2_keys_list [array names addrs2_arr]
+                                        foreach key $addrs2_keys_list {
+                                        aa_equals "A1.${do}-4 qal_address_read returns same as written with qal_address_write for key '${key}'" $addrs2_arr(${key}) $addrs_arr(${key})
+                                            
+                                        }
+                                        set apt_edit_p 0
+                                    } else {
+                                        # This edit actually created a new address.
+                                        # Let's check it. Yeah, there are other cases of new addresses. Yet, maybe this results in something different..
+                                        # This is essentially a copy of test code between references x0x
+
+                                        set addrs_id_is_nbr_p [qf_is_natural_number $addrs_id2]
+                                        aa_true "A1.${do}-0-A1.1 qal_demo_address_write returns a valid addrs_id '${addrs_id}'" $addrs_id_is_nbr_p
+                                        
+                                        set record_type [qal_address_type $addrs_id2 ]
+                                        set record_type2 [qal_address_type $addrs_id2 $co_id]
+                                        aa_equals "A1.${do}-0-A1.2 qal_address_type calls are consistent record_type '${record_type}' record_type2 '${record_type2}'" $record_type $record_type2
+                                        if { $addrs_arr(record_type) ne "" } {
+                                            # filter out cases that we leave to qal_demo_address_write to make
+                                            aa_equals "A1.${do}-0-A1.3 qal_address_type from db matches expected/specified type" $record_type $addrs_arr(record_type)
+                                        } else {
+                                            if { $record_type eq "other" } {
+                                                set blank_to_other_p 1
+                                            } else {
+                                                set blank_to_other_p 0
+                                            }
+                                            aa_true "A1.${do}-0-A1.3.b qal_address_type returns 'other' when demo submits ''" $blank_to_other_p 
+                                        }
+                                        set addrs2_list [qal_address_read $addrs_id2]
+                                        array unset addrs2_arr
+                                        array set addrs2_arr $addrs2_list
+                                        # compare i/o
+                                        set addrs2_keys_list [array names addrs2_arr]
+                                        if { [llength $addrs2_keys_list] > 0 } {
+                                            foreach key $addrs2_keys_list {
+                                                aa_equals "A1.${do}-0-A1.4 qal_address_read returns same as written with qal_address_write for key '${key}'" $addrs2_arr(${key}) $addrs_arr(${key})
+                                                
+                                            }
+                                        } else {
+                                            aa_true "A1.${do}-0-A1.4b qal_address_read returns a full address record" 0
+                                        }
+                                        
+                                        # set sets of addresses for retesting
+                                        if { $addrs_id_is_nbr_p } {
+                                            set addrs_id_is_apt_p_arr(${addrs_id}) [qal_address_type_is_postal_q $record_type] 
+                                            lappend addrs_ids_list $addrs_id2
+                                            set deleted_p_arr(${addrs_id}) 0
+                                            set trashed_p_arr(${addrs_id}) 0
+                                        }
+                                    }
                                 }
                                 apt_trash {
 
