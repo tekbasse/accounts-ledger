@@ -514,7 +514,7 @@ ad_proc -public qal_demo_address_write {
     set a_arr(instance_id) $instance_id
     qf_array_to_vars a_arr [qal_other_address_map_keys]
 
-    if { $a_arr(record_type) eq "" } {
+    if { $record_type eq "" } {
         # Use of any specific trademark names in text without font or logo representation 
         # is permitted under scenarios of "fair use" for purposes of demonstration of 
         # usage of product as intended and/or parody.
