@@ -937,7 +937,7 @@ ad_proc -public qal_address_create {
     If contact_id is not supplied, the value is assumed to be in arr_name(contact_id).
     If there is an error, such as contact_id not found, an empty string is returned.
     <br/><br/>
-    If address_type matches "*address*" then type is assumed to be a postal address.
+    If record_type is in <code>qal_address_type_keys</code> it is a postal address.
     <br/><br/>
     Postal address_types: 
     street_address, mailing_address, billing_address and anything that matches *address*.
@@ -959,7 +959,9 @@ ad_proc -public qal_address_create {
     @param array_name
     @return qal_other_address_map.id or ""
 
+    @see qal_address_type_is_postal_q
     @see qal_address_postal_set_primary
+
 
 } {
     upvar 1 instance_id instance_id
@@ -986,7 +988,7 @@ ad_proc -public qal_address_write {
     If there is an error, such as id not found, an empty string is returned.
     If contact_id is not supplied, the value is assumed to be in arr_name(contact_id).
     <br/><br/>
-    If address_type matches "*address*" then type is assumed to be a postal address.
+    If record_type in <code>qal_address_type_keys</code> then type is a postal address.
     <br/><br/>
     Postal address_types: 
     street_address, mailing_address, billing_address and anything that matches *address*.
@@ -1008,6 +1010,7 @@ ad_proc -public qal_address_write {
     @param array_name
     @return qal_other_address_map.id or ""
 
+    @see qal_address_type_is_postal_q
     @see qal_address_postal_set_primary
     @see qal_address_keys
     @see qal_other_address_map_keys
@@ -1067,10 +1070,7 @@ ad_proc -public qal_address_write {
         set created_by $instance_id
     }
 
-    set postal_address_p 0
-    if { [string match -nocase "address" $record_type] } {
-        set postal_address_p 1
-    }
+    set postal_address_p [qal_address_type_is_postal_q $record_type]
     set trashed_p 0
     set trashed_by ""
     set trashed_ts ""
@@ -1079,21 +1079,22 @@ ad_proc -public qal_address_write {
             set created [qf_clock_format [clock seconds]]
         } else {
             if { $created eq "" } {
-                db_0or1row qal_contact_created_r0 {
-                    select created from qal_contact 
+                db_0or1row qal_other_address_map_created_r1 {
+                    select created from qal_qal_other_address_map 
                     where id=:contact_id 
                     and addrs_id=:addrs_id
                     and trashed_p!='1'
                     and instance_id=:instance_id }
             }
-            db_dml qal_address_trash { update qal_address set trashed_p='1',trashed_by=:user_id,trashed_ts=now() 
+            db_dml qal_address_trash { update qal_other_address_map set trashed_p='1',trashed_by=:user_id,trashed_ts=now() 
                 where addrs_id=:addrs_id 
                 and contact_id=:contact_id
                 and instance_id=:instance_id
             }
         }
         if { $postal_address_p } {
-            set address_id [qal_postal_address_postal_write a_arr]
+            set a_arr(address_type) $record_type
+            set address_id [qal_address_postal_create a_arr]
         }
         ns_log Notice "qal_address_write.1097. contact_id '${contact_id}' instance_id '${instance_id} notes '$notes'"
         db_dml qal_address_create_1 "insert into qal_other_address_map \

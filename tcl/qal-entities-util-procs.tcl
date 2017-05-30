@@ -344,7 +344,6 @@ ad_proc -public qal_address_keys {
     Returns an ordered list of keys for qal_address:
     id 
     instance_id 
-    rev_id 
     address_type 
     address0 
     address1 
@@ -361,10 +360,10 @@ ad_proc -public qal_address_keys {
     cc 
     bcc
 } {
+    # removed rev_id. see table definition.
     set keys_list [list \
                        id \
                        instance_id \
-                       rev_id \
                        address_type \
                        address0 \
                        address1 \
