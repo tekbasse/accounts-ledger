@@ -191,7 +191,7 @@ ad_proc -public qal_address_read {
     set return_val_list [lindex $return_lists 0]
     set return_list [list ]
     if { [llength $return_val_list] > 0 } {
-        set keys_list [qal_address_keys]
+        set keys_list [qal_addresses_keys]
         set i 0
         foreach key $keys_list {
             set val [lindex $return_val_list $i]
@@ -199,6 +199,7 @@ ad_proc -public qal_address_read {
             incr i
         }
     }
+    ns_log Notice "qal_address_read.202: return_list '${return_list}'"
     return $return_list
 }
 
@@ -206,7 +207,7 @@ ad_proc -public qal_address_read {
 ad_proc -public qal_addresses_read {
     addrs_id_list
 } {
-    Returns list of lists; Each list is an address record for each addrs_id in address_id_list as a list of address record values. Each list contains ordered values of these ordered names from qal_other_address_map and qal_address tables: contact_id, instance_id, addrs_id, record_type, address_id, sort_order, created, created_by, trashed_p, trashed_by, trashed_ts, accounts_name, notes, address_type, address0, address1, address2, city, state, postal_code, country_code, attn, phone, phone_time, fax, email, cc, bcc
+    Returns list of lists; Each list is an address record for each addrs_id in address_id_list as a list of address record values. Each list contains ordered values of these ordered names from qal_other_address_map and qal_address tables: contact_id, instance_id, addrs_id, record_type, address_id, sort_order, created, created_by, trashed_p, trashed_by, trashed_ts, account_name, notes, address_type, address0, address1, address2, city, state, postal_code, country_code, attn, phone, phone_time, fax, email, cc, bcc
     <br/>
     Returns an empty list if none found.
     <br/>
@@ -225,19 +226,21 @@ ad_proc -public qal_addresses_read {
         if { [ns_conn isconnected] } {
             set user_id [ad_conn user_id]
         } else {
-            set user_id ""
+            set user_id $instance_id
         }
     }
     set addrs_ids_list [hf_list_filter_by_natural_number $addrs_id_list]
-    set allowed_contact_ids [qal_contact_ids_of_user_id $user_id]
+    set allowed_contact_ids_list [qal_contact_ids_of_user_id $user_id]
+    ns_log Notice "qal_addresses_read.234. addrs_ids_list '${addrs_ids_list}' allowed_contact_ids_list '${allowed_contact_ids_list}' user_id '${user_id}'"
     set rows_lists [list ]
-    if { [llength $allowed_contact_ids] > 0 && [llength $addrs_ids_list ] > 0 } {
+    if { [llength $allowed_contact_ids_list] > 0 && [llength $addrs_ids_list ] > 0 } {
         set rows_lists [db_list_of_lists qal_address_get "select [qal_addresses_keys ","] \
         from qal_other_address_map om, qal_address ad \
         where om.addrs_id=ad.id and om.instance_id=ad.instance_id \
         and om.instance_id=:instance_id and trashed_p!='1' \
-        and om.contact_id in ([template::util::tcl_to_sql_list $allowed_contact_ids]) \
+        and om.contact_id in ([template::util::tcl_to_sql_list $allowed_contact_ids_list]) \
         and om.addrs_id in ([template::util::tcl_to_sql_list $addrs_ids_list])" ]
     }
+    ns_log Notice "qal_addresses_read.244: rows_lists '${rows_lists}'"
     return $rows_lists
 }

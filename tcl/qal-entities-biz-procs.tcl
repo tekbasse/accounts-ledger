@@ -1025,6 +1025,12 @@ ad_proc -public qal_address_write {
     if { $addrs_id ne "" } {
         set a_arr(addrs_id) $addrs_id
     }
+    if { [ns_conn isconnected] } {
+        set user_id [ad_conn user_id]
+    } else {
+        set user_id $instance_id
+    }
+
     ns_log Notice "qal_address_write.1024. contact_id '${contact_id}' instance_id '${instance_id} notes '$a_arr(notes)'"
     qal_other_address_map_defaults a_arr
     qf_array_to_vars a_arr [qal_other_address_map_keys]
@@ -1039,6 +1045,8 @@ ad_proc -public qal_address_write {
     if { ![qf_is_natural_number $addrs_id] } {
         set addrs_id ""
         set create_p 1
+        set record_type_old ""
+        set old_address_is_postal_p 0
     } else {
         set record_type_old [qal_address_type $addrs_id]
         set old_address_is_postal_p [qal_address_type_is_postal_q $record_type_old]
@@ -1057,14 +1065,6 @@ ad_proc -public qal_address_write {
         }
     }
     
-    if { $create_p } {
-        set addrs_id [db_nextval qal_id]
-        set address_id ""
-        set created ""
-        set record_type_old ""
-        set old_address_is_postal_p 0
-    }
-
   
     if { $record_type eq "" } {
         ns_log Warning "qal_address_write.1041: record_type '' is unexpected."
@@ -1086,31 +1086,26 @@ ad_proc -public qal_address_write {
         set sort_order [expr { $addrs_id_ct + 20 } ]
     }
     
-    set created_s [qf_clock_scan $created]
-    set created [qf_clock_format $created_s ]
-    if { [ns_conn isconnected] } {
-        set user_id [ad_conn user_id]
-    } else {
-        set user_id $instance_id
-    }
-    set created_by $created_by
-
     set trashed_p 0
     set trashed_by ""
     set trashed_ts ""
     db_transaction {
         if { $create_p } {
+            set addrs_id [db_nextval qal_id]
+            set address_id ""
             set created [qf_clock_format [clock seconds]]
             set created_by $user_id
         } else {
             if { $created eq "" } {
                 db_0or1row qal_other_address_map_created_r1 {
-                    select created from qal_other_address_map 
+                    select created, created_by from qal_other_address_map 
                     where contact_id=:contact_id 
                     and addrs_id=:addrs_id
                     and trashed_p!='1'
                     and instance_id=:instance_id }
             }
+            set created_s [qf_clock_scan_from_db $created]
+            set created [qf_clock_format $created_s ]
             db_dml qal_address_trash { update qal_other_address_map set trashed_p='1',trashed_by=:user_id,trashed_ts=now() 
                 where addrs_id=:addrs_id 
                 and contact_id=:contact_id

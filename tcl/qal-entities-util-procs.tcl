@@ -129,10 +129,21 @@ ad_proc -public qal_contact_ids_of_user_id {
     Returns contact_id(s) of user_id, or empty string if none found.
 } {
     upvar 1 instance_id instance_id
-    set contact_id_list [db_list qal_contact_user_map_read_ids { select contact_id from qal_contact_user_map 
+    # Orignally, designed to use:
+    # 
+    # select contact_id from qal_contact_user_map 
+    #   where instance_id=:instance_id
+    #   and user_id=:user_id
+    #   and trashed_p!='1' 
+    # 
+    # However, this is not consistent with q-control.
+    # Since q-control is a required package, 
+    # query the q-control map directly.
+
+    set contact_id_list [db_list qal_contact_user_map_read_ids {
+        select distinct qal_contact_id from qc_user_roles_map
         where instance_id=:instance_id
-        and user_id=:user_id
-        and trashed_p!='1' } ]
+        and user_id=:user_id} ]
     return $contact_id_list
 }
 
@@ -438,7 +449,7 @@ ad_proc -public qal_addresses_keys {
         trashed_p \
         trashed_by \
         trashed_ts \
-        accounts_name \
+        account_name \
         notes \
         address_type \
         address0 \
@@ -472,7 +483,7 @@ ad_proc -public qal_addresses_keys {
                     om.trashed_p \
                     om.trashed_by \
                     om.trashed_ts \
-                    om.accounts_name \
+                    om.account_name \
                     om.notes \
                     ad.address_type \
                     ad.address0 \
