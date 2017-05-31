@@ -560,13 +560,14 @@ ad_proc -public qal_demo_address_write {
         set digits [randomRange 10]
         incr digits
         append address0 [ad_generate_random_string $digits]
-        set address1 [join [qal_namelur 5 7 " "]]
+        set address1 [string range [join [qal_namelur 5 7 " "]] 0 39]
         set address2 [randomRange 99999]
         append address2 [join [qal_namelur $word_count $syllables " "]]
+        set address2 [string range $address2 0 39]
         set city [join [qal_namelur 2]]
         set state [join [qal_namelur 1 8]]
         set postal_code [string tolower [ad_generate_random_string 10]]
-        set country_code [ad_generate_random_string 3]
+        set country_code [ad_generate_random_string 2]
         set attn [join [qal_namelur 3 3]]
         set phone_val [randomRange 9000000]
         incr phone_val 1000000
