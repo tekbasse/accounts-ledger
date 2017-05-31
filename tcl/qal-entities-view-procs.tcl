@@ -222,25 +222,61 @@ ad_proc -public qal_addresses_read {
 
     upvar 1 instance_id instance_id
     upvar 1 user_id user_id
-    if { ![info exists user_id] } {
-        if { [ns_conn isconnected] } {
-            set user_id [ad_conn user_id]
-        } else {
+
+    if { [ns_conn isconnected] } {
+        set user_id [ad_conn user_id]
+    } else {
+        if { ![info exists user_id] } {
             set user_id $instance_id
         }
     }
-    set addrs_ids_list [hf_list_filter_by_natural_number $addrs_id_list]
-    set allowed_contact_ids_list [qal_contact_ids_of_user_id $user_id]
-    ns_log Notice "qal_addresses_read.234. addrs_ids_list '${addrs_ids_list}' allowed_contact_ids_list '${allowed_contact_ids_list}' user_id '${user_id}'"
     set rows_lists [list ]
-    if { [llength $allowed_contact_ids_list] > 0 && [llength $addrs_ids_list ] > 0 } {
-        set rows_lists [db_list_of_lists qal_address_get "select [qal_addresses_keys ","] \
-        from qal_other_address_map om, qal_address ad \
-        where om.address_id=ad.id and om.instance_id=ad.instance_id \
-        and om.instance_id=:instance_id and trashed_p!='1' \
-        and om.contact_id in ([template::util::tcl_to_sql_list $allowed_contact_ids_list]) \
-        and om.addrs_id in ([template::util::tcl_to_sql_list $addrs_ids_list])" ]
+
+    set read_p [qc_permission_p $user_id $instance_id non_assets read $instance_id]
+    if { $read_p } {
+
+        set addrs_ids_list [hf_list_filter_by_natural_number $addrs_id_list]
+        ns_log Notice "qal_addresses_read.234. addrs_ids_list '${addrs_ids_list}' user_id '${user_id}' instance_id '${instance_id}'"
+
+        if { [llength $addrs_ids_list ] > 0 } {
+            set rows_lists [db_list_of_lists qal_address_get_by_adm "select [qal_addresses_keys ","] \
+                from qal_other_address_map om left outer join qal_address ad \
+                on om.address_id=ad.id and om.instance_id=ad.instance_id \
+                where om.instance_id=:instance_id and om.trashed_p!='1' \
+                and om.addrs_id in ([template::util::tcl_to_sql_list $addrs_ids_list])" ]
+            ##code remove this diagnostic notice
+            ns_log Notice "qal_addresses_read.248 query: select [qal_addresses_keys ","] \
+                from qal_other_address_map om left outer join qal_address ad \
+                on om.address_id=ad.id and om.instance_id=ad.instance_id \
+                where om.instance_id=${instance_id} and om.trashed_p!='1' \
+                and om.addrs_id in ([template::util::tcl_to_sql_list $addrs_ids_list])"
+        }
+
+    } else { 
+
+        set addrs_ids_list [hf_list_filter_by_natural_number $addrs_id_list]
+        set vet_contact_ids_list [db_list qal_contact_ids_of_addrs_ids "\
+            select distinct contact_id from qal_other_address_map \
+            where instance_id=:instance_id and trashed_p!='1' \
+            and addrs_id in ([template::util::tcl_to_sql_list $addrs_ids_list])"]
+        set allowed_contact_ids_list [list ]
+        foreach cid $vet_contact_ids_list {
+            if { [qc_permission_p $user_id $cid non_assets read $instance_id] } {
+                lappend allowed_contact_ids_list $cid
+            }
+        }
+
+        ns_log Notice "qal_addresses_read.252. addrs_ids_list '${addrs_ids_list}' allowed_contact_ids_list '${allowed_contact_ids_list}' user_id '${user_id}'"
+
+        if { [llength $allowed_contact_ids_list] > 0 && [llength $addrs_ids_list ] > 0 } {
+            set rows_lists [db_list_of_lists qal_address_get "select [qal_addresses_keys ","] \
+                from qal_other_address_map om left outer join qal_address ad \
+                on om.address_id=ad.id and om.instance_id=ad.instance_id \
+                where om.instance_id=:instance_id and om.trashed_p!='1' \
+                and om.contact_id in ([template::util::tcl_to_sql_list $allowed_contact_ids_list]) \
+                and om.addrs_id in ([template::util::tcl_to_sql_list $addrs_ids_list])" ]
+        }
     }
-    ns_log Notice "qal_addresses_read.244: rows_lists '${rows_lists}'"
+    ns_log Notice "qal_addresses_read.264: rows_lists '${rows_lists}'"
     return $rows_lists
 }

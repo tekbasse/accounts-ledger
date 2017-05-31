@@ -103,24 +103,24 @@ aa_register_case -cats {api smoke} qal_addresses_check {
                             if { [llength $addrs2_keys_list] > 0 } {
                                 foreach key $addrs2_keys_list {
                                     if { $key in $ignore_blank_originals_list && $addrs_arr(${key}) eq "" } {
-                                        aa_true "A1.4 qal_address_read returns value in place of blank." 1
+                                        aa_true "A1.4.a qal_address_read returns value in place of blank." 1
                                     } elseif { $key in $special_ids_list } {
                                         set are_id2_p [qf_is_natural_number $addrs2_arr(${key})] 
                                         set are_id1_p [qf_is_natural_number $addrs_arr(${key})]
                                         set are_ids_p [expr { $are_id2_p && $are_id1_p } ]
-                                        aa_true "A1.4 qal_address_read returns integers for both cases. '$addrs_arr(${key})' -> '$addrs2_arr(${key})' " $are_ids_p
+                                        aa_true "A1.4.b qal_address_read returns integers for both cases. '$addrs_arr(${key})' -> '$addrs2_arr(${key})' " $are_ids_p
                                     } elseif { $key in $special_ts_list } {
                                         set epoch1 [qf_clock_scan $addrs_arr(${key})]
                                         set epoch2 [qf_clock_scan $addrs2_arr(${key})]
                                         set epoch_diff [expr { abs( $epoch1 - $epoch2 ) } ]
                                         set diff_lt_1_p [expr { $epoch_diff < 3 } ]
-                                        aa_true "A1.4 qal_address_read returns same timestamps: '$addrs_arr(${key})' -> '$addrs2_arr(${key})' epoch_diff '${epoch_diff}'" $diff_lt_1_p
+                                        aa_true "A1.4.c qal_address_read returns same timestamps: '$addrs_arr(${key})' -> '$addrs2_arr(${key})' epoch_diff '${epoch_diff}'" $diff_lt_1_p
                                     } else {
-                                        aa_equals "A1.4 qal_address_read returns same as written with qal_address_write for key '${key}'" $addrs2_arr(${key}) $addrs_arr(${key})
+                                        aa_equals "A1.4.d qal_address_read returns same as written with qal_address_write for key '${key}'" $addrs2_arr(${key}) $addrs_arr(${key})
                                     }
                                 }
                             } else {
-                                aa_true "A1.4b qal_address_read returns a full address record for addrs_id '${addrs_id}'" 0
+                                aa_true "A1.4 qal_address_read returns a full address record for addrs_id '${addrs_id}'" 0
                             }
                             
                             # set sets of addresses for retesting
@@ -222,11 +222,11 @@ aa_register_case -cats {api smoke} qal_addresses_check {
                                         set addrs2_keys_list [array names addrs2_arr]
                                         if { [llength $addrs2_keys_list] > 0 } {
                                             foreach key $addrs2_keys_list {
-                                                aa_equals "A1.${do}-0-A1.4 qal_address_read returns same as written with qal_address_write for key '${key}'" $addrs2_arr(${key}) $addrs_arr(${key})
+                                                aa_equals "A1.${do}-0-A1.4.a qal_address_read returns same as written with qal_address_write for key '${key}'" $addrs2_arr(${key}) $addrs_arr(${key})
                                                 
                                             }
                                         } else {
-                                            aa_true "A1.${do}-0-A1.4b qal_address_read returns a full address record for addrs_id '${addrs_id2}'" 0
+                                            aa_true "A1.${do}-0-A1.4 qal_address_read returns a full address record for addrs_id '${addrs_id2}'" 0
                                         }
                                         
                                         # set sets of addresses for retesting
@@ -339,11 +339,11 @@ aa_register_case -cats {api smoke} qal_addresses_check {
                                         set addrs2_keys_list [array names addrs2_arr]
                                         if { [llength $addrs2_keys_list] > 0 } {
                                             foreach key $addrs2_keys_list {
-                                                aa_equals "A1.${do}-0-A1.4 qal_address_read returns same as written with qal_address_write for key '${key}'" $addrs2_arr(${key}) $addrs_arr(${key})
+                                                aa_equals "A1.${do}-0-A1.4.a qal_address_read returns same as written with qal_address_write for key '${key}'" $addrs2_arr(${key}) $addrs_arr(${key})
                                                 
                                             }
                                         } else {
-                                            aa_true "A1.${do}-0-A1.4b qal_address_read returns a full address record for addrs_id '${addrs_id2}'" 0
+                                            aa_true "A1.${do}-0-A1.4 qal_address_read returns a full address record for addrs_id '${addrs_id2}'" 0
                                         }
                                         
                                         # set sets of addresses for retesting
