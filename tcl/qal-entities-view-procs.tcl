@@ -236,7 +236,7 @@ ad_proc -public qal_addresses_read {
     if { [llength $allowed_contact_ids_list] > 0 && [llength $addrs_ids_list ] > 0 } {
         set rows_lists [db_list_of_lists qal_address_get "select [qal_addresses_keys ","] \
         from qal_other_address_map om, qal_address ad \
-        where om.addrs_id=ad.id and om.instance_id=ad.instance_id \
+        where om.address_id=ad.id and om.instance_id=ad.instance_id \
         and om.instance_id=:instance_id and trashed_p!='1' \
         and om.contact_id in ([template::util::tcl_to_sql_list $allowed_contact_ids_list]) \
         and om.addrs_id in ([template::util::tcl_to_sql_list $addrs_ids_list])" ]

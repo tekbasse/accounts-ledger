@@ -243,7 +243,6 @@ ad_proc -private qal_address_defaults {
     set v_list [list \
                     id "" \
                     instance_id $instance_id \
-                    rev_id "" \
                     address_type "" \
                     address0 "" \
                     address1 "" \
