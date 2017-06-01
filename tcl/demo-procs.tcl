@@ -560,6 +560,7 @@ ad_proc -public qal_demo_address_write {
         set digits [randomRange 10]
         incr digits
         append address0 [ad_generate_random_string $digits]
+        set address0 [string range $address0 0 39]
         set address1 [string range [join [qal_namelur 5 7 " "]] 0 39]
         set address2 [randomRange 99999]
         append address2 [join [qal_namelur $word_count $syllables " "]]

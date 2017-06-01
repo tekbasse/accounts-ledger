@@ -1131,13 +1131,16 @@ ad_proc -public qal_address_delete {
     addrs_id_list may be a one qal_contact.*_addrs_id or a list, where * is street, mailing or billing.
     User must be a package admin.
 } {
-    set success_p 1
+    upvar 1 instance_id instance_id
+    set success_p 0
     if { $addrs_id_list ne "" } {
         set user_id [ad_conn user_id]
-        set instance_id [qc_set_instance_id]
+        set instance_id2 [qc_set_instance_id]
+        if { $instance_id ne $instance_id2 } {
+            ns_log Warning "qal_address_delete.1140: instance_id '${instance_id}' instance_id2 '${instance_id2}'"
+        }
         set admin_p [permission::permission_p -party_id $user_id \
                          -object_id [ad_conn package_id] -privilege admin]
-        set success_p $admin_p
         if { $admin_p } {
             if { [llength $addrs_id_list] > 0 } {
                 set validated_p [hf_natural_number_list_validate $addrs_id_list]
@@ -1145,13 +1148,15 @@ ad_proc -public qal_address_delete {
                 set validated_p 0
             }
             if { $validated_p } {
+                set success_p 1
                 set address_id_list [list ]
                 set address_id_list [db_list qal_address_id_2_d "\
                     select address_id from qal_other_address_map \
                     where instance_id=:instance_id \
-                    and addrs_id in ([template::util::tcl_to_sql_list $addrs_id_list])"]
-                
-                db_transaction {
+                    and addrs_id in ([template::util::tcl_to_sql_list $addrs_id_list]) \
+                    and address_id is not null"]
+         ##code renable commented code.       
+         #       db_transaction {
                     if { [string length $address_id_list ] > 0 } {
                         db_dml qal_address_ids_delete "delete from qal_address \
                             where instance_id=:instance_id \
@@ -1160,12 +1165,10 @@ ad_proc -public qal_address_delete {
                     db_dml qal_addrs_ids_delete "delete from qal_other_address_map \
                         where instance_id=:instance_id \
                         and addrs_id in ([template::util::tcl_to_sql_list $addrs_id_list])"
-                } on_error {
-                    set success_p 0
-                }
-            } else {
-                set success_p 0
-            }
+          #      } on_error {
+          #          set success_p 0
+          #      }
+            } 
         }
     }
     return $success_p

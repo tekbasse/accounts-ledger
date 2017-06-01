@@ -72,9 +72,10 @@ aa_register_case -cats {api smoke} qal_addresses_check {
                         set actions_list_len_1 [llength $actions_list]
                         incr actions_list_len -1
                         set i 0
-                        while { $more_to_test_p && $i < 50 } {
+                        while { $more_to_test_p && $i < 100 } {
                             ns_log Notice "qal-entities-procs.tcl.73: this_user_id ${this_user_id}' org_admin_id '${org_admin_id}' user_id '${user_id}' instance_id '${instance_id}'"
                             set a_idx [randomRange 3]
+                            array unset addrs_arr
                             set addrs_arr(record_type) [lindex $record_type_list $a_idx]
                             set addrs_id [qal_demo_address_write addrs_arr $co_id]
                             # ref x0x0 start
@@ -103,20 +104,24 @@ aa_register_case -cats {api smoke} qal_addresses_check {
                             if { [llength $addrs2_keys_list] > 0 } {
                                 foreach key $addrs2_keys_list {
                                     if { $key in $ignore_blank_originals_list && $addrs_arr(${key}) eq "" } {
-                                        aa_true "A1.4.a qal_address_read returns value in place of blank." 1
+                                        aa_true "A1.4.a qal_address_read key '${key}' returns value in place of blank." 1
                                     } elseif { $key in $special_ids_list } {
                                         set are_id2_p [qf_is_natural_number $addrs2_arr(${key})] 
                                         set are_id1_p [qf_is_natural_number $addrs_arr(${key})]
                                         set are_ids_p [expr { $are_id2_p && $are_id1_p } ]
-                                        aa_true "A1.4.b qal_address_read returns integers for both cases. '$addrs_arr(${key})' -> '$addrs2_arr(${key})' " $are_ids_p
+                                        aa_true "A1.4.b qal_address_read key '${key}' returns integers for both cases. '$addrs_arr(${key})' -> '$addrs2_arr(${key})' " $are_ids_p
                                     } elseif { $key in $special_ts_list } {
                                         set epoch1 [qf_clock_scan $addrs_arr(${key})]
                                         set epoch2 [qf_clock_scan $addrs2_arr(${key})]
                                         set epoch_diff [expr { abs( $epoch1 - $epoch2 ) } ]
                                         set diff_lt_1_p [expr { $epoch_diff < 3 } ]
-                                        aa_true "A1.4.c qal_address_read returns same timestamps: '$addrs_arr(${key})' -> '$addrs2_arr(${key})' epoch_diff '${epoch_diff}'" $diff_lt_1_p
+                                        aa_true "A1.4.c qal_address_read key '${key}' returns same timestamps: '$addrs_arr(${key})' -> '$addrs2_arr(${key})' epoch_diff '${epoch_diff}'" $diff_lt_1_p
                                     } else {
-                                        aa_equals "A1.4.d qal_address_read returns same as written with qal_address_write for key '${key}'" $addrs2_arr(${key}) $addrs_arr(${key})
+                                        # for cases when nonpostal data returns a nonexistent key for postal address keys
+                                        if { ![info exists addrs_arr(${key}) ]} {
+                                            set addrs_arr(${key}) ""
+                                        }
+                                        aa_equals "A1.4.d qal_address_read addrs2_arr('${key}') '$addrs2_arr(${key})' returns same qal_address_write '$addrs_arr(${key})'." $addrs2_arr(${key}) $addrs_arr(${key})
                                     }
                                 }
                             } else {
@@ -306,8 +311,17 @@ aa_register_case -cats {api smoke} qal_addresses_check {
                                         # compare i/o
                                         set addrs2_keys_list [array names addrs2_arr]
                                         foreach key $addrs2_keys_list {
-                                        aa_equals "A1.${do}-4 qal_address_read returns same as written with qal_address_write for key '${key}'" $addrs2_arr(${key}) $addrs_arr(${key})
-                                            
+                                            if { $key ne "address_id" } {
+                                                aa_equals "A1.${do}-4 qal_address_read returns same as written with qal_address_write for key '${key}'" $addrs2_arr(${key}) $addrs_arr(${key})
+                                            } else {
+                                                if { $addrs2_arr(${key}) ne $addrs_arr(${key}) && $addrs2_arr(${key}) ne "" } {
+                                                    set not_equals_p 1
+                                                } else {
+                                                    set not_equals_p 0
+                                                }
+                                                aa_true "A1.${do}-4.b qal_address_read returns a different non-empty value for ${key} addrs2_arr(${key}) '$addrs2_arr(${key})' addrs_arr(${key}) '$addrs_arr(${key})'." $not_equals_p
+                                            }
+
                                         }
                                         set ant_edit_p 0
                                     } else {
