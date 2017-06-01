@@ -222,7 +222,6 @@ ad_proc -public qal_contact_write {
                 append label "-" $i
                 set id_from_label [qal_contact_id_from_label $label]
             }
-            ns_log Notice "qal_contact_create.213: created '${created}' qf_clock_scan -> '[qf_clock_scan $created]' qf_clock_scan_from_db -> '[qf_clock_scan_from_db $created]'"
             db_dml qal_contact_create_1 "insert into qal_contact \
  ([qal_contact_keys ","]) values ([qal_contact_keys ",:"])"
         }
@@ -429,14 +428,14 @@ ad_proc -public qal_customer_write {
         set contact_id ""
         set contact_id_exists_p 0
     }
-    ns_log Notice "qal_customer_write.401. contact_id '${contact_id}' id '${id}' contact_id_exists_p '${contact_id_exists_p}'"
+
     if { [qf_is_natural_number $id] } {
         set contact_id_from_cu_id [qal_contact_id_from_customer_id $id]
     } else {
         set id ""
         set contact_id_from_cu_id ""
     }
-    ns_log Notice "qal_customer_write.408. contact_id '${contact_id}' id '${id}' contact_id_exists_p '${contact_id_exists_p}' contact_id_from_cu_id '${contact_id_from_cu_id}'"
+
     if { $contact_id_exists_p } {
         if { $contact_id_from_cu_id ne $contact_id } {
             set id [qal_customer_id_from_contact_id $contact_id]
@@ -451,7 +450,7 @@ ad_proc -public qal_customer_write {
             set contact_id $contact_id_from_cu_id
         }
     }
-    ns_log Notice "qal_customer_write.423. contact_id '${contact_id}' id '${id}' contact_id_exists_p '${contact_id_exists_p}' contact_id_from_cu_id '${contact_id_from_cu_id}' error_p '${error_p}'"
+
     if { !$error_p } {
         
         # insert into db
@@ -601,7 +600,7 @@ ad_proc -public qal_customer_trash {
             } 
             if { $instance_write_p || $at_least_one_write_p } {
                 set success_p 1
-                ns_log Notice "qal_customer_trash id in '${filtered_customer_id_list}'"
+
                 db_transaction {
                     db_dml qal_customer_ids_trash "update qal_customer \
                         set trashed_p='1',trashed_by=:user_id,trashed_ts=now() \
@@ -706,14 +705,14 @@ ad_proc -public qal_vendor_write {
         set contact_id ""
         set contact_id_exists_p 0
     }
-    ns_log Notice "qal_vendor_write.703: contact_id '${contact_id}' id '${id}' contact_id_exists_p '${contact_id_exists_p}'"
+
     if { [qf_is_natural_number $id] } {
         set contact_id_from_ve_id [qal_contact_id_from_vendor_id $id]
     } else {
         set id ""
         set contact_id_from_ve_id ""
     }
-    ns_log Notice "qal_vendor_write.710: contact_id '${contact_id}' id '${id}' contact_id_exists_p '${contact_id_exists_p}' contact_id_from_ve_id '${contact_id_from_ve_id}'"
+
     if { $contact_id_exists_p } {
         if { $contact_id_from_ve_id ne $contact_id } {
             set id [qal_vendor_id_from_contact_id $contact_id]
@@ -728,7 +727,7 @@ ad_proc -public qal_vendor_write {
             set contact_id $contact_id_from_ve_id
         }
     }
-    ns_log Notice "qal_vendor_write.725: contact_id '${contact_id}' id '${id}' contact_id_exists_p '${contact_id_exists_p}' contact_id_from_ve_id '${contact_id_from_ve_id}' error_p '${error_p}'"
+
     if { !$error_p } {
         
         # insert into db
@@ -872,7 +871,6 @@ ad_proc -public qal_vendor_trash {
             } 
             if { $instance_write_p || $at_least_one_write_p } {
                 set success_p 1
-                ns_log Notice "qal_vendor_trash id.871: in '${filtered_vendor_id_list}'"
                 db_transaction {
                     db_dml qal_vendor_ids_trash "update qal_vendor \
                             set trashed_p='1',trashed_by=:user_id,trashed_ts=now() \
@@ -1031,10 +1029,9 @@ ad_proc -public qal_address_write {
         set user_id $instance_id
     }
 
-    ns_log Notice "qal_address_write.1024. contact_id '${contact_id}' instance_id '${instance_id} notes '$a_arr(notes)'"
     qal_other_address_map_defaults a_arr
     qf_array_to_vars a_arr [qal_other_address_map_keys]
-    ns_log Notice "qal_address_write.1027. contact_id '${contact_id}' instance_id '${instance_id} notes '$notes'"
+
     # validations etc
     if { ![qf_is_natural_number $contact_id] } {
         set contact_id ""
@@ -1116,7 +1113,7 @@ ad_proc -public qal_address_write {
             set a_arr(address_type) $record_type
             set address_id [qal_address_postal_create a_arr]
         }
-        ns_log Notice "qal_address_write.1097. contact_id '${contact_id}' instance_id '${instance_id} array get a_arr '[array get a_arr]'"
+
         db_dml qal_address_create_1 "insert into qal_other_address_map \
  ([qal_other_address_map_keys ","]) values ([qal_other_address_map_keys ",:"])"
     }
@@ -1155,8 +1152,7 @@ ad_proc -public qal_address_delete {
                     where instance_id=:instance_id \
                     and addrs_id in ([template::util::tcl_to_sql_list $addrs_id_list]) \
                     and address_id is not null"]
-         ##code renable commented code.       
-         #       db_transaction {
+                db_transaction {
                     if { [string length $address_id_list ] > 0 } {
                         db_dml qal_address_ids_delete "delete from qal_address \
                             where instance_id=:instance_id \
@@ -1165,9 +1161,9 @@ ad_proc -public qal_address_delete {
                     db_dml qal_addrs_ids_delete "delete from qal_other_address_map \
                         where instance_id=:instance_id \
                         and addrs_id in ([template::util::tcl_to_sql_list $addrs_id_list])"
-          #      } on_error {
-          #          set success_p 0
-          #      }
+                } on_error {
+                    set success_p 0
+                }
             } 
         }
     }
@@ -1259,7 +1255,6 @@ ad_proc -public qal_address_postal_set_primary {
     set is_postal_p [qal_address_type_is_postal_q $address_type_new]
     if { $postal_constraint_p } {
         if { $is_postal_p } {
-            ns_log Notice "qal_address_postal_set_primary.987: address_type_new '${address_type_new}' not a postal address. Ignored for instance_id '${instance_id}' contact_id '${contact_id}' addrs_id '${addrs_id}' address_type '${address_type}'."
             set postal_go_p 0
         }
     }

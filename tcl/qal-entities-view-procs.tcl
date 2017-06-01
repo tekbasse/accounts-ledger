@@ -22,10 +22,6 @@ ad_proc -public qal_contact_read {
             set val [lindex $return_val_list $i]
             lappend return_list $key $val
             incr i
-            if { $key eq "created" } {
-                set created $val
-                ns_log Notice "qal_contact_read.26: created '${created}' qf_clock_scan -> '[qf_clock_scan $created]' qf_clock_scan_from_db -> '[qf_clock_scan_from_db $created]'"
-            }
         }
     }
     return $return_list
@@ -199,7 +195,7 @@ ad_proc -public qal_address_read {
             incr i
         }
     }
-    ns_log Notice "qal_address_read.202: return_list '${return_list}'"
+    #ns_log Notice "qal_address_read.202: return_list '${return_list}'"
     return $return_list
 }
 
@@ -236,7 +232,7 @@ ad_proc -public qal_addresses_read {
     if { $read_p } {
 
         set addrs_ids_list [hf_list_filter_by_natural_number $addrs_id_list]
-        ns_log Notice "qal_addresses_read.234. addrs_ids_list '${addrs_ids_list}' user_id '${user_id}' instance_id '${instance_id}'"
+        #ns_log Notice "qal_addresses_read.234. addrs_ids_list '${addrs_ids_list}' user_id '${user_id}' instance_id '${instance_id}'"
 
         if { [llength $addrs_ids_list ] > 0 } {
             set rows_lists [db_list_of_lists qal_address_get_by_adm "select [qal_addresses_keys ","] \
@@ -244,12 +240,6 @@ ad_proc -public qal_addresses_read {
                 on om.address_id=ad.id and om.instance_id=ad.instance_id \
                 where om.instance_id=:instance_id and om.trashed_p!='1' \
                 and om.addrs_id in ([template::util::tcl_to_sql_list $addrs_ids_list])" ]
-            ##code remove this diagnostic notice
-            ns_log Notice "qal_addresses_read.248 query: select [qal_addresses_keys ","] \
-                from qal_other_address_map om left outer join qal_address ad \
-                on om.address_id=ad.id and om.instance_id=ad.instance_id \
-                where om.instance_id=${instance_id} and om.trashed_p!='1' \
-                and om.addrs_id in ([template::util::tcl_to_sql_list $addrs_ids_list])"
         }
 
     } else { 
@@ -266,8 +256,6 @@ ad_proc -public qal_addresses_read {
             }
         }
 
-        ns_log Notice "qal_addresses_read.252. addrs_ids_list '${addrs_ids_list}' allowed_contact_ids_list '${allowed_contact_ids_list}' user_id '${user_id}'"
-
         if { [llength $allowed_contact_ids_list] > 0 && [llength $addrs_ids_list ] > 0 } {
             set rows_lists [db_list_of_lists qal_address_get "select [qal_addresses_keys ","] \
                 from qal_other_address_map om left outer join qal_address ad \
@@ -277,6 +265,6 @@ ad_proc -public qal_addresses_read {
                 and om.addrs_id in ([template::util::tcl_to_sql_list $addrs_ids_list])" ]
         }
     }
-    ns_log Notice "qal_addresses_read.264: rows_lists '${rows_lists}'"
+    #ns_log Notice "qal_addresses_read.264: rows_lists '${rows_lists}'"
     return $rows_lists
 }

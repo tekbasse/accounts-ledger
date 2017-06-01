@@ -73,7 +73,7 @@ aa_register_case -cats {api smoke} qal_addresses_check {
                         incr actions_list_len -1
                         set i 0
                         while { $more_to_test_p && $i < 100 } {
-                            ns_log Notice "qal-entities-procs.tcl.73: this_user_id ${this_user_id}' org_admin_id '${org_admin_id}' user_id '${user_id}' instance_id '${instance_id}'"
+
                             set a_idx [randomRange 3]
                             array unset addrs_arr
                             set addrs_arr(record_type) [lindex $record_type_list $a_idx]
@@ -314,12 +314,23 @@ aa_register_case -cats {api smoke} qal_addresses_check {
                                             if { $key ne "address_id" } {
                                                 aa_equals "A1.${do}-4 qal_address_read returns same as written with qal_address_write for key '${key}'" $addrs2_arr(${key}) $addrs_arr(${key})
                                             } else {
-                                                if { $addrs2_arr(${key}) ne $addrs_arr(${key}) && $addrs2_arr(${key}) ne "" } {
-                                                    set not_equals_p 1
+                                                if { [qal_address_type_is_postal_q $record_type] } {
+                                                    if { $addrs2_arr(${key}) ne $addrs_arr(${key}) && $addrs2_arr(${key}) ne "" } {
+                                                        set not_equals_p 1
+                                                    } else {
+                                                        set not_equals_p 0
+                                                    }
+                                                    aa_true "A1.${do}-4.b qal_address_read returns a different non-empty value for ${key} addrs2_arr(${key}) '$addrs2_arr(${key})' addrs_arr(${key}) '$addrs_arr(${key})'." $not_equals_p
                                                 } else {
-                                                    set not_equals_p 0
+                                                    if { $addrs2_arr(${key}) eq $addrs_arr(${key}) && $addrs2_arr(${key}) eq "" } {
+                                                        set equals_p 1
+                                                    } else {
+                                                        set equals_p 0
+                                                    }
+
+                                                    aa_true "A1.${do}-4.c qal_address_read returns empty value for ${key} addrs2_arr(${key}) '$addrs2_arr(${key})' addrs_arr(${key}) '$addrs_arr(${key})'." $equals_p
                                                 }
-                                                aa_true "A1.${do}-4.b qal_address_read returns a different non-empty value for ${key} addrs2_arr(${key}) '$addrs2_arr(${key})' addrs_arr(${key}) '$addrs_arr(${key})'." $not_equals_p
+
                                             }
 
                                         }
@@ -539,7 +550,7 @@ aa_register_case -cats {api smoke} qal_addresses_check {
                             set cu_updated_p 1
                         } else {
                             set cu_updated_p 0
-                            ns_log Notice "qal-entities-procs.tcl.136 co_id '$co_id' co2_id '$co2_id' cu_id '$cu_id' cu2_id '$cu2_id'"
+                            ns_log Warning "qal-entities-procs.tcl.136 co_id '$co_id' co2_id '$co2_id' cu_id '$cu_id' cu2_id '$cu2_id'"
                         }
 
                         aa_true "C2  Updated a customer" $cu_updated_p
@@ -549,7 +560,7 @@ aa_register_case -cats {api smoke} qal_addresses_check {
                             set ve_updated_p 1
                         } else {
                             set ve_updated_p 0
-                            ns_log Notice "qal-entities-procs.tcl.146 co_id '$co_id' co2_id '$co2_id' ve_id '$ve_id' ve2_id '$ve2_id'"
+                            ns_log Warning "qal-entities-procs.tcl.146 co_id '$co_id' co2_id '$co2_id' ve_id '$ve_id' ve2_id '$ve2_id'"
                         }
 
                         aa_true "C3  Updated a vendor" $ve_updated_p
