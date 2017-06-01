@@ -426,7 +426,7 @@ aa_register_case -cats {api smoke} qal_addresses_check {
                             incr i
                         }
 
-                        
+                        aa_log "while loop completed ${i} iterations."
 
 
 
