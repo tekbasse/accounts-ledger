@@ -44,10 +44,10 @@ ad_proc -public hf_interval_ymdhms {
     ns_log Notice "hf_interval_ymdhms starting with $s1 $s2"
     set units_list [list years months days hours minutes seconds]
     # if s1 and s2 aren't in seconds, convert to seconds.
-    if { ![string is entier -strict $s1] } {
+    if { ![string is wideinteger -strict $s1] } {
         set s1 [clock scan $s1]
     }
-    if { ![string is entier -strict $s2] } {
+    if { ![string is wideinteger -strict $s2] } {
         set s2 [clock scan $s2]
     }
     # postgreSQL intervals determine month length based on earliest date in interval calculations.
@@ -324,10 +324,10 @@ ad_proc -public hf_interval_remains_ymdhms {
     ns_log Notice "hf_interval_remains_ymdhms starting with $s1 $s2"
     set units_list [list years months days hours minutes seconds]
     # if s1 and s2 aren't in seconds, convert to seconds.
-    if { ![string is entier -strict $s1] } {
+    if { ![string is wideinteger -strict $s1] } {
         set s1 [clock scan $s1]
     }
-    if { ![string is entier -strict $s2] } {
+    if { ![string is wideinteger -strict $s2] } {
         set s2 [clock scan $s2]
     }
     # set s1 to s2 in reverse chronological sequence
