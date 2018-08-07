@@ -3,6 +3,17 @@
 -- @ported from sql-ledger and combined with parts from OpenACS ecommerce package
 -- @license GNU GENERAL PUBLIC LICENSE, Version 2, June 1991
 
+select acs_object_type__drop_type('qal_grps_customer','f');
+drop index qal_customer_object_id_map_customer_id_idx;
+drop index qal_customer_object_id_map_instance_id_idx;
+
+DROP TABLE qal_customer_object_id_map;
+
+select acs_object_type__drop_type('qal_grps_vendor','f');
+drop index qal_vendor_object_id_map_vendor_id_idx;
+drop index qal_vendor_object_id_map_instance_id_idx;
+
+DROP TABLE qal_vendor_object_id_map;
 
 -- App data model
 
