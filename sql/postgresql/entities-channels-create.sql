@@ -2,6 +2,9 @@
 --
 -- @ported from sql-ledger and combined with parts from OpenACS ecommerce package
 
+-- Every vendor requires a contact record
+-- Every customer requires a contact record
+
 
 CREATE TABLE qal_customer_object_id_map (
        object_id integer unique not null,
