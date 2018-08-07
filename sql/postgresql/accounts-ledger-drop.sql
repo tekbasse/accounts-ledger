@@ -68,4 +68,3 @@ DROP TABLE qal_template_accounts;
 
 \i entities-channels-drop.sql
 
-DROP SEQUENCE qal_id;

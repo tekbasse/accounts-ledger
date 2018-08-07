@@ -6,9 +6,6 @@
 
 -- t/f values are converted to tcl 1/0 for api consistency
 
-CREATE SEQUENCE qal_id start 10000;
-SELECT nextval ('qal_id');
-
 
 -- gets imported into qal_chart
 -- Each account represents two traditional accounting columns:
