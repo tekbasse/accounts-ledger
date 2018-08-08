@@ -11,6 +11,7 @@ aa_register_case -cats {api smoke} qal_entities_check {
             # -rollback \
                         ns_log Notice "aa_register_case.13: Begin test contact_check"
 
+			# some of this is from tests in accounts-contacts
                         set instance_id [ad_conn package_id]
                         # use the sysadmin user, because we aren't testing permissions
                         set sysowner_email [ad_system_owner]
