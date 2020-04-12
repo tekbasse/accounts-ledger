@@ -12,6 +12,7 @@
         @content_c2;noquote@
       </if>
     </div>
+  </div>
   <div class="grid-4 m-grid-12 s-grid-12 padded">
     <div class="padded-inner content-box">
       <if @content_c3 not nil>

@@ -1,30 +1,18 @@
-<div class="grid-whole padded">
-  <div class="grid-whole padded">
-    <div class="padded-inner-sides header-example">
-      <h3><em>Example from B Responsive Theme showing how document pages are formated based on screen size and gracefully stacking to fit smaller screens.</em></h3>
-    </div>
+<master>
+
+  <p>For some reason, equalize is not working here. Not important for beta. TODO: fix or remove before launch.</p>
+  
+  <div class="equalize">  
+    <include src="/packages/accounts-ledger/www/page-runner-block-1col" content_c1="standard 1 column header"/>
+    
+    <include src="/packages/accounts-ledger/www/page-runner-block-3col" content_c2="center content for 3 column header block"/>
+    
+    
+    <include src="/packages/accounts-ledger/www/page-runner-block-3col" content_c2="center content for 3 column row block"/>
+    
+    <include src="/packages/accounts-ledger/www/page-runner-block-2col" content_c1="left content for 2 column footer block" content_c2="right content for 2 column footer block"/>
+    <hr>
+    
+    <include src="/packages/accounts-ledger/www/page-runner-block-5col" content_c1="cell1" content_c2="cell2" content_c3="cell3" content_c4="cell4" content_c5="cell5"/>
   </div>
-  <div class="grid-whole equalize">
-    <div class="grid-third s-grid-whole padded">
-      <div class="padded-inner content-box">You can do the normal columns</div>
-    </div>
-    <div class="grid-third s-grid-whole padded">
-      <div class="padded-inner content-box">that collapse to stacked</div>
-    </div>
-    <div class="grid-third s-grid-whole padded">
-      <div class="padded-inner content-box">when you are on a small screen...</div>
-    </div>
-    <div class="grid-quarter m-grid-half s-grid-whole padded">
-      <div class="padded-inner content-box">How about four columns on large...</div>
-    </div>
-    <div class="grid-quarter m-grid-half s-grid-whole padded">
-      <div class="padded-inner content-box">two columns on medium (phablet!)...</div>
-    </div>
-    <div class="grid-quarter m-grid-half s-grid-whole padded">
-      <div class="padded-inner content-box">and stacked on small...</div>
-    </div>
-    <div class="grid-quarter m-grid-half s-grid-whole padded">
-      <div class="padded-inner content-box">Not a problem!</div>
-    </div>
-  </div>
-</div>
+  
