@@ -1,8 +1,8 @@
 <master>
 
-  <p>For some reason, equalize is not working here. Not important for beta. TODO: fix or remove before launch.</p>
+  <p>Equalize doesn't work by default in OpenACS due to security concerns. It's not needed when background is same color anyway, so leaving out.</p>
   
-  <div class="equalize">  
+
     <include src="/packages/accounts-ledger/www/page-runner-block-1col" content_c1="standard 1 column header"/>
     
     <include src="/packages/accounts-ledger/www/page-runner-block-3col" content_c2="center content for 3 column header block"/>
@@ -14,5 +14,5 @@
     <hr>
     
     <include src="/packages/accounts-ledger/www/page-runner-block-5col" content_c1="cell1" content_c2="cell2" content_c3="cell3" content_c4="cell4" content_c5="cell5"/>
-  </div>
+
   
