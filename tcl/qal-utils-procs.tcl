@@ -118,9 +118,6 @@ ad_proc -public qal_3g {
     <code>hash_check</code>, and <br>
     <code>post_only</code> see <code>qf_get_inputs_as_array</code>.
     <code>write_p</code> if write_p is 0, presents form as a list of uneditable information.
-    For example, setting to "\n<style>\nlabel { display: block ; }\n</style>\n"
-    causes form elements to be displayed in a vertical, linear fashion
-    as one would expect on a small device screen.
     <br><br>
     Note: fieldset tag is not implemented in this paradigm.
     <br><br>
