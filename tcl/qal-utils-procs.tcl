@@ -93,8 +93,8 @@ ad_proc -public qal_3g {
     Yet, <code>fields_ordered_list</code> is optional.
     When fields_ordered_list is empty, sequence is soley 
     in sequential order according to relative tabindex value.
-    Actual tabindex value is calculated, so that a sequence is contiguous
-    even if supplied values are not.
+    Actual tabindex value is calculated, so that a sequence is tabindex
+    compliant. Supplied values can be integers (negative and positive).
     <br><br>
 
     <code>field_types_lists</code> is a list of lists 
@@ -252,7 +252,7 @@ ad_proc -public qal_3g {
 
     # fatts = field attributes
     # fatts_arr(label,qdt::data_types.fieldname)
-    # qd::data_types fieldnames:
+    # qdt::data_types fieldnames:
     #    label 
     #    tcl_type 
     #    max_length 
@@ -340,6 +340,7 @@ ad_proc -public qal_3g {
     }
 
     # Make a list of datatype elements
+    # These are the same as in list qdt::data_types.fieldname listed above.
     set datatype_dummy [lindex $data_type_existing_list 0]
     set datatype_elements_list [list]
     set datatype_dummy_len [string length $datatype_dummy]
@@ -347,9 +348,12 @@ ad_proc -public qal_3g {
         lappend datatype_elements_list [string range $n $datatype_dummy_len+1 end]
     }
     #ns_log Debug "qal_3g.534: datatype_elements_list '${datatype_elements_list}'"
+    # datatype_elements are:
+    # label xml_format default_proc tcl_format_str tcl_type
+    # tcl_clock_format_str abbrev_proc valida_proc input_hint max_length
+    # css_abbrev empty_allowed_p html_style text_format_proc css_span
+    # form_tag_attrs css_div form_tag_type filter_proc
 
-    set dedt_idx [lsearch -exact $datatype_elements_list $datatype_c]
-    set ftat_idx [lsearch -exact $datatype_elements_list $form_tag_attrs_c]
     
     # Determine adjustments to be applied to tabindex values
     if { $qtable_enabled_p } {
@@ -359,14 +363,19 @@ ad_proc -public qal_3g {
     }
     set tabindex_tail [expr { $fields_ordered_list_len + $field_ct } ]
 
+    #
+    # Parse form fields
+    #
+    
+    # Build dataset validation and make a form
 
-    # Parse fields
-
-    # Build dataset validation and making a form
-
-    # make a list of datatype elements that are not made during next loop:
-    # element "datatype" already exists, skip that loop:
+    # Make a list of datatype elements that are not made during next loop
+    # remaining_datatype_elements
+    
+    # element "datatype" already exists, skip that loop.
     # element "form_tag_attrs" already exists, skip that in loop also.
+    set dedt_idx [lsearch -exact $datatype_elements_list $datatype_c]
+    set ftat_idx [lsearch -exact $datatype_elements_list $form_tag_attrs_c]
     # e = element
     # Remove from list, the last case first so that existing index values work
     set remaining_datatype_elements_list $datatype_elements_list
@@ -382,17 +391,20 @@ ad_proc -public qal_3g {
     # tag_type is the html tag (aka element) used in the form.
     # Note: 'tag' is an attribute of 'tag_type', even though
     # nomenclature suggests the opposite.  This is because
-    # tag_type and context ultimately determine the tag used.
+    # tag_type and other factors ultimately determine the tag used.
     set default_type $text_c
     set default_tag_type "input"
 
     # $f_hash is field_index not field name.
+    # This loop standardizes element input data that does not
+    # depend on values of prior element.
+    ### Calculations, such as 'context and scalar_array_p are
+    ### left to later.
     foreach f_hash $qfi_fields_list {
 
         ns_log Debug "qal_3g.686  f_hash: '${f_hash}'"
         # This loop fills fatts_arr(${f_hash},${datatype_element})
-        # where datatype elements are:
-        # label xml_format default_proc tcl_format_str tcl_type tcl_clock_format_str abbrev_proc valida_proc input_hint max_length css_abbrev empty_allowed_p html_style text_format_proc css_span form_tag_attrs css_div form_tag_type filter_proc
+        
         # Additionally,
         # fatts_arr(${f_hash},names) lists the name (or names in the case of
         # multiple associated with form element) associated with f_hash.
