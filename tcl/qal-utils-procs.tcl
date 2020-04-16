@@ -29,7 +29,7 @@ ad_proc -public qal_3g {
     manages field type validation like qfo_2g, but with 2 new features:
 
     1. capacity to handle 'scalared arrays' as names for multiple rows of sets
-    of data.  This allows clean handling of arrays in the
+    of named form elements.  This allows clean handling of arrays in the
     context of form CGI by avoiding use of special characters which may be
     problematic in some contexts.
     <br><br>
@@ -37,17 +37,24 @@ ad_proc -public qal_3g {
     A 'scalared array' here means a scalar variable with a suffix
     number appened that represents an array index.  For example, if an array
     is named 'foobar' with 3 elements, then it would be represented with
-    foobar_1, foobar_2, foobar3.
+    foobar1, foobar2, foobar3.
 
     <br><br>
     2. split 'form_varname'(s) for placing different parts of the output
     form html into different parts of a templated adp page.
-    Each input field is assigned a '<code>context</code>' name/value pair.
+    The developer assigns each input field a
+    '<code>context</code>' and its value (name/value pair).
     The value of context is the form_varname that the associated form field
     html is assigned to.
     If no context is provided, the previous context is assumed.
-    The generated form fragment is a text value containing markup language
-    tags.
+    The generated form fragments containing HTML markup language and
+    are assigned to the form_varname with a numeric suffix.
+    form_varname_open contains the open FORM tag.
+    form_varname1 contains the first form fragment determined by TABINDEX.
+    form_varname2 contains the second form fragment..
+    form_varnameN contains the Nth form fragment
+    form_varname_close contains the close FORM tag. This is supplied for
+    consistency, but its value is constant.
     The first context contains open FORM tag. The last defined context includes
     the closed FORM tag.
     <br><br>
@@ -173,10 +180,9 @@ ad_proc -public qal_3g {
 
     @qfo_2g
 } {
-    # Done: Verify negative numbers pass as values in ad_proc that uses
-    # parameters passed starting with dash.. -for_example.
-    # PASSED. If a non-decimal number begins with dash, flags warning in log.
-    # Since default form_id may begin with dash, a warning is possible.
+
+    # Form fragments are not assigned to context names in order to maximize
+    # portability of code and for consistency.
 
     # Blend the field types according to significance:
     # qtables field types declarations may point to different ::qdt::data_types
@@ -184,25 +190,23 @@ ad_proc -public qal_3g {
     # ::qdt::data_types defaults in qdt_types_arr
     # Blending is largely done via features of called procs.
 
-    # Coding note: A simple way of blending may be to
-    # convert each to an array,
-    # and then write one array over the other, and convert back to
-    # lists or whatever
-
-    
     # fieldset is not implemented in this paradigm, because
     # it adds too much complexity to the code for the benefit.
     # A question is, if there is a need for fieldset, maybe
     # there is a need for a separate input page?
+    # qal_3g uses the OpenACS template system instead of fieldset
+    # for grouping.
 
     # qfi = qf input
     # form_ml = form markup (usually in html starting with FORM tag)
     set error_p 0
     upvar 1 $fields_array fields_arr
     upvar 1 $inputs_as_array qfi_arr
-
-### Three hashes means current notes under DEV.    
-    ###upvar 1 $form_varname form_m
+    upvar 1 $form_varname form_m
+    upvar 1 ${form_varname}_open form_m_open
+    upvar 1 ${form_varname}_close form_m_close
+    # upvar assignments like:  upvar 1 ${form_varname}N form_mN
+    # are delayed until determined dynamically
 
     # To obtain page's doctype, if customized:
     upvar 1 doc doc
@@ -242,7 +246,7 @@ ad_proc -public qal_3g {
 
     # Create a field attributes array
     
-    # Do not assume field index is same as attribute name's value.
+    # Do not assume field index is same as attribute 'name's value.
     # Ideally, this list is the names used for inputs. 
     # Yet, this pattern breaks for 'input checkbox' (not 'select multiple'),
     # where names are defined in the supplied value list of lists.
@@ -273,7 +277,7 @@ ad_proc -public qal_3g {
     #    css_abbrev 
     #    xml_format
 
-    ####context and scalared_array_p break this paradigm. Need to add in...
+    ###context and scalared_array_p break this paradigm. Need to add in...
 
     
     set fields_ordered_list_len [llength $fields_ordered_list]
@@ -330,7 +334,10 @@ ad_proc -public qal_3g {
     set value_c "value"
     set title_c "title"
     set ignore_list [list $submit_c $button_c $hidden_c]
-
+    ###
+    set context_c "context"
+    set scalar_array_p_c "scalar_array_p"
+    
     # Array for holding datatype 'sets' defined by select/choice/choices:
     # fchoices_larr(element_name)
 
@@ -349,10 +356,10 @@ ad_proc -public qal_3g {
     }
     #ns_log Debug "qal_3g.534: datatype_elements_list '${datatype_elements_list}'"
     # datatype_elements are:
-    # label xml_format default_proc tcl_format_str tcl_type
-    # tcl_clock_format_str abbrev_proc valida_proc input_hint max_length
-    # css_abbrev empty_allowed_p html_style text_format_proc css_span
-    # form_tag_attrs css_div form_tag_type filter_proc
+    #   label xml_format  default_proc  tcl_format_str  tcl_type
+    #   tcl_clock_format_str  abbrev_proc  valida_proc  input_hint  max_length
+    #   css_abbrev empty_allowed_p  html_style  text_format_proc  css_span
+    #   form_tag_attrs  css_div  form_tag_type  filter_proc
 
     
     # Determine adjustments to be applied to tabindex values
@@ -396,10 +403,9 @@ ad_proc -public qal_3g {
     set default_tag_type "input"
 
     # $f_hash is field_index not field name.
-    # This loop standardizes element input data that does not
+    # The following loop standardizes element input data that does not
     # depend on values of prior element.
-    ### Calculations, such as 'context and scalar_array_p are
-    ### left to later.
+
     foreach f_hash $qfi_fields_list {
 
         ns_log Debug "qal_3g.686  f_hash: '${f_hash}'"
@@ -432,17 +438,34 @@ ad_proc -public qal_3g {
         # The value is used to branch at various points in code,
         # so add an index with a logical value to speed up
         # parsing at these logical branches:  is_datatyped_p
-
-
         
 
         # get fresh, highest priority field html tag attributes
         set field_nvl $fields_arr(${f_hash})
+        set field_new_nvl [list ]
         foreach {n v} $field_nvl {
             set nlc [string tolower $n]
-            set hfv_arr(${nlc}) $v
-            set hfn_arr(${nlc}) $n
+
+            ###  Extract 'context' and 'scalar_array_p'
+            ###  into a new array of same index so as to avoid
+            ###  needing to modify existing, working logic
+            ###  fcs_arr(${f_hash},context) fcs_arr(${f_hash},scalar_array_p)
+            switch -exact -- $nlc {
+                $context_c {
+                    set fcs_arr(${f_hash},${context_c}) $v
+                }
+                $scalar_array_p_c {
+                    set fcs_arr(${f_hash},${scalar_array_p_c}) $v
+                }
+                default {
+                    set hfv_arr(${nlc}) $v
+                    set hfn_arr(${nlc}) $n
+                    lappend field_new_nvl $n $v
+                }
+            }
         }
+        set fields_arr(${f_hash}) $field_new_nvl
+        
         ns_log Debug "qal_3g.725 array get hfv_arr '[array get hfv_arr]'"
 
         set tag_type ""
@@ -751,7 +774,8 @@ ad_proc -public qal_3g {
 
 
     ### allow dynamically generated fields (scalared arrays) to allow
-    # this following exception:
+    ### this following exception:
+    
     # Except, we don't want a filter process
     #   to lose dynamically generated form fields, such as used in
     #   forms that pass N number of cells in a spreadsheet.
@@ -803,7 +827,7 @@ ad_proc -public qal_3g {
     if { $form_submitted_p } {
         
         # validate inputs
-
+### validate the scalar_array_p variables via glob
         foreach f_hash $qfi_fields_list {
 
             # validate.
@@ -929,11 +953,18 @@ ad_proc -public qal_3g {
 
         
         # build form using qf_* api
-   ###next line becomes a loop, setting each of the contexts.
+        
+        ###next line becomes a loop, setting each of the contexts.
+        ### count the unique contexts, because
+        ### upvar must be called for each form_varnameN form_mN *before*
+        ### assigning values to form_mN
+        ### get context and scalar_array_p from: fcs_arr(${f_hash},${scalar_array_p_c})
         set form_m ""
         
         set form_id [qf_form form_id $form_id hash_check $hash_check]
-
+        set form_m_open [qf_read form_id $form_id]
+        ns_log "qal_3g.944: form_m_open '${form_m_open}'"
+        
         # Use qfi_fields_sorted_list to generate 
         # an ordered list of form elements
 
