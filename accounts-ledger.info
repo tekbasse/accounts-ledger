@@ -23,7 +23,6 @@
         <requires url="ref-countries" version="0.001"/>
         <requires url="ref-language" version="0.001"/>
         <requires url="spreadsheet" version="0.048"/>
-        <requires url="accounts-contacts" version="0.023"/>
 	
         <callbacks>
         </callbacks>
