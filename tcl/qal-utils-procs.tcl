@@ -37,7 +37,7 @@ ad_proc -public qal_3g {
     A 'scalared array' here means a scalar variable with a suffix
     number appened that represents an array index.  For example, if an array
     is named 'foobar' with 3 elements, then it would be represented with
-    foobar1, foobar2, foobar3.
+    foobar_1, foobar_2, foobar_3.
 
     <br><br>
     2. split 'form_varname'(s) for placing different parts of the output
@@ -447,7 +447,7 @@ ad_proc -public qal_3g {
             set nlc [string tolower $n]
 
             ###  Extract 'context' and 'scalar_array_p'
-            ###  into a new array of same index so as to avoid
+            ###  into a new array with same index so as to avoid
             ###  needing to modify existing, working logic
             ###  fcs_arr(${f_hash},context) fcs_arr(${f_hash},scalar_array_p)
             switch -exact -- $nlc {
@@ -772,24 +772,45 @@ ad_proc -public qal_3g {
     # into an array and then overwrite the array with qfi_arr
     # Except, we don't want any extraneous input inserted unexpectedly in code.
 
-
-    ### allow dynamically generated fields (scalared arrays) to allow
-    ### this following exception:
+    ### Allow dynamically generated fields (scalared arrays) 
     
-    # Except, we don't want a filter process
-    #   to lose dynamically generated form fields, such as used in
-    #   forms that pass N number of cells in a spreadsheet.
-    # So, don't optimize with: array set qfv_arr /array get qfi_arr/
-    # Yet, provide a mechanism to allow 
+    # We don't want a filter process
+    # to lose dynamically generated form fields, such as used in
+    # forms that pass N number of cells in a spreadsheet, or scalar arrays.
+    # So, don't optimize code with simple: array set qfv_arr /array get qfi_arr/
+    
+    # Provide a mechanism to allow 
     # batch process of a set of dynamic fields
     # by selecting the fields via a glob that uniquely identifes them like so:
     #  array set qfv_arr /array get qfi_arr "{glob1}"
     #  array set qfv_arr /array get qfi_arr "glob2"
 
+    ### How to identify the fields to process?
+    ### $fatts_arr(${f_hash},${name_c}) contains root variable name
+    ### $fcs_arr(${f_hash},${scalar_array_p_c}) is 1 if is a scalar_array
+    ### suffix consists of delimiter "_" and natural number.
+    
+    # Whatever the case, qal_3g does not add rows etc.
+    # It only works with what it is given via form_array.
+    # It sees dynamically generated fields as static as anything else.
+    ### form_array needs to add the dynamic rows to be consistent.
+    ### To do this, it needs to have a data passed to it identifying the
+    ### scalar arrays, and total count for each.
+    ### Maybe via a qal3g_{root_name}_ct value that is the max for root_name
+    ### Does there need to be one for each root_name?
+    ### If qal_3g is generating it, yes, or
+    ### another variable identifying the root_names of a "row"
+    ### Would that be difficult to conceptualize in the API, or ?
+
+    ### SL tracks by a single hidden input variable 'rowcount', but
+    ### we want to automate this as much as possible.
+    ### For example, pass the original form definiton, and it adds
+    ### new rows.. No. That's an app thing. It just validates what's there.
+
+    
     # For now, dynamically generated fields need to be 
     # created in fields_array or be detected and filtered
     # by calling qf_get_inputs_as_array *before* qal_3g
-
     
     #ns_log Debug "qal_3g.903 form_submitted_p '${form_submitted_p}' array get qfi_arr '[array get qfi_arr]'"
 
