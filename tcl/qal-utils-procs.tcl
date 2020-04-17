@@ -46,17 +46,25 @@ ad_proc -public qal_3g {
     '<code>context</code>' and its value (name/value pair).
     The value of context is the form_varname that the associated form field
     html is assigned to.
-    If no context is provided, the previous context is assumed.
+    
+    The <code>context</code> attribute and its value determines
+    which form context the form element is added to.
+    Each 'context' value may be supplied as either a number or
+    the form_varname with its number as a suffix.
+    If no context is provided or the context sequence number is not
+    supplied, the previous context is assumed based on TABINDEX order.
     The generated form fragments containing HTML markup language and
     are assigned to the form_varname with a numeric suffix.
     form_varname_open contains the open FORM tag.
-    form_varname1 contains the first form fragment determined by TABINDEX.
+    form_varname1 contains the first form fragment determined by context
     form_varname2 contains the second form fragment..
     form_varnameN contains the Nth form fragment
     form_varname_close contains the close FORM tag. This is supplied for
     consistency, but its value is constant.
     The first context contains open FORM tag. The last defined context includes
     the closed FORM tag.
+
+  
     <br><br>
 
     <code>fields_array</code> is an <strong>array name</strong>. 
@@ -979,7 +987,8 @@ ad_proc -public qal_3g {
         ### count the unique contexts, because
         ### upvar must be called for each form_varnameN form_mN *before*
         ### assigning values to form_mN
-        ### get context and scalar_array_p from: fcs_arr(${f_hash},${scalar_array_p_c})
+        ### get context and scalar_array_p from:
+        ###  fcs_arr(${f_hash},${scalar_array_p_c})
         set form_m ""
         
         set form_id [qf_form form_id $form_id hash_check $hash_check]
