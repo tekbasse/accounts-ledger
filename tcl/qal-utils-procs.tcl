@@ -342,9 +342,15 @@ ad_proc -public qal_3g {
     set value_c "value"
     set title_c "title"
     set ignore_list [list $submit_c $button_c $hidden_c]
-    ###
+
+    ### Adding form element/tag attributes
+    ### to allow breaking a form up into multiple html segments
+    ### at the page level via 'context', and within each segment
+    ### for use in responsive page design (and traditional templating).
     set context_c "context"
     set scalar_array_p_c "scalar_array_p"
+    set html_before_c "html_before"
+    set html_after_c "html_after"
     
     # Array for holding datatype 'sets' defined by select/choice/choices:
     # fchoices_larr(element_name)
@@ -451,19 +457,29 @@ ad_proc -public qal_3g {
         # get fresh, highest priority field html tag attributes
         set field_nvl $fields_arr(${f_hash})
         set field_new_nvl [list ]
+        set fcshtml_arr(${f_hash},${context_c}) ""
+        set fcshtml_arr(${f_hash},${scalar_array_p_c}) 0
+        set fcshtml_arr(${f_hash},${html_before_c}) ""
+        set fcshtml_arr(${f_hash},${html_after_c}) ""
         foreach {n v} $field_nvl {
             set nlc [string tolower $n]
 
             ###  Extract 'context' and 'scalar_array_p'
             ###  into a new array with same index so as to avoid
             ###  needing to modify existing, working logic
-            ###  fcs_arr(${f_hash},context) fcs_arr(${f_hash},scalar_array_p)
+            ###  fcshtml_arr(${f_hash},context) fcshtml_arr(${f_hash},scalar_array_p)
             switch -exact -- $nlc {
                 $context_c {
-                    set fcs_arr(${f_hash},${context_c}) $v
+                    set fcshtml_arr(${f_hash},${context_c}) $v
                 }
                 $scalar_array_p_c {
-                    set fcs_arr(${f_hash},${scalar_array_p_c}) $v
+                    set fcshtml_arr(${f_hash},${scalar_array_p_c}) $v
+                }
+                $html_before_c {
+                    set fcshtml_arr(${f_hash},${html_before_c}) $v
+                }
+                $html_after_c {
+                    set fcshtml_arr(${f_hash},${html_after_c}) $v
                 }
                 default {
                     set hfv_arr(${nlc}) $v
@@ -782,11 +798,11 @@ ad_proc -public qal_3g {
 
     ### Allow dynamically generated fields (scalared arrays) 
     
-    # We don't want a filter process
-    # to lose dynamically generated form fields, such as used in
-    # forms that pass N number of cells in a spreadsheet, or scalar arrays.
-    # So, don't optimize code with simple: array set qfv_arr /array get qfi_arr/
-    
+    # We don't want a filter process to lose dynamically generated form fields,
+    # such as used in forms that pass N number of cells in a spreadsheet,
+    # or scalar arrays.  So, don't optimize code
+    # with simple: array set qfv_arr /array get qfi_arr/
+    # Instead:
     # Provide a mechanism to allow 
     # batch process of a set of dynamic fields
     # by selecting the fields via a glob that uniquely identifes them like so:
@@ -795,12 +811,12 @@ ad_proc -public qal_3g {
 
     ### How to identify the fields to process?
     ### $fatts_arr(${f_hash},${name_c}) contains root variable name
-    ### $fcs_arr(${f_hash},${scalar_array_p_c}) is 1 if is a scalar_array
+    ### $fcshtml_arr(${f_hash},${scalar_array_p_c}) is 1 if is a scalar_array
     ### suffix consists of delimiter "_" and natural number.
     
     # Whatever the case, qal_3g does not add rows etc.
     # It only works with what it is given via form_array.
-    # It sees dynamically generated fields as static as anything else.
+    # It sees dynamically generated fields as static as everything else.
     ### form_array needs to add the dynamic rows to be consistent.
     ### To do this, it needs to have a data passed to it identifying the
     ### scalar arrays, and total count for each.
@@ -814,8 +830,9 @@ ad_proc -public qal_3g {
     ### we want to automate this as much as possible.
     ### For example, pass the original form definiton, and it adds
     ### new rows.. No. That's an app thing. It just validates what's there.
-
-    
+    ### If an app wants to add a new row when one is submitted,
+    ### the app can intercept the data before qal_3g and add a row
+    ### to the form definition in fields_array.
     # For now, dynamically generated fields need to be 
     # created in fields_array or be detected and filtered
     # by calling qf_get_inputs_as_array *before* qal_3g
@@ -856,7 +873,8 @@ ad_proc -public qal_3g {
     if { $form_submitted_p } {
         
         # validate inputs
-### validate the scalar_array_p variables via glob
+        ### Validate the scalar_array_p variables via glob? No
+        ### Each is statically defined, so the usual process works.
         foreach f_hash $qfi_fields_list {
 
             # validate.
@@ -983,12 +1001,55 @@ ad_proc -public qal_3g {
         
         # build form using qf_* api
         
-        ###next line becomes a loop, setting each of the contexts.
-        ### count the unique contexts, because
+        ### setup any contexts
         ### upvar must be called for each form_varnameN form_mN *before*
         ### assigning values to form_mN
         ### get context and scalar_array_p from:
-        ###  fcs_arr(${f_hash},${scalar_array_p_c})
+        ###  fcshtml_arr(${f_hash},${scalar_array_p_c})
+
+        ### count contexts, not the number in a scalar array..
+        set context_ct 1
+        
+        foreach f_hash $qfi_fields_sorted_list {
+            ### Every html element should have a 'context' attribute
+            ### If not, add one.
+            set context $fcshmtl_arr(${f_hash},${context_c})
+            set form_m_len [string length $form_m]
+
+            switch -glob -- $context {
+                ${form_m}[0-9][0-9]-
+                ${form_m}[0-9] {
+                    # in good form. Leave as is.
+                    # Assumes there are less than 99 contexts on a page.
+                    # update context_ct
+                    set conext_new $context
+                    set context_ct [string range $context $form_m_len end]
+                }
+                *[0-9][0-9] -
+                *[0-9] {
+                    # There's a number there,
+                    # and maybe nothing else, or maybe a spelling
+                    # issue. Use the number..
+                    # update context_ct to the same.
+                    ns_log Notice "qal_3g.1034: context '${context}' not \
+                    recognized for f_hash '${f_hash}' form_id '${form_id}'"
+                    regexp -- {^[^0-9]*([0-9]+)$} $context context_ct
+                    set context_new $form_m
+                    append context_new $context_c
+                }
+                default {
+                    # No recognizable context assigned.
+                    # Assign the same as the last context, or the first
+                    # if no previous ones.
+                    set context_new $form_m
+                    append context_new $context_ct
+                }
+            }
+            set fcshtml_larr(${f_hash},${context_c}) $context_new
+
+        }
+
+
         set form_m ""
         
         set form_id [qf_form form_id $form_id hash_check $hash_check]
