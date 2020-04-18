@@ -192,6 +192,11 @@ ad_proc -public qal_3g {
     # Form fragments are not assigned to context names in order to maximize
     # portability of code and for consistency.
 
+    # For forms that display an entire table, this is not the proc you seek.
+    # A different proc needs to be made. Maybe something named like
+    #   qss::3g and put in spreadsheet package.
+
+    
     # Blend the field types according to significance:
     # qtables field types declarations may point to different ::qdt::data_types
     # fields_arr overrides ::qdt::data_types
@@ -489,7 +494,7 @@ ad_proc -public qal_3g {
             }
         }
         set fields_arr(${f_hash}) $field_new_nvl
-        
+
         ns_log Debug "qal_3g.725 array get hfv_arr '[array get hfv_arr]'"
 
         set tag_type ""
@@ -1002,32 +1007,62 @@ ad_proc -public qal_3g {
         
         # build form using qf_* api
         
+        ### TODO recognize rc 'name' naming convention and
+        ### generate css-based
+        ### table (not an html table) with column headers
+        ### titled with a standard row/column (rc) reference, and
+        ### each input 'cell' labeled with an rc reference
+        ### in the spirit of responsive html page design.
+
+        ### Problem: The vertical sequence is determined by sort tabindex,
+        ###    which messes with the row and column order.
+
+
+        ### To put titles and cells in same horizontal sequence,
+        ### look at the name suffix _{group letter}{col letter}{row}
+        ###    ..but that doesn't work for qf_choices...
+        ### fatts_arr(${f_hash},names) lists the name (or names in the case of
+        ### multiple associated with form element) associated with f_hash.
+        ### This is a f_hash <--> name map, 
+        ### where name is a list of 1 or more form elements.
+        ###
+        ### qfo::form_list_def_to_array names the multiple choices 'multipleN'
+        ### for the ones that don't have a single name, but that doesn't
+        ### transfer to the form.. response. Does it need to?
+
+        ### If we're building the form on response from input_array
+        ### in either case, and if the
+        ### multiple selection names are named accordingly, it's possible
+        ### to validate the data, and also build a form using the mulipleN def.
+
+        ### Well, those multiple cases are either checkboxes or
+        ### multiple selects.. which don't really fit the 'row' paradigm UI,
+        ### since they also accept multiple 'rows' or selections as inputs.
+        ### So, let's ignore this case for now.
+        ### Except, if f_hash=name, or multpleN, then.. f_hash could be used,
+        ### because it is name, except when it's not, that's okay.
+        ### We can still use a stored f_shash_{group}{column}{row} to build
+        ### the form, and names from a form's post based on suffix to validate.
+        
+        ### Detect the qal_ct counts, extract those form elements
+        ### The name is needed to detect 
+        ### field elements in repeatable rows
+        ### and cross reference to f_hash
+        ### except, qf_choices doesn't use names.. see how f_hash is made
+
+        
         ### setup any contexts
         ### upvar must be called for each form_varnameN form_mN *before*
         ### assigning values to form_mN
         ### get context and scalar_array_p from:
         ###  fcshtml_arr(${f_hash},${scalar_array_p_c})
 
-
-        ###    TODO recognize rc 'name' naming convention and
-        ###    generate css-based
-        ###    table (not an html table) with column headers
-        ###    titled with a standard row/column (rc) reference, and
-        ###    each input 'cell' labeled with an rc reference.
-        ###    The use of css to build a table is meant to promote
-        ###    responsive web design styles.          
-        ###    for forms that display an entire table, a different proc
-        ###    needs to be made. maybe something like
-        ###    qss::3g put in spreadsheet package
-
-        
         ### count contexts, not the number in a scalar array..
         set context_ct 1
-        
         foreach f_hash $qfi_fields_sorted_list {
             ### Every html element should have a 'context' attribute
             ### If not, add one.
-            set context $fcshmtl_arr(${f_hash},${context_c})
+            set context $fcshtml_arr(${f_hash},${context_c})
             set form_m_len [string length $form_m]
 
             switch -glob -- $context {
@@ -1229,7 +1264,7 @@ ad_proc -public qal_3g {
                 array unset attv_arr
                 
                 ### add html before tag
-                set html_b $fschtml_arr(${f_hash},${html_before_c})
+                set html_b $fcshtml_arr(${f_hash},${html_before_c})
                 if { $html_b ne "" } {
                     #qf_append html $html_b
                     append $f_context $html_b
@@ -1272,7 +1307,7 @@ ad_proc -public qal_3g {
                 }
 
                 ### add html after tag
-                set html_a $fschtml_arr(${f_hash},${html_after_c})
+                set html_a $fcshtml_arr(${f_hash},${html_after_c})
                 if { $html_a ne "" } {
                     #qf_append html $html_a
                     append $f_context $html_a
