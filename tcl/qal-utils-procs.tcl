@@ -214,7 +214,7 @@ ad_proc -public qal_3g {
     upvar 1 ${form_varname}_open form_m_open
     upvar 1 ${form_varname}_close form_m_close
     # upvar assignments like:  upvar 1 ${form_varname}N form_mN
-    # are delayed until determined dynamically
+    # are deferred until determined dynamically
 
     # To obtain page's doctype, if customized:
     upvar 1 doc doc
@@ -1048,8 +1048,13 @@ ad_proc -public qal_3g {
                     append context_new $context_ct
                 }
             }
+            ### Create the upvar link before the context is used.
+            if { ![info exists $context_new] } {
+                upvar 1 $context_new $context_new
+                # give it a value to make sure it exists.
+                set $context_new ""
+            }
             set fcshtml_larr(${f_hash},${context_c}) $context_new
-
         }
 
 
@@ -1175,8 +1180,12 @@ ad_proc -public qal_3g {
         }
 
         # Every f_hash element has a value at this point..
-        if { $write_p } {
-            
+
+        ### qfo_2g splits the logic here between write_p 0 and 1.
+        ### We don't want to break the view with the complexity of
+        ### the rendering, so write_p is checked for each tag, and disabled
+        ### or the equivalent is added to the attributes.
+        
             # build form
             set tabindex $tabindex_start
             
@@ -1187,8 +1196,8 @@ ad_proc -public qal_3g {
                     set attn_arr(${nlc}) $n
                     set attv_arr(${nlc}) $v
                 }
+                set f_context $fcshtml_arr(${f_hash},${context_c})
                 
-
                 if { [info exists attv_arr(tabindex) ] } {
                     if { $suppress_tabindex_p } {
                         unset attv_arr(tabindex)
@@ -1202,16 +1211,17 @@ ad_proc -public qal_3g {
                 foreach nlc [array names attn_arr ] {
                     lappend atts_list $attn_arr(${nlc}) $attv_arr(${nlc})
                 }
+                if { !$write_p } {
+                    lappend atts_list "disabled" 1
+                }
                 array unset attn_arr
                 array unset attv_arr
-                
-                ######TODO Collect the form context in form_m${context_id}
-                #### instead of relying on qf_close
                 
                 ### add html before tag
                 set html_b $fschtml_arr(${f_hash},${html_before_c})
                 if { $html_b ne "" } {
-                    qf_append html $html_b
+                    #qf_append html $html_b
+                    append $f_context $html_b
                 }
                                                 
                 if { $fatts_arr(${f_hash},is_datatyped_p) } {
@@ -1220,12 +1230,12 @@ ad_proc -public qal_3g {
                         input {
                             #ns_log Notice "qal_3g.1001: qf_input \
                                    ## fatts_arr(${f_hash},form_tag_attrs) '${atts_list}'"
-                            qf_input $atts_list
+                            append $f_context [qf_input $atts_list ]
                         }
                         textarea {
                             #ns_log Notice "qal_3g.1003: qf_textarea \
                                       # fatts_arr(${f_hash},form_tag_attrs) '${atts_list}'"
-                            qf_textarea $atts_list
+                            append $f_context [qf_textarea $atts_list ]
                         }
                         default {
                             # this is not a form_tag_type
@@ -1243,9 +1253,9 @@ ad_proc -public qal_3g {
                     # choice/choices
 
                     if { $fatts_arr(${f_hash},multiple_names_p) } {
-                        qf_choices $atts_list
+                        append $f_context [qf_choices $atts_list ]
                     } else {
-                        qf_choice $atts_list
+                        append $f_context [qf_choice $atts_list ]
                     }
 
                 }
@@ -1253,175 +1263,16 @@ ad_proc -public qal_3g {
                 ### add html after tag
                 set html_a $fschtml_arr(${f_hash},${html_after_c})
                 if { $html_a ne "" } {
-                    qf_append html $html_a
+                    #qf_append html $html_a
+                    append $f_context $html_a
                 }
                 
                 incr tabindex
             }
-            qf_close form_id $form_id
+            #qf_close form_id $form_id
+            set form_m_close "</form>"
             append form_m [qf_read form_id $form_id]
-        } else {
-            # write_p is 0
-            # Display form data only
-            
-            append form_m "<ul id="
-            append form_m "\"" $form_id "\">\n"
-            
-            foreach f_hash $qfi_fields_sorted_list {
-                set atts_list $fatts_arr(${f_hash},form_tag_attrs)
-                foreach {n v} $atts_list {
-                    set nlc [string tolower $n]
-                    set attn_arr(${nlc}) $n
-                    set attv_arr(${nlc}) $v
-                }
-                
-                ### add html before tag
-                set html_b $fschtml_arr(${f_hash},${html_before_c})
-                if { $html_b ne "" } {
-                    qf_append html $html_b
-                }
 
-                if { $fatts_arr(${f_hash},is_datatyped_p) } {
-
-                    switch -exact -- $fatts_arr(${f_hash},form_tag_type) {
-                        textarea -
-                        input {
-                            if { [info exists attv_arr(type) ] \
-                                     && ![string match -nocase "hidden" $attv_arr(type) ] \
-                                     && ![string match -nocase "submit" $attv_arr(type) ] \
-                                     && ![string match -nocase "button" $attv_arr(type) ] \
-                                     && ![string match -nocase "password" $attv_arr(type) ] \
-                                     && ![string match -nocase "reset" $attv_arr(type) ] \
-                                     && ![string match -nocase "search" $attv_arr(type) ] } {
-                                append form_m "<li>"
-                                set class_p [info exists attv_arr(class)]
-                                set style_p [info exists attv_arr(style)]
-                                set value_p [info exists attv_arr(value)]
-                                set name_p [info exists attv_arr(name)]
-                                set label_p [info exists attv_arr(label)]
-                                if { $label_p } {
-                                    set label $attv_arr(label)
-                                } else {
-                                    set label ""
-                                }
-                                if { $class_p || $style_p } {
-                                    append form_m "<span"
-                                    if { $class_p } {
-                                        append form_m " class=\"" $attv_arr(class) "\""
-                                    }
-                                    if { $style_p } {
-                                        append form_m " style=\"" $attv_arr(style) "\""
-                                    }
-                                    append form_m ">" $label "</span>"
-                                } else {
-                                    append form_m $label
-                                }
-                                if { $value_p } {
-                                    append form_m "<br>" $attv_arr(value) "</li>\n"
-                                } else {
-                                    append form_m "<br></li>\n"
-                                    #ns_log Notice "qal_3g.1420. No value for attv_(value) array get attv_arr '[array get attv_arr]'"
-                                }
-                            }
-                        }
-                        default {
-                            # this is not a form_tag_type
-                            # tag attribute 'type' determines if this
-                            # is checkbox, radio, select, or select/multiple
-                            # This should not happen, because
-                            # fatts_arr(${f_hash},is_datatyped_p) is false for 
-                            # these cases.
-                            ns_log Warning "qal_3g.1410: Unexpected form element: \
- f_hash '${f_hash}' ignored. \
- fatts_arr(${f_hash},form_tag_type) '$fatts_arr(${f_hash},form_tag_type)'"
-                        }
-                    }
-                } else {
-                    append form_m "<li>"
-                    set class_p [info exists attv_arr(class)]
-                    set style_p [info exists attv_arr(style)]
-                    if { $class_p || $style_p } {
-                        append form_m "<span"
-                        if { $class_p } {
-                            append form_m " class=\"" $attv_arr(class) "\""
-                        }
-                        if { $style_p } {
-                            append form_m " style=\"" $attv_arr(style) "\""
-                        }
-                        append form_m ">" $attv_arr(label) "</span>"
-                    } else {
-                        if { [info exists attv_arr(label) ] } {
-                            append form_m $attv_arr(label)
-                        } 
-                    }
-                    append form_m "<br><ul>\n"
-                    # choice/choices
-                    # Just show the values selected
-                    ns_log Notice "qal_3g.1483: f_hash '${f_hash}'"
-                    if { $fatts_arr(${f_hash},multiple_names_p) eq 1 } {
-                        #qf_choices
-                        foreach row_list $attv_arr(value) {
-                            foreach {n v} $row_list {
-                                set nlc [string tolower $n]
-                                set choices_arr(${nlc}) $v
-                            }
-                            if { [info exists choices_arr(selected)] } {
-                                if { $choices_arr(selected) } {
-                                    append form_m "<li>"
-                                    if { [info exists choices_arr(label) ] } {
-                                        append form_m $choices_arr(label)
-                                    } elseif { [info exists choices_arr(value) ] } {
-                                        append form_m $choices_arr(value)
-                                    }
-                                    append form_m "</li>"
-                                }
-                            }
-                            array unset choices_arr
-                        }		
-                    } else {
-                        #qf_choice
-                        if { [info exists attv_arr(value) ] } {
-                            set rows_max [llength $attv_arr(value) ]
-                            set i 0
-                            set i_max 500
-                            while { $i < $rows_max && $i < $i_max } {
-                                set row_list [lindex $attv_arr(value) $i]
-                                foreach {n v} $row_list {
-                                    set nlc [string tolower $n]
-                                    set choices_arr(${nlc}) $v
-                                }
-                                if { [info exists choices_arr(selected)] } {
-                                    if { $choices_arr(selected) } {
-                                        append form_m "<li>"
-                                        if { [info exists choices_arr(label) ] } {
-                                            append form_m $choices_arr(label)
-                                        } elseif { [info exists choices_arr(value) ] } {
-                                            append form_m $choices_arr(value)
-                                        }
-                                        append form_m "</li>"
-                                    }
-                                }
-                                array unset choices_arr
-                                incr i
-                            }
-                        }
-                    }
-
-                    ### add html after tag
-                    set html_a $fschtml_arr(${f_hash},${html_after_c})
-                    if { $html_a ne "" } {
-                        qf_append html $html_a
-                    }
-                    
-                    append form_m "</ul>"
-                    append form_m "</li>\n"
-                }
-                
-                array unset attn_arr
-                array unset attv_arr
-                # next field
-            }
-        }
     }    
     return $validated_p
 }
