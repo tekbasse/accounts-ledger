@@ -332,6 +332,7 @@ ad_proc -public qal_3g {
     set button_c "button"
     set comma_c ","
     set datatype_c "datatype"
+    set disabled_c "disabled"
     set form_tag_attrs_c "form_tag_attrs"
     set form_tag_type_c "form_tag_type"
     set hidden_c "hidden"
@@ -1016,7 +1017,10 @@ ad_proc -public qal_3g {
 
         ### Problem: The vertical sequence is determined by sort tabindex,
         ###    which messes with the row and column order.
+        ### sort tabindex is this order: qfi_fields_sorted_list
+        ### using f_hash values. We need to look at names..
 
+        
 
         ### To put titles and cells in same horizontal sequence,
         ### look at the name suffix _{group letter}{col letter}{row}
@@ -1028,9 +1032,9 @@ ad_proc -public qal_3g {
         ###
         ### qfo::form_list_def_to_array names the multiple choices 'multipleN'
         ### for the ones that don't have a single name, but that doesn't
-        ### transfer to the form.. response. Does it need to?
-
-        ### If we're building the form on response from input_array
+        ### transfer to the form.. response. Does it need to? 
+        ### We're building the form on response from form_array with hints
+        ### about rows from qal_ct_{group} counts
         ### in either case, and if the
         ### multiple selection names are named accordingly, it's possible
         ### to validate the data, and also build a form using the mulipleN def.
@@ -1044,11 +1048,16 @@ ad_proc -public qal_3g {
         ### We can still use a stored f_shash_{group}{column}{row} to build
         ### the form, and names from a form's post based on suffix to validate.
         
-        ### Detect the qal_ct counts, extract those form elements
-        ### The name is needed to detect 
+        ### Get the qal_ct_{group} counts, extract those form elements
+        ### The name is needed to audit 
         ### field elements in repeatable rows
         ### and cross reference to f_hash
+        ### to get context
         ### except, qf_choices doesn't use names.. see how f_hash is made
+        ### Rewrite above.. iterate through f_hashes to collect names
+        ### verify/audit with qal_ct_{group} and re-order
+        ### qfi_fields_sorted_list to qfi_sorted_grouped_list
+
 
         
         ### setup any contexts
@@ -1057,7 +1066,7 @@ ad_proc -public qal_3g {
         ### get context and scalar_array_p from:
         ###  fcshtml_arr(${f_hash},${scalar_array_p_c})
 
-        ### count contexts, not the number in a scalar array..
+        ### count contexts
         set context_ct 1
         foreach f_hash $qfi_fields_sorted_list {
             ### Every html element should have a 'context' attribute
@@ -1258,7 +1267,7 @@ ad_proc -public qal_3g {
                     lappend atts_list $attn_arr(${nlc}) $attv_arr(${nlc})
                 }
                 if { !$write_p } {
-                    lappend atts_list "disabled" 1
+                    lappend atts_list $disabled_c 1
                 }
                 array unset attn_arr
                 array unset attv_arr
