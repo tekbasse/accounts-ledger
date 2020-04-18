@@ -820,6 +820,9 @@ ad_proc -public qal_3g {
 
     #### hmm.TODO scalar arrays need to handled completely outside of qal_3g
     ##### move this logic into a fields_rows_builder,validator,extractor procs
+    #### move it into qforms/tcl/form-gen-procs.tcl
+    #### like: qfo::row_repeat rows_lol count
+    
     ### form_array needs to add the dynamic rows to be consistent.
     ### To do this, it needs to have a data passed to it identifying the
     ### scalar arrays, and total count for each.
@@ -1276,5 +1279,4 @@ ad_proc -public qal_3g {
     }    
     return $validated_p
 }
-
 
