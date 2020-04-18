@@ -817,6 +817,9 @@ ad_proc -public qal_3g {
     # Whatever the case, qal_3g does not add rows etc.
     # It only works with what it is given via form_array.
     # It sees dynamically generated fields as static as everything else.
+
+    #### hmm.TODO scalar arrays need to handled completely outside of qal_3g
+    ##### move this logic into a fields_rows_builder,validator,extractor procs
     ### form_array needs to add the dynamic rows to be consistent.
     ### To do this, it needs to have a data passed to it identifying the
     ### scalar arrays, and total count for each.
@@ -1201,7 +1204,16 @@ ad_proc -public qal_3g {
                 }
                 array unset attn_arr
                 array unset attv_arr
-
+                
+                ######TODO Collect the form context in form_m${context_id}
+                #### instead of relying on qf_close
+                
+                ### add html before tag
+                set html_b $fschtml_arr(${f_hash},${html_before_c})
+                if { $html_b ne "" } {
+                    qf_append html $html_b
+                }
+                                                
                 if { $fatts_arr(${f_hash},is_datatyped_p) } {
 
                     switch -exact -- $fatts_arr(${f_hash},form_tag_type) {
@@ -1237,6 +1249,13 @@ ad_proc -public qal_3g {
                     }
 
                 }
+
+                ### add html after tag
+                set html_a $fschtml_arr(${f_hash},${html_after_c})
+                if { $html_a ne "" } {
+                    qf_append html $html_a
+                }
+                
                 incr tabindex
             }
             qf_close form_id $form_id
@@ -1256,6 +1275,12 @@ ad_proc -public qal_3g {
                     set attv_arr(${nlc}) $v
                 }
                 
+                ### add html before tag
+                set html_b $fschtml_arr(${f_hash},${html_before_c})
+                if { $html_b ne "" } {
+                    qf_append html $html_b
+                }
+
                 if { $fatts_arr(${f_hash},is_datatyped_p) } {
 
                     switch -exact -- $fatts_arr(${f_hash},form_tag_type) {
@@ -1381,7 +1406,14 @@ ad_proc -public qal_3g {
                             }
                         }
                     }
-                    lappend form_m "</ul>"
+
+                    ### add html after tag
+                    set html_a $fschtml_arr(${f_hash},${html_after_c})
+                    if { $html_a ne "" } {
+                        qf_append html $html_a
+                    }
+                    
+                    append form_m "</ul>"
                     append form_m "</li>\n"
                 }
                 
