@@ -818,11 +818,6 @@ ad_proc -public qal_3g {
     # It only works with what it is given via form_array.
     # It sees dynamically generated fields as static as everything else.
 
-    #### hmm.TODO scalar arrays need to handled completely outside of qal_3g
-    ##### move this logic into a fields_rows_builder,validator,extractor procs
-    #### move it into qforms/tcl/form-gen-procs.tcl
-    #### like: qfo::row_repeat rows_lol count
-    
     ### form_array needs to add the dynamic rows to be consistent.
     ### To do this, it needs to have a data passed to it identifying the
     ### scalar arrays, and total count for each.
@@ -1013,6 +1008,19 @@ ad_proc -public qal_3g {
         ### get context and scalar_array_p from:
         ###  fcshtml_arr(${f_hash},${scalar_array_p_c})
 
+
+        ###    TODO recognize rc 'name' naming convention and
+        ###    generate css-based
+        ###    table (not an html table) with column headers
+        ###    titled with a standard row/column (rc) reference, and
+        ###    each input 'cell' labeled with an rc reference.
+        ###    The use of css to build a table is meant to promote
+        ###    responsive web design styles.          
+        ###    for forms that display an entire table, a different proc
+        ###    needs to be made. maybe something like
+        ###    qss::3g put in spreadsheet package
+
+        
         ### count contexts, not the number in a scalar array..
         set context_ct 1
         
