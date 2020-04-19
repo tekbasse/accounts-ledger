@@ -64,7 +64,7 @@ ad_proc -public qal_3g {
     The first context contains open FORM tag. The last defined context includes
     the closed FORM tag.
 
-  
+    
     <br><br>
 
     <code>fields_array</code> is an <strong>array name</strong>. 
@@ -869,145 +869,145 @@ ad_proc -public qal_3g {
 
 
 
-        ### TODO recognize rc 'name' naming convention and
-        ### generate css-based
-        ### table (not an html table) with column headers
-        ### titled with a standard row/column (rc) reference, and
-        ### each input 'cell' labeled with an rc reference
-        ### in the spirit of responsive html page design.
+    ### TODO recognize rc 'name' naming convention and
+    ### generate css-based
+    ### table (not an html table) with column headers
+    ### titled with a standard row/column (rc) reference, and
+    ### each input 'cell' labeled with an rc reference
+    ### in the spirit of responsive html page design.
 
-        ### Problem: The vertical sequence is determined by sort tabindex,
-        ###    which messes with the row and column order.
-        ### sort tabindex is this order: qfi_fields_sorted_list
-        ### using f_hash values. We need to look at names..
+    ### Problem: The vertical sequence is determined by sort tabindex,
+    ###    which messes with the row and column order.
+    ### sort tabindex is this order: qfi_fields_sorted_list
+    ### using f_hash values. We need to look at names..
 
-        
+    
 
-        ### To put titles and cells in same horizontal sequence,
-        ### look at the name suffix _{group letter}{col letter}{row}
-        ###    ..but that doesn't work for qf_choices...
-        ### fatts_arr(${f_hash},names) lists the name (or names in the case of
-        ### multiple associated with form element) associated with f_hash.
-        ### This is a f_hash <--> name map, 
-        ### where name is a list of 1 or more form elements.
-        ###
-        ### qfo::form_list_def_to_array names the multiple choices 'multipleN'
-        ### for the ones that don't have a single name, but that doesn't
-        ### transfer to the form.. response. Does it need to? 
-        ### We're building the form on response from form_array with hints
-        ### about rows from qal_ct_{group} counts
-        ### in either case, and if the
-        ### multiple selection names are named accordingly, it's possible
-        ### to validate the data, and also build a form using the mulipleN def.
+    ### To put titles and cells in same horizontal sequence,
+    ### look at the name suffix _{group letter}{col letter}{row}
+    ###    ..but that doesn't work for qf_choices...
+    ### fatts_arr(${f_hash},names) lists the name (or names in the case of
+    ### multiple associated with form element) associated with f_hash.
+    ### This is a f_hash <--> name map, 
+    ### where name is a list of 1 or more form elements.
+    ###
+    ### qfo::form_list_def_to_array names the multiple choices 'multipleN'
+    ### for the ones that don't have a single name, but that doesn't
+    ### transfer to the form.. response. Does it need to? 
+    ### We're building the form on response from form_array with hints
+    ### about rows from qal_ct_{group} counts
+    ### in either case, and if the
+    ### multiple selection names are named accordingly, it's possible
+    ### to validate the data, and also build a form using the mulipleN def.
 
-        ### Well, those multiple cases are either checkboxes or
-        ### multiple selects.. which don't really fit the 'row' paradigm UI,
-        ### since they also accept multiple 'rows' or selections as inputs.
-        ### So, let's ignore this case for now.
-        ### Except, if f_hash=name, or multpleN, then.. f_hash could be used,
-        ### because it is name, except when it's not, that's okay.
-        ### We can still use a stored f_shash_{group}{column}{row} to build
-        ### the form, and names from a form's post based on suffix to validate.
-        
- 
+    ### Well, those multiple cases are either checkboxes or
+    ### multiple selects.. which don't really fit the 'row' paradigm UI,
+    ### since they also accept multiple 'rows' or selections as inputs.
+    ### So, let's ignore this case for now.
+    ### Except, if f_hash=name, or multpleN, then.. f_hash could be used,
+    ### because it is name, except when it's not, that's okay.
+    ### We can still use a stored f_shash_{group}{column}{row} to build
+    ### the form, and names from a form's post based on suffix to validate.
+    
+    
 
-        ### Iterate through f_hashes to collect names
-        ### Get the qal_ct_{group}{column count}{row count}
-        ### The max rows and columns can be used to audit 
-        ### field elements in repeatable rows
-        ### and cross reference to f_hash
-        ### to get context.
-        ### re-order if necessary
-        ### qfi_fields_sorted_list to qfi_sorted_grouped_list
-        ### the tabindex of column1 row1 becomes most significant.
-        ### the tabindex of column2 row1 becomes next most etc.
-        ### then column1 row2..
-        ### Assume qfi_fields_sorted_list already has done this
-        ### a manual rendering of the code suggests as much.
-        ### And any automatic re-calculating of tab indexing *should*
-        ### retain the order, since, if any tabindex is included in the
-        ### row elements, it will be applied to all the rows.
-        ### This info is still needed to audit input,
-        ### because the form definition only includes default count of rows
-        ### when there may be more (or depending on UI/app), less.
+    ### Iterate through f_hashes to collect names
+    ### Get the qal_ct_{group}{column count}{row count}
+    ### The max rows and columns can be used to audit 
+    ### field elements in repeatable rows
+    ### and cross reference to f_hash
+    ### to get context.
+    ### re-order if necessary
+    ### qfi_fields_sorted_list to qfi_sorted_grouped_list
+    ### the tabindex of column1 row1 becomes most significant.
+    ### the tabindex of column2 row1 becomes next most etc.
+    ### then column1 row2..
+    ### Assume qfi_fields_sorted_list already has done this
+    ### a manual rendering of the code suggests as much.
+    ### And any automatic re-calculating of tab indexing *should*
+    ### retain the order, since, if any tabindex is included in the
+    ### row elements, it will be applied to all the rows.
+    ### This info is still needed to audit input,
+    ### because the form definition only includes default count of rows
+    ### when there may be more (or depending on UI/app), less.
 
-        ### Instead of using fcshtml_arr,
-        ### reference the group directly, so another array.
-        
-        set qfo_ct__c "qfo_ct_[a-z][a-z][1-9]*"
-        foreach f_hash $qfi_fields_sorted_list {
-            if { [match -nocase $qfo_ct__c $fatts_arr(${f_hash},names) ] } {
-                # a row group exists.
-                set gcr_max [string range $fatts_arr(${f_hash},names) 7 end]
-                set group [string range $gcr_max 0 0]
-                set column [string range $gcr_max 1 1]
-                set rows [string range $gcr_max 2 end]
-                set col_nbr [string first $column $qfo::alphabet_c]
-                ### These two can audit fields in input array to make sure
-                ### there's not extra fields being added externally.
-                set fg_arr(${group},${column_c}) $column
-                set fg_arr(${group},${rows_c}) $rows
-                ### cross ref. to f_hash, so we can get datatype, context etc.
-                set fg_arr(${group},${column},${f_hash_c}) $f_hash
-                set fg_arr(${group},${column},${datatype_c}) $fatts_arr(${f_hash},${datatype_c})
-                ### Is it faster to get it from the root column name?
-                ### No, because parsing to get root name from input_array
-                ### may be fastest with regexp i.e. slow.
-                
-            }
+    ### Instead of using fcshtml_arr,
+    ### reference the group directly, so another array.
+    
+    set qfo_ct__c "qfo_ct_[a-z][a-z][1-9]*"
+    foreach f_hash $qfi_fields_sorted_list {
+        if { [match -nocase $qfo_ct__c $fatts_arr(${f_hash},names) ] } {
+            # a row group exists.
+            set gcr_max [string range $fatts_arr(${f_hash},names) 7 end]
+            set group [string range $gcr_max 0 0]
+            set column [string range $gcr_max 1 1]
+            set rows [string range $gcr_max 2 end]
+            set col_nbr [string first $column $qfo::alphabet_c]
+            ### These two can audit fields in input array to make sure
+            ### there's not extra fields being added externally.
+            set fg_arr(${group},${column_c}) $column
+            set fg_arr(${group},${rows_c}) $rows
+            ### cross ref. to f_hash, so we can get datatype, context etc.
+            set fg_arr(${group},${column},${f_hash_c}) $f_hash
+            set fg_arr(${group},${column},${datatype_c}) $fatts_arr(${f_hash},${datatype_c})
+            ### Is it faster to get it from the root column name?
+            ### No, because parsing to get root name from input_array
+            ### may be fastest with regexp i.e. slow.
+            
         }
-        
-        ### setup any contexts
-        ### upvar must be called for each form_varnameN form_mN *before*
-        ### assigning values to form_mN
-        ### get context and scalar_array_p from:
-        ###  fcshtml_arr(${f_hash},${scalar_array_p_c})
+    }
+    
+    ### setup any contexts
+    ### upvar must be called for each form_varnameN form_mN *before*
+    ### assigning values to form_mN
+    ### get context and scalar_array_p from:
+    ###  fcshtml_arr(${f_hash},${scalar_array_p_c})
 
-        ### count contexts
-        set context_ct 1
-        foreach f_hash $qfi_fields_sorted_list {
-            ### Every html element should have a 'context' attribute
-            ### If not, add one.
-            set context $fcshtml_arr(${f_hash},${context_c})
-            set form_m_len [string length $form_m]
+    ### count contexts
+    set context_ct 1
+    foreach f_hash $qfi_fields_sorted_list {
+        ### Every html element should have a 'context' attribute
+        ### If not, add one.
+        set context $fcshtml_arr(${f_hash},${context_c})
+        set form_m_len [string length $form_m]
 
-            switch -glob -- $context {
-                ${form_m}[0-9][0-9]-
-                ${form_m}[0-9] {
-                    # in good form. Leave as is.
-                    # Assumes there are less than 99 contexts on a page.
-                    # update context_ct
-                    set conext_new $context
-                    set context_ct [string range $context $form_m_len end]
-                }
-                *[0-9][0-9] -
-                *[0-9] {
-                    # There's a number there,
-                    # and maybe nothing else, or maybe a spelling
-                    # issue. Use the number..
-                    # update context_ct to the same.
-                    ns_log Notice "qal_3g.1034: context '${context}' not \
+        switch -glob -- $context {
+            ${form_m}[0-9][0-9]-
+            ${form_m}[0-9] {
+                # in good form. Leave as is.
+                # Assumes there are less than 99 contexts on a page.
+                # update context_ct
+                set conext_new $context
+                set context_ct [string range $context $form_m_len end]
+            }
+            *[0-9][0-9] -
+            *[0-9] {
+                # There's a number there,
+                # and maybe nothing else, or maybe a spelling
+                # issue. Use the number..
+                # update context_ct to the same.
+                ns_log Notice "qal_3g.1034: context '${context}' not \
                     recognized for f_hash '${f_hash}' form_id '${form_id}'"
-                    regexp -- {^[^0-9]*([0-9]+)$} $context context_ct
-                    set context_new $form_m
-                    append context_new $context_c
-                }
-                default {
-                    # No recognizable context assigned.
-                    # Assign the same as the last context, or the first
-                    # if no previous ones.
-                    set context_new $form_m
-                    append context_new $context_ct
-                }
+                regexp -- {^[^0-9]*([0-9]+)$} $context context_ct
+                set context_new $form_m
+                append context_new $context_c
             }
-            ### Create the upvar link before the context is used.
-            if { ![info exists $context_new] } {
-                upvar 1 $context_new $context_new
-                # give it a value to make sure it exists.
-                set $context_new ""
+            default {
+                # No recognizable context assigned.
+                # Assign the same as the last context, or the first
+                # if no previous ones.
+                set context_new $form_m
+                append context_new $context_ct
             }
-            set fcshtml_larr(${f_hash},${context_c}) $context_new
         }
+        ### Create the upvar link before the context is used.
+        if { ![info exists $context_new] } {
+            upvar 1 $context_new $context_new
+            # give it a value to make sure it exists.
+            set $context_new ""
+        }
+        set fcshtml_larr(${f_hash},${context_c}) $context_new
+    }
 
 
 
@@ -1294,92 +1294,92 @@ ad_proc -public qal_3g {
         ### the rendering, so write_p is checked for each tag, and disabled
         ### or the equivalent is added to the attributes.
         
-            # build form
-            set tabindex $tabindex_start
+        # build form
+        set tabindex $tabindex_start
+        
+        foreach f_hash $qfi_fields_sorted_list {
+            set atts_list $fatts_arr(${f_hash},form_tag_attrs)
+            foreach {n v} $atts_list {
+                set nlc [string tolower $n]
+                set attn_arr(${nlc}) $n
+                set attv_arr(${nlc}) $v
+            }
+            set f_context $fcshtml_arr(${f_hash},${context_c})
             
-            foreach f_hash $qfi_fields_sorted_list {
-                set atts_list $fatts_arr(${f_hash},form_tag_attrs)
-                foreach {n v} $atts_list {
-                    set nlc [string tolower $n]
-                    set attn_arr(${nlc}) $n
-                    set attv_arr(${nlc}) $v
+            if { [info exists attv_arr(tabindex) ] } {
+                if { $suppress_tabindex_p } {
+                    unset attv_arr(tabindex)
+                    unset attn_arr(tabindex)
+                } else {
+                    set attv_arr(tabindex) $tabindex
                 }
-                set f_context $fcshtml_arr(${f_hash},${context_c})
-                
-                if { [info exists attv_arr(tabindex) ] } {
-                    if { $suppress_tabindex_p } {
-                        unset attv_arr(tabindex)
-                        unset attn_arr(tabindex)
-                    } else {
-                        set attv_arr(tabindex) $tabindex
+            }
+
+            set atts_list [list ]
+            foreach nlc [array names attn_arr ] {
+                lappend atts_list $attn_arr(${nlc}) $attv_arr(${nlc})
+            }
+            if { !$write_p } {
+                lappend atts_list $disabled_c 1
+            }
+            array unset attn_arr
+            array unset attv_arr
+            
+            ### add html before tag
+            set html_b $fcshtml_arr(${f_hash},${html_before_c})
+            if { $html_b ne "" } {
+                #qf_append html $html_b
+                append $f_context $html_b
+            }
+            
+            if { $fatts_arr(${f_hash},is_datatyped_p) } {
+
+                switch -exact -- $fatts_arr(${f_hash},form_tag_type) {
+                    input {
+                        #ns_log Notice "qal_3g.1001: qf_input \
+                               ## fatts_arr(${f_hash},form_tag_attrs) '${atts_list}'"
+                        append $f_context [qf_input $atts_list ]
                     }
-                }
-
-                set atts_list [list ]
-                foreach nlc [array names attn_arr ] {
-                    lappend atts_list $attn_arr(${nlc}) $attv_arr(${nlc})
-                }
-                if { !$write_p } {
-                    lappend atts_list $disabled_c 1
-                }
-                array unset attn_arr
-                array unset attv_arr
-                
-                ### add html before tag
-                set html_b $fcshtml_arr(${f_hash},${html_before_c})
-                if { $html_b ne "" } {
-                    #qf_append html $html_b
-                    append $f_context $html_b
-                }
-                                                
-                if { $fatts_arr(${f_hash},is_datatyped_p) } {
-
-                    switch -exact -- $fatts_arr(${f_hash},form_tag_type) {
-                        input {
-                            #ns_log Notice "qal_3g.1001: qf_input \
-                                   ## fatts_arr(${f_hash},form_tag_attrs) '${atts_list}'"
-                            append $f_context [qf_input $atts_list ]
-                        }
-                        textarea {
-                            #ns_log Notice "qal_3g.1003: qf_textarea \
-                                      # fatts_arr(${f_hash},form_tag_attrs) '${atts_list}'"
-                            append $f_context [qf_textarea $atts_list ]
-                        }
-                        default {
-                            # this is not a form_tag_type
-                            # tag attribute 'type' determines if this
-                            # is checkbox, radio, select, or select/multiple
-                            # This should not happen, because
-                            # fatts_arr(${f_hash},is_datatyped_p) is false for 
-                            # these cases.
-                            ns_log Warning "qal_3g.1009: Unexpected form element: \
+                    textarea {
+                        #ns_log Notice "qal_3g.1003: qf_textarea \
+                                  # fatts_arr(${f_hash},form_tag_attrs) '${atts_list}'"
+                        append $f_context [qf_textarea $atts_list ]
+                    }
+                    default {
+                        # this is not a form_tag_type
+                        # tag attribute 'type' determines if this
+                        # is checkbox, radio, select, or select/multiple
+                        # This should not happen, because
+                        # fatts_arr(${f_hash},is_datatyped_p) is false for 
+                        # these cases.
+                        ns_log Warning "qal_3g.1009: Unexpected form element: \
  f_hash '${f_hash}' ignored. \
  fatts_arr(${f_hash},form_tag_type) '$fatts_arr(${f_hash},form_tag_type)'"
-                        }
                     }
+                }
+            } else {
+                # choice/choices
+
+                if { $fatts_arr(${f_hash},multiple_names_p) } {
+                    append $f_context [qf_choices $atts_list ]
                 } else {
-                    # choice/choices
-
-                    if { $fatts_arr(${f_hash},multiple_names_p) } {
-                        append $f_context [qf_choices $atts_list ]
-                    } else {
-                        append $f_context [qf_choice $atts_list ]
-                    }
-
+                    append $f_context [qf_choice $atts_list ]
                 }
 
-                ### add html after tag
-                set html_a $fcshtml_arr(${f_hash},${html_after_c})
-                if { $html_a ne "" } {
-                    #qf_append html $html_a
-                    append $f_context $html_a
-                }
-                
-                incr tabindex
             }
-            #qf_close form_id $form_id
-            set form_m_close "</form>"
-            append form_m [qf_read form_id $form_id]
+
+            ### add html after tag
+            set html_a $fcshtml_arr(${f_hash},${html_after_c})
+            if { $html_a ne "" } {
+                #qf_append html $html_a
+                append $f_context $html_a
+            }
+            
+            incr tabindex
+        }
+        #qf_close form_id $form_id
+        set form_m_close "</form>"
+        append form_m [qf_read form_id $form_id]
 
     }    
     return $validated_p
