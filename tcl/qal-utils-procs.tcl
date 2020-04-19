@@ -263,7 +263,7 @@ ad_proc -public qal_3g {
     ### The only additional changes to code that needs to be made
     ### is adapting form_m to a set of contexts.
 
-    ### TODO recognize rc 'name' naming convention and
+    ### Recognize row/column 'name' naming convention and
     ### generate css-based
     ### table (not an html table) with column headers
     ### titled with a standard row/column (rc) reference, and
@@ -324,9 +324,12 @@ ad_proc -public qal_3g {
     ### Instead of using fcshtml_arr,
     ### reference the group directly, so another array.
     
-    set qfo_ct__c "qfo_ct_[a-z][a-z][1-9]*"
-    set qfo_ct_fields_list [array names form_arr ${qfo_ct__c}]
+    set qfo_ct_blob_c "qfo_ct_[a-z][a-z][1-9]*"
+    set target_first_gc1_c "*_${group}b1"
+    set qfo_ct_fields_list [array names form_arr ${qfo_ct_blob_c}]
+    set reset_ct_p 0
     foreach f_hash $qfo_ct_fields_list {
+        set reset_ct_p 1
         set f_list $form_arr(${f_hash})
         set name_idx [lsearch $f_list ${name_c}]
         incr name_idx
@@ -349,29 +352,62 @@ ad_proc -public qal_3g {
         set fg_arr(${group},${column},${f_hash_c}) $f_hash
 
         ### Do all fields already exist?
-        if { [info exists qfi_arr(${name} ] } {
+        ## check for input via form.
+        if { [info exists qfi_arr(${name}) ] } {
             set v $qfi_arr(${name})
             if { ![qf_is_natural_number $v] } {
                 ns_log Warning "qal_3g.357. name '${name}'s value not a number: '${v}'"
                 set v $rows               
             }
-
+            
             set diff [expr { $v - $rows } ]
-            if { $diff > $rows } {
+            if { $diff > 0 } {
                 ### add this many ($diff) rows using the first as a reference.
-                #####todo
 
+                ### get existing first field f_hash
+                set tgf_hash [array names form_arr $target_first_gc1_c]
+                if { [llength $tgf_hash ] ne 1 } {
+                    nslog Error "qal_3g.367. tgf_hash '${tgf_hash}'. There should be one."
+                    ad_script_abort
+                }
+                set f_list $form_arr(${tgf_hash})
+                set tgf_name_idx [lsearch $tfg_list ${name_c}]
+                incr tgf_name_idx
+                set tgf_name [lindex $tgf_list $tfg_name_idx ]
+                set name_base [string range $tgf_name 0 end-2]
+                ## name_base looks like 'some_name_g'
+                set row_start $rows
+                incr row_start
+                set row_end $rows
+                incr row_end $diff
+                for {set r $row_start} {$r <= $row_end} {incr r} {
+                    # make new name and f_hash
+                    # do for each column
+                    
+                    for {set c 1} { $c <= $column} {incr c } {
+                        set col [string range $qfo::alphabet_c $c $c]
+                        set name_new $name_base
+                        append name_new $group $col $r
+                        # add to field_arr (not qfi_arr)
+                        # new f_hash is same as name
+                        set form_arr(${name_new}) [lreplace $form_arr($tgf_hash) $idx $idx $name_new]
+                    }
+                }
             }
         }
     }
-    
+    if { $reset_ct_p } {
+        set qfi_fields_list [array names fields_arr]
+        set field_ct [llength $qfi_fields_list]
+    }
+        
     ### setup any contexts
     ### upvar must be called for each form_varnameN form_mN *before*
     ### assigning values to form_mN
     ### get context and scalar_array_p from:
     ###  fcshtml_arr(${f_hash},${scalar_array_p_c})
 
-    ### count contexts
+    ### count contexts, create upvar links for them.
     set context_ct 1
     foreach f_hash $qfi_fields_list {
         ### Every html element should have a 'context' attribute
@@ -416,7 +452,6 @@ ad_proc -public qal_3g {
         }
         set fcshtml_larr(${f_hash},${context_c}) $context_new
     }
-
 
 
 
@@ -556,11 +591,7 @@ ad_proc -public qal_3g {
 
     
     # Determine adjustments to be applied to tabindex values
-    if { $qtable_enabled_p } {
-        set tabindex_adj [expr { 0 - $field_ct - $fields_ordered_list_len } ]
-    } else {
-        set tabindex_adj $fields_ordered_list_len
-    }
+    set tabindex_adj $fields_ordered_list_len
     set tabindex_tail [expr { $fields_ordered_list_len + $field_ct } ]
 
     #
@@ -1002,8 +1033,6 @@ ad_proc -public qal_3g {
             # These cases will be caught during validation further on.
         }
     } 
-    ### TODO Add cases of dynamically added rows, because they won't be
-    ### in the f_hash defined set considered above.
 
 
 
@@ -1059,7 +1088,6 @@ ad_proc -public qal_3g {
                                          -proc_name $fatts_arr(${f_hash},valida_proc) \
                                          -form_tag_type $fatts_arr(${f_hash},form_tag_type) \
                                          -form_tag_attrs $fatts_arr(${f_hash},form_tag_attrs) \
-                                         -q_tables_enabled_p $qtable_enabled_p \
                                          -empty_allowed_p $fatts_arr(${f_hash},empty_allowed_p) ]
                         if { !$valid_p } {
                             lappend invalid_field_val_list $f_hash
@@ -1123,10 +1151,6 @@ ad_proc -public qal_3g {
     if { $validated_p } {
         # Which means form_submitted_p is 1 also.
 
-        if { $qtable_enabled_p } {
-            # save a new row in customized q-tables table
-            qt_row_create $qtable_id $row_list
-        }
         # put qfv_arr back into qfi_arr
         array set qfi_arr [array get qfv_arr]
 
@@ -1151,11 +1175,15 @@ ad_proc -public qal_3g {
             # Create a new qfi_fields_list, sorted according to tabindex
             set qfi_fields_tabindex_lists [list ]
             foreach f_hash $qfi_fields_list {
-                set f_list [list $f_hash $fatts_arr(${f_hash},tabindex) ]
+                set f_list [list $f_hash $fatts_arr(${f_hash},tabindex) $fatts_arr(${f_hash},names) ]
                 lappend qfi_fields_tabindex_lists $f_list
             }
+            ### subsort list by name's value in order using -dictionary
+            ### keep scalar array rows in same sequence.
+            set qfi_fields_name_sorted_lists [lsort -dictionary -index 2 \
+                                                  $qfi_fields_tabindex_lists]
             set qfi_fields_tabindex_sorted_lists [lsort -integer -index 1 \
-                                                      $qfi_fields_tabindex_lists]
+                                                      $qfi_fields_name_sorted_lists]
             set qfi_fields_sorted_list [list]
             foreach f_list $qfi_fields_tabindex_sorted_lists {
                 lappend qfi_fields_sorted_list [lindex $f_list 0]
