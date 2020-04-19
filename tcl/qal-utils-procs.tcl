@@ -818,30 +818,16 @@ ad_proc -public qal_3g {
     ### How to identify the fields to process?
     ### $fatts_arr(${f_hash},${name_c}) contains root variable name
     ### $fcshtml_arr(${f_hash},${scalar_array_p_c}) is 1 if is a scalar_array
-    ### suffix consists of delimiter "_" and natural number.
+    ### suffix consists of delimiter "_" {group letter}{column letter}
+    ### and natural number {row}.
     
     # Whatever the case, qal_3g does not add rows etc.
     # It only works with what it is given via form_array.
     # It sees dynamically generated fields as static as everything else.
-
-    ### form_array needs to add the dynamic rows to be consistent.
-    ### To do this, it needs to have a data passed to it identifying the
-    ### scalar arrays, and total count for each.
-    ### Maybe via a qal3g_{root_name}_ct value that is the max for root_name
-    ### Does there need to be one for each root_name?
-    ### If qal_3g is generating it, yes, or
-    ### another variable identifying the root_names of a "row"
-    ### Would that be difficult to conceptualize in the API, or ?
-
-    ### SL tracks by a single hidden input variable 'rowcount', but
-    ### we want to automate this as much as possible.
-    ### For example, pass the original form definiton, and it adds
-    ### new rows.. No. That's an app thing. It just validates what's there.
-    ### If an app wants to add a new row when one is submitted,
-    ### the app can intercept the data before qal_3g and add a row
-    ### to the form definition in fields_array.
-    # For now, dynamically generated fields need to be 
-    # created in fields_array or be detected and filtered
+    # So there's no need to change code to validate dynamically created fields.
+    
+    # Dynamically generated fields need to be 
+    # created in or before fields_array or be detected and filtered
     # by calling qf_get_inputs_as_array *before* qal_3g
     
     #ns_log Debug "qal_3g.903 form_submitted_p '${form_submitted_p}' array get qfi_arr '[array get qfi_arr]'"
@@ -1048,17 +1034,25 @@ ad_proc -public qal_3g {
         ### We can still use a stored f_shash_{group}{column}{row} to build
         ### the form, and names from a form's post based on suffix to validate.
         
-        ### Get the qal_ct_{group} counts, extract those form elements
-        ### The name is needed to audit 
+ 
+
+        ### Iterate through f_hashes to collect names
+        ### Get the qal_ct_{group}{column count}{row count}
+        ### The max rows and columns can be used to audit 
         ### field elements in repeatable rows
         ### and cross reference to f_hash
-        ### to get context
-        ### except, qf_choices doesn't use names.. see how f_hash is made
-        ### Rewrite above.. iterate through f_hashes to collect names
-        ### verify/audit with qal_ct_{group} and re-order
+        ### to get context.
+        ### re-order
         ### qfi_fields_sorted_list to qfi_sorted_grouped_list
+        ### the tabindex of column1 row1 becomes most significant.
+        ### the tabindex of column2 row1 becomes next most etc.
+        ### then column1 row2..
+        ### Assume qfi_fields_sorted_list already has done this
+        ### a manual rendering of the code suggests as much.
+        foreach f_hash $qfi_fields_sorted_list {
 
-
+todo
+        }
         
         ### setup any contexts
         ### upvar must be called for each form_varnameN form_mN *before*
