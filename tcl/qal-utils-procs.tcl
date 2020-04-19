@@ -325,26 +325,43 @@ ad_proc -public qal_3g {
     ### reference the group directly, so another array.
     
     set qfo_ct__c "qfo_ct_[a-z][a-z][1-9]*"
-    foreach f_hash $qfi_fields_list {
-        ###### fatts_arr needs to be replaced with form_arr equiv.
-        if { [match -nocase $qfo_ct__c $fatts_arr(${f_hash},names) ] } {
-            # a row group exists.
-            set gcr_max [string range $fatts_arr(${f_hash},names) 7 end]
-            set group [string range $gcr_max 0 0]
-            set column [string range $gcr_max 1 1]
-            set rows [string range $gcr_max 2 end]
-            set col_nbr [string first $column $qfo::alphabet_c]
-            ### These two can audit fields in input array to make sure
-            ### there's not extra fields being added externally.
-            set fg_arr(${group},${column_c}) $column
-            set fg_arr(${group},${rows_c}) $rows
-            ### cross ref. to f_hash, so we can get datatype, context etc.
-            set fg_arr(${group},${column},${f_hash_c}) $f_hash
-            set fg_arr(${group},${column},${datatype_c}) $fatts_arr(${f_hash},${datatype_c})
-            ### Is it faster to get it from the root column name?
-            ### No, because parsing to get root name from input_array
-            ### may be fastest with regexp i.e. slow.
-            
+    set qfo_ct_fields_list [array names form_arr ${qfo_ct__c}]
+    foreach f_hash $qfo_ct_fields_list {
+        set f_list $form_arr(${f_hash})
+        set name_idx [lsearch $f_list ${name_c}]
+        incr name_idx
+        set name [lindex $f_list $name_idx]
+        if { [llength $name] > 1 } {
+            ns_log Error "qfo_3g:335 More than 1 name '${name}'. Not supported."
+            ad_script_abort
+        }
+        
+        set gcr_max [string range $name 7 end]
+        set group [string range $gcr_max 0 0]
+        set column [string range $gcr_max 1 1]
+        set rows [string range $gcr_max 2 end]
+        set col_nbr [string first $column $qfo::alphabet_c]
+        ### These two can audit fields in input array to make sure
+        ### there's not extra fields being added externally.
+        set fg_arr(${group},${column_c}) $column
+        set fg_arr(${group},${rows_c}) $rows
+        ### cross ref. to f_hash, so we can get datatype, context etc.
+        set fg_arr(${group},${column},${f_hash_c}) $f_hash
+
+        ### Do all fields already exist?
+        if { [info exists qfi_arr(${name} ] } {
+            set v $qfi_arr(${name})
+            if { ![qf_is_natural_number $v] } {
+                ns_log Warning "qal_3g.357. name '${name}'s value not a number: '${v}'"
+                set v $rows               
+            }
+
+            set diff [expr { $v - $rows } ]
+            if { $diff > $rows } {
+                ### add this many ($diff) rows using the first as a reference.
+                #####todo
+
+            }
         }
     }
     
