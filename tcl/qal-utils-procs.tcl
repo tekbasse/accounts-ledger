@@ -226,21 +226,6 @@ ad_proc -public qal_3g {
     # external doc array is used here
     set doctype [qf_doctype $doc_type]
 
-    
-    # Add the customization code
-    # where a q-tables table of same name overrides form definition
-    # per form element.
-    # That is, any element defined in a q-table overrides existing
-    # form element with all existing attributes.
-    # This way, customization may remove certain attributes.
-    set qtable_enabled_p 0
-    set qtable_list [qfo::qtable_label_package_id $form_id]
-    if { [llength $qtable_list ] ne 0 } {
-        # customize using q-tables paradigm
-        set qtable_enabled_p 1
-        lassign $qtable_list qtable_label instance_id qtable_id
-
-    }
 
     ::qdt::data_types -array_name qdt_types_arr \
         -local_data_types_lists $field_types_lists
@@ -255,6 +240,167 @@ ad_proc -public qal_3g {
     set field_ct [llength $qfi_fields_list]
     #ns_log Debug "qal_3g.453: array get fields_arr '[array get fields_arr]'"
     #ns_log Debug "qal_3g.454: qfi_fields_list '${qfi_fields_list}'"
+
+    ### qal_3g does not add rows etc.
+    ### It only works with what it is given via
+    ### input_form_array and form_array,
+    ### which may be more than provided from form_array alone.
+    ### It sees dynamically generated fields as static as everything else.
+    ### So code only has to be changed to validate dynamically created fields.
+
+    ### Allow dynamically generated fields (scalared arrays)
+    ### Before we parse fields, adapt form_array ie form_arr to include the
+    ### dynamically generated fields that are not in the default defintion.
+    ### A filter process needs to retain these dynamically generated fields.
+    ### How to identify the fields to process?
+    ### $fcshtml_arr(${f_hash},${scalar_array_p_c}) is 1 if is a scalar_array
+    ### suffix consists of delimiter "_" {group letter}{column letter}
+    ### and natural number {row}.
+    
+    
+    ### If dynamically generated fields are
+    ### created in fields_array definition
+    ### The only additional changes to code that needs to be made
+    ### is adapting form_m to a set of contexts.
+
+    ### TODO recognize rc 'name' naming convention and
+    ### generate css-based
+    ### table (not an html table) with column headers
+    ### titled with a standard row/column (rc) reference, and
+    ### each input 'cell' labeled with an rc reference
+    ### in the spirit of responsive html page design.
+
+    ### Problem: The vertical sequence is determined by sort tabindex,
+    ###    which messes with the row and column order.
+    ### sort tabindex is this order: qfi_fields_sorted_list
+    ### using f_hash values. We need to look at names..
+
+    
+
+    ### To put titles and cells in same horizontal sequence,
+    ### look at the name suffix _{group letter}{col letter}{row}
+    ###    ..but that doesn't work for qf_choices...
+    ###
+    ### qfo::form_list_def_to_array names the multiple choices 'multipleN'
+    ### for the ones that don't have a single name, but that doesn't
+    ### transfer to the form.. response. Does it need to? 
+    ### We're building the form on response from form_array with hints
+    ### about rows from qal_ct_{group} counts
+    ### in either case, and if the
+    ### multiple selection names are named accordingly, it's possible
+    ### to validate the data, and also build a form using the mulipleN def.
+
+    ### Well, those multiple cases are either checkboxes or
+    ### multiple selects.. which don't really fit the 'row' paradigm UI,
+    ### since they also accept multiple 'rows' or selections as inputs.
+    ### So, let's ignore this case for now.
+    ### Except, if f_hash=name, or multpleN, then.. f_hash could be used,
+    ### because it is name, except when it's not, that's okay.
+    ### We can still use a stored f_shash_{group}{column}{row} to build
+    ### the form, and names from a form's post based on suffix to validate.
+    
+    
+
+    ### Iterate through f_hashes to collect names
+    ### Get the qal_ct_{group}{column count}{row count}
+    ### The max rows and columns can be used to audit 
+    ### field elements in repeatable rows
+    ### and cross reference to f_hash
+    ### to get context.
+    ### re-order if necessary
+    ### qfi_fields_sorted_list to qfi_sorted_grouped_list
+    ### the tabindex of column1 row1 becomes most significant.
+    ### the tabindex of column2 row1 becomes next most etc.
+    ### then column1 row2..
+    ### Assume qfi_fields_sorted_list already has done this
+    ### a manual rendering of the code suggests as much.
+    ### And any automatic re-calculating of tab indexing *should*
+    ### retain the order, since, if any tabindex is included in the
+    ### row elements, it will be applied to all the rows.
+    ### This info is still needed to audit input,
+    ### because the form definition only includes default count of rows
+    ### when there may be more (or depending on UI/app), less.
+
+    ### Instead of using fcshtml_arr,
+    ### reference the group directly, so another array.
+    
+    set qfo_ct__c "qfo_ct_[a-z][a-z][1-9]*"
+    foreach f_hash $qfi_fields_list {
+        ###### fatts_arr needs to be replaced with form_arr equiv.
+        if { [match -nocase $qfo_ct__c $fatts_arr(${f_hash},names) ] } {
+            # a row group exists.
+            set gcr_max [string range $fatts_arr(${f_hash},names) 7 end]
+            set group [string range $gcr_max 0 0]
+            set column [string range $gcr_max 1 1]
+            set rows [string range $gcr_max 2 end]
+            set col_nbr [string first $column $qfo::alphabet_c]
+            ### These two can audit fields in input array to make sure
+            ### there's not extra fields being added externally.
+            set fg_arr(${group},${column_c}) $column
+            set fg_arr(${group},${rows_c}) $rows
+            ### cross ref. to f_hash, so we can get datatype, context etc.
+            set fg_arr(${group},${column},${f_hash_c}) $f_hash
+            set fg_arr(${group},${column},${datatype_c}) $fatts_arr(${f_hash},${datatype_c})
+            ### Is it faster to get it from the root column name?
+            ### No, because parsing to get root name from input_array
+            ### may be fastest with regexp i.e. slow.
+            
+        }
+    }
+    
+    ### setup any contexts
+    ### upvar must be called for each form_varnameN form_mN *before*
+    ### assigning values to form_mN
+    ### get context and scalar_array_p from:
+    ###  fcshtml_arr(${f_hash},${scalar_array_p_c})
+
+    ### count contexts
+    set context_ct 1
+    foreach f_hash $qfi_fields_list {
+        ### Every html element should have a 'context' attribute
+        ### If not, add one.
+        set context $fcshtml_arr(${f_hash},${context_c})
+        set form_m_len [string length $form_m]
+
+        switch -glob -- $context {
+            ${form_m}[0-9][0-9]-
+            ${form_m}[0-9] {
+                # in good form. Leave as is.
+                # Assumes there are less than 99 contexts on a page.
+                # update context_ct
+                set conext_new $context
+                set context_ct [string range $context $form_m_len end]
+            }
+            *[0-9][0-9] -
+            *[0-9] {
+                # There's a number there,
+                # and maybe nothing else, or maybe a spelling
+                # issue. Use the number..
+                # update context_ct to the same.
+                ns_log Notice "qal_3g.1034: context '${context}' not \
+                    recognized for f_hash '${f_hash}' form_id '${form_id}'"
+                regexp -- {^[^0-9]*([0-9]+)$} $context context_ct
+                set context_new $form_m
+                append context_new $context_c
+            }
+            default {
+                # No recognizable context assigned.
+                # Assign the same as the last context, or the first
+                # if no previous ones.
+                set context_new $form_m
+                append context_new $context_ct
+            }
+        }
+        ### Create the upvar link before the context is used.
+        if { ![info exists $context_new] } {
+            upvar 1 $context_new $context_new
+            # give it a value to make sure it exists.
+            set $context_new ""
+        }
+        set fcshtml_larr(${f_hash},${context_c}) $context_new
+    }
+
+
 
 
     # Create a field attributes array
@@ -290,6 +436,12 @@ ad_proc -public qal_3g {
     #    css_abbrev 
     #    xml_format
 
+    # $fatts_arr(${f_hash},names) lists the name (or names in the case of
+    # multiple associated with form element) associated with f_hash.
+    # This is a f_hash <--> name map, 
+    # where name is a list of 1 or more form elements.
+
+    
     ###context and scalared_array_p break this paradigm. Need to add in...
 
     
@@ -397,7 +549,8 @@ ad_proc -public qal_3g {
     #
     # Parse form fields
     #
-    
+
+   
     # Build dataset validation and make a form
 
     # Make a list of datatype elements that are not made during next loop
@@ -779,19 +932,19 @@ ad_proc -public qal_3g {
     # end of foreach f_hash
 
 
-
+    #
     # All the fields and datatypes are known.
     # Proceed with form building and UI stuff
-
+    #
 
     # Collect only the field_types that are used, because
     # each set of datatypes could grow in number, slowing performance
     # as system grows in complexity etc.
     set datatypes_used_list [array names fields_w_datatypes_used_arr]
 
-
-    # field types are settled by this point
-
+    #
+    # field types are settled at this point
+    #
     
     if { $form_submitted_p eq "" } {
         set form_submitted_p [qf_get_inputs_as_array qfi_arr \
@@ -802,49 +955,18 @@ ad_proc -public qal_3g {
         #ns_log Debug "qal_3g.891 array get qfi_arr '[array get qfi_arr]'"
     } 
 
+
+
+
     # Make sure every qfi_arr(x) exists for each field
     # Fastest to just collect the most fine grained defaults of each field
     # into an array and then overwrite the array with qfi_arr
     # Except, we don't want any extraneous input inserted unexpectedly in code.
-
-    ### Allow dynamically generated fields (scalared arrays) 
-    
-    ### We don't want a filter process to lose dynamically generated form fields,
-    ### such as used in forms that pass N number of cells in a spreadsheet,
-    ### or scalar arrays.  So, don't optimize code
-    ### with simple: array set qfv_arr /array get qfi_arr/
-    ### Instead:
-    ### Provide a mechanism to allow 
-    ### batch process of a set of dynamic fields by selecting the fields
-    ### via a glob that uniquely identifes them like so:
-    ###  array set qfv_arr /array get qfi_arr "{glob1}"
-    ###  array set qfv_arr /array get qfi_arr "glob2"
-
-    ### How to identify the fields to process?
-    ### $fatts_arr(${f_hash},${name_c}) contains root variable name
-    ### $fcshtml_arr(${f_hash},${scalar_array_p_c}) is 1 if is a scalar_array
-    ### suffix consists of delimiter "_" {group letter}{column letter}
-    ### and natural number {row}.
-    
-    ### Whatever the case, qal_3g does not add rows etc.
-    ### It only works with what it is given via
-    ### input_form_array and form_array,
-    ### which may be more than provided from form_array alone.
-    ### It sees dynamically generated fields as static as everything else.
-    ### So code only has to be changed to validate dynamically created fields.
-    
-    ### Dynamically generated fields need to be 
-    ### * created in fields_array definition
-    ### AND one of the following:
-    ### * be detected and filtered
-    ###   by calling qf_get_inputs_as_array *before* qal_3g
-    ### * be detected and validated by this proc
-    ###   using qal_ct_{group}{column}{rowcount} rows paradigm.
-
     
     #ns_log Debug "qal_3g.903 form_submitted_p '${form_submitted_p}' array get qfi_arr '[array get qfi_arr]'"
 
     #ns_log Debug "qal_3g.905 array get fields_arr '[array get fields_arr]'"
+
 
     # qfv = field value
     foreach f_hash $qfi_fields_list {
@@ -863,152 +985,14 @@ ad_proc -public qal_3g {
             # These cases will be caught during validation further on.
         }
     } 
+    ### TODO Add cases of dynamically added rows, because they won't be
+    ### in the f_hash defined set considered above.
+
+
+
     # Don't use qfi_arr anymore, as it may contain extraneous input
     # Use qfv_arr for input array
     array unset qfi_arr
-
-
-
-    ### TODO recognize rc 'name' naming convention and
-    ### generate css-based
-    ### table (not an html table) with column headers
-    ### titled with a standard row/column (rc) reference, and
-    ### each input 'cell' labeled with an rc reference
-    ### in the spirit of responsive html page design.
-
-    ### Problem: The vertical sequence is determined by sort tabindex,
-    ###    which messes with the row and column order.
-    ### sort tabindex is this order: qfi_fields_sorted_list
-    ### using f_hash values. We need to look at names..
-
-    
-
-    ### To put titles and cells in same horizontal sequence,
-    ### look at the name suffix _{group letter}{col letter}{row}
-    ###    ..but that doesn't work for qf_choices...
-    ### fatts_arr(${f_hash},names) lists the name (or names in the case of
-    ### multiple associated with form element) associated with f_hash.
-    ### This is a f_hash <--> name map, 
-    ### where name is a list of 1 or more form elements.
-    ###
-    ### qfo::form_list_def_to_array names the multiple choices 'multipleN'
-    ### for the ones that don't have a single name, but that doesn't
-    ### transfer to the form.. response. Does it need to? 
-    ### We're building the form on response from form_array with hints
-    ### about rows from qal_ct_{group} counts
-    ### in either case, and if the
-    ### multiple selection names are named accordingly, it's possible
-    ### to validate the data, and also build a form using the mulipleN def.
-
-    ### Well, those multiple cases are either checkboxes or
-    ### multiple selects.. which don't really fit the 'row' paradigm UI,
-    ### since they also accept multiple 'rows' or selections as inputs.
-    ### So, let's ignore this case for now.
-    ### Except, if f_hash=name, or multpleN, then.. f_hash could be used,
-    ### because it is name, except when it's not, that's okay.
-    ### We can still use a stored f_shash_{group}{column}{row} to build
-    ### the form, and names from a form's post based on suffix to validate.
-    
-    
-
-    ### Iterate through f_hashes to collect names
-    ### Get the qal_ct_{group}{column count}{row count}
-    ### The max rows and columns can be used to audit 
-    ### field elements in repeatable rows
-    ### and cross reference to f_hash
-    ### to get context.
-    ### re-order if necessary
-    ### qfi_fields_sorted_list to qfi_sorted_grouped_list
-    ### the tabindex of column1 row1 becomes most significant.
-    ### the tabindex of column2 row1 becomes next most etc.
-    ### then column1 row2..
-    ### Assume qfi_fields_sorted_list already has done this
-    ### a manual rendering of the code suggests as much.
-    ### And any automatic re-calculating of tab indexing *should*
-    ### retain the order, since, if any tabindex is included in the
-    ### row elements, it will be applied to all the rows.
-    ### This info is still needed to audit input,
-    ### because the form definition only includes default count of rows
-    ### when there may be more (or depending on UI/app), less.
-
-    ### Instead of using fcshtml_arr,
-    ### reference the group directly, so another array.
-    
-    set qfo_ct__c "qfo_ct_[a-z][a-z][1-9]*"
-    foreach f_hash $qfi_fields_sorted_list {
-        if { [match -nocase $qfo_ct__c $fatts_arr(${f_hash},names) ] } {
-            # a row group exists.
-            set gcr_max [string range $fatts_arr(${f_hash},names) 7 end]
-            set group [string range $gcr_max 0 0]
-            set column [string range $gcr_max 1 1]
-            set rows [string range $gcr_max 2 end]
-            set col_nbr [string first $column $qfo::alphabet_c]
-            ### These two can audit fields in input array to make sure
-            ### there's not extra fields being added externally.
-            set fg_arr(${group},${column_c}) $column
-            set fg_arr(${group},${rows_c}) $rows
-            ### cross ref. to f_hash, so we can get datatype, context etc.
-            set fg_arr(${group},${column},${f_hash_c}) $f_hash
-            set fg_arr(${group},${column},${datatype_c}) $fatts_arr(${f_hash},${datatype_c})
-            ### Is it faster to get it from the root column name?
-            ### No, because parsing to get root name from input_array
-            ### may be fastest with regexp i.e. slow.
-            
-        }
-    }
-    
-    ### setup any contexts
-    ### upvar must be called for each form_varnameN form_mN *before*
-    ### assigning values to form_mN
-    ### get context and scalar_array_p from:
-    ###  fcshtml_arr(${f_hash},${scalar_array_p_c})
-
-    ### count contexts
-    set context_ct 1
-    foreach f_hash $qfi_fields_sorted_list {
-        ### Every html element should have a 'context' attribute
-        ### If not, add one.
-        set context $fcshtml_arr(${f_hash},${context_c})
-        set form_m_len [string length $form_m]
-
-        switch -glob -- $context {
-            ${form_m}[0-9][0-9]-
-            ${form_m}[0-9] {
-                # in good form. Leave as is.
-                # Assumes there are less than 99 contexts on a page.
-                # update context_ct
-                set conext_new $context
-                set context_ct [string range $context $form_m_len end]
-            }
-            *[0-9][0-9] -
-            *[0-9] {
-                # There's a number there,
-                # and maybe nothing else, or maybe a spelling
-                # issue. Use the number..
-                # update context_ct to the same.
-                ns_log Notice "qal_3g.1034: context '${context}' not \
-                    recognized for f_hash '${f_hash}' form_id '${form_id}'"
-                regexp -- {^[^0-9]*([0-9]+)$} $context context_ct
-                set context_new $form_m
-                append context_new $context_c
-            }
-            default {
-                # No recognizable context assigned.
-                # Assign the same as the last context, or the first
-                # if no previous ones.
-                set context_new $form_m
-                append context_new $context_ct
-            }
-        }
-        ### Create the upvar link before the context is used.
-        if { ![info exists $context_new] } {
-            upvar 1 $context_new $context_new
-            # give it a value to make sure it exists.
-            set $context_new ""
-        }
-        set fcshtml_larr(${f_hash},${context_c}) $context_new
-    }
-
 
 
 
