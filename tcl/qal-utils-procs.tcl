@@ -185,8 +185,7 @@ ad_proc -public qal_3g {
     @see qf_select
     @see qf_choice
     @see qf_choices
-
-    @qfo_2g
+    @see qfo_2g
 } {
 
     # Form fragments are not assigned to context names in order to maximize
@@ -335,7 +334,7 @@ ad_proc -public qal_3g {
         incr name_idx
         set name [lindex $f_list $name_idx]
         if { [llength $name] > 1 } {
-            ns_log Error "qfo_3g:335 More than 1 name '${name}'. Not supported."
+            ns_log Error "qal_3g:335 More than 1 name '${name}'. Not supported."
             ad_script_abort
         }
         
