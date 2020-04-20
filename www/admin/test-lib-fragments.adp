@@ -13,6 +13,6 @@
     <include src="/packages/accounts-ledger/www/page-runner-block-2col" content_c1="left content for 2 column footer block" content_c2=@content_c4;noquote@>
     <hr>
     
-    <include src="/packages/accounts-ledger/www/page-runner-block-5col" content_c1="cell1" content_c2="cell2" content_c3="cell3" content_c4="cell4" content_c5="cell5"/>
+    <include src="/packages/accounts-ledger/www/page-runner-block-5col" content_c1=@content_c5;noquote@ content_c2=@content_c6;noquote@ content_c3=@content_c7;noqote@ content_c4="cell4" content_c5="cell5"/>
 
   
