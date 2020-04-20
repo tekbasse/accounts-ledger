@@ -423,7 +423,8 @@ ad_proc -public qal_3g {
     ###  fcshtml_arr(${f_hash},${scalar_array_p_c})
 
 
-
+    ns_log Notice "qal_3g.426 array get fields_arr '[array get fields_arr]'"
+    
     foreach f_hash $qfi_fields_list {
         ### extract group feature, highest priority field html tag attributes
         set field_nvl $fields_arr(${f_hash})
@@ -440,16 +441,16 @@ ad_proc -public qal_3g {
             ###  needing to modify existing, working logic
             ###  because these attributes were not in qfo_2g.
             switch -exact -- $nlc {
-                $context_c {
+                context {
                     set fcshtml_arr(${f_hash},${context_c}) $v
                 }
-                $scalar_array_p_c {
+                scalar_array_p {
                     set fcshtml_arr(${f_hash},${scalar_array_p_c}) $v
                 }
-                $html_before_c {
+                html_before {
                     set fcshtml_arr(${f_hash},${html_before_c}) $v
                 }
-                $html_after_c {
+                html_after {
                     set fcshtml_arr(${f_hash},${html_after_c}) $v
                 }
                 default {
@@ -461,7 +462,7 @@ ad_proc -public qal_3g {
         }
         set fields_arr(${f_hash}) $field_new_nvl
     }
-
+    
     ns_log Notice "qal_3g.461 array get fields_arr '[array get fields_arr]'"
 
 
@@ -469,6 +470,8 @@ ad_proc -public qal_3g {
     ### count contexts, create upvar links for them.
     set context_ct 1
     set context_prev ""
+    set one_digit {[2-9]}
+    set two_digits {[3-9][0-9]}
     foreach f_hash $qfi_fields_list {
         ### Every html element should have a 'context' attribute
         ### in fcshtml_arr, but not in fields_arr.
@@ -483,42 +486,39 @@ ad_proc -public qal_3g {
         ### avoid form_varname / form_m mixup.
         ### Here we just want the name of form_m
         set fvarn $form_varname
-        switch -glob -- $context {
-            ${fvarn}[0-9][0-9] -
-            ${fvarn}[0-9] {
-                # in good form. Leave as is.
-                # Assumes there are less than 9999 contexts on a page.
-                # update context_ct
-                set conext_new $context
-                set context_ct [string range $context $fvarn_len end]
-            }
-            *[0-9][0-9] -
-            *[0-9] {
-                # There's a number there,
-                # and maybe nothing else, or maybe a spelling
-                # issue. Use the number..
-                # update context_ct to the same.
-                ns_log Notice "qal_3g.1034: context '${context}' not \
-                          recognized for f_hash '${f_hash}' form_id '${form_id}'"       
-                regexp -- {^[^0-9]*([0-9]+)$} $context context_ct
-                set context_new $fvarn
-                append context_new $context_c
-            }
-            default {
-                # No recognizable context assigned.
-                # Assign the same as the last context, or the first
-                # if no previous ones.
-                if { $context_prev ne "" } {
-                    set context_new $context_prev
-                } else {
-                    set context_new $fvarn
-                    append context_new $context_ct
-                }
-            }
+        # switch doesn't accept variables for the cases, so
+        # using if statements.
+        
+        if { [string match "${fvarn}${two_digits}" $context] \
+                 || [string match "${fvarn}${one_digit}" $context] } {
+            # in good form. Leave as is.
+            # Assumes there are less than 9999 contexts on a page.
+            # update context_ct
+            set context_new $context
+            set context_ct [string range $context $fvarn_len end]
+        } elseif { [string match "*${two_digits}" $context] \
+                       || [string match "*${one_digit}" $context ] } {
+            # There's a number there,
+            # and maybe nothing else, or maybe a spelling
+            # issue. Use the number..
+            # update context_ct to the same.
+            ns_log Notice "qal_3g.1034: context '${context}' not \
+                recognized for f_hash '${f_hash}' form_id '${form_id}'"
+            regexp -- {^[^0-9]*([0-9]+)$} $context context_ct
+            set context_new $fvarn
+            append context_new $context_ct
+        } elseif { $context_prev ne "" } {
+            # No recognizable context assigned.
+            # Assign the same as the last context, or the first
+            # if no previous ones.
+            set context_new $context_prev
+        } else {
+            set context_new $fvarn
+            append context_new $context_ct
         }
         
         ### Create the upvar link before the context is used.
-        if { ![info exists $context_new] } {
+        if { ![info exists ${context_new} ] } {
             ns_log Notice "qal_3g.512: creating context '${context_new}' for form_varname/fvarn '${fvarn}'"
             upvar 1 $context_new $context_new
             # give it a value to make sure it exists.
