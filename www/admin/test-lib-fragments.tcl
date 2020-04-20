@@ -3,15 +3,16 @@ set context [list $title]
 set contents ""
 
 set f_lol [list \
-               [list type input name stack_id value stack_id_value context content_c1] \
-               [list type input name deck_id value deck-id_value context content_c2 ] \
+               [list type input name stack_id value stack_id_value context content_c2 ] \
+               [list type input name deck_id value deck-id_value context content_c1 ] \
                [list type input name card_id value card_id_value context content_c3] ]
 
-
+set html_before { <div class="grid-4 m-grid-4 s-grid-12 padded"><div class="padded-inner content-box">}
+set html_after {</div></div>}
 set c4_list  [list \
-                  [list type input name frompage value "backside" context content_c4] \
-                  [list type input name hello value "frontside" context content_c4] \
-                  [list type input name item3 value "sideside" context content_c4] ]
+                  [list type input name frompage value "backside" context content_c4 html_before $html_before html_after $html_after ] \
+                  [list type input name hello value "frontside" context content_c4 html_before $html_before html_after $html_after ] \
+                  [list type input name item3 value "sideside" context content_c4 html_before $html_before html_after $html_after ] ]
               
 set f4_lol [qfo::form_list_def_to_css_table_rows -list_of_lists_name f_lol -form_field_defs_to_multiply c4_list -rows_count 6 -group_letter j]
 

@@ -26,7 +26,7 @@ ad_proc -public qal_3g {
     {-write_p "1"}
 } {
     Inputs essentially declare properties of a form and
-    manages field type validation like qfo_2g, but with 2 new features:
+    manages field type validation like qfo_2g, but with new features:
 
     1. capacity to handle 'scalared arrays' as names for multiple rows of sets
     of named form elements.  This allows clean handling of arrays in the
@@ -35,9 +35,13 @@ ad_proc -public qal_3g {
     <br><br>
 
     A 'scalared array' here means a scalar variable with a suffix
-    number appened that represents an array index.  For example, if an array
-    is named 'foobar' with 3 elements, then it would be represented with
-    foobar_1, foobar_2, foobar_3.
+    number appened that represents an array index.  For example, if an input
+    tag with the name's attribute set to 'foobar', and there are 3 rows
+    of the input tag, then it would be represented with something like
+    foobar_1, foobar_2, foobar_3. Actually, it would be foobar_aa1,
+    foobar_aa2, foobar_aa3. The two letters before the number help
+    with structuring the form on the page properly by putting the fields
+    in the expected order. 
 
     <br><br>
     2. split 'form_varname'(s) for placing different parts of the output
@@ -45,7 +49,12 @@ ad_proc -public qal_3g {
     The developer assigns each input field a
     '<code>context</code>' and its value (name/value pair).
     The value of context is the form_varname that the associated form field
-    html is assigned to.
+    html is assigned to.  In qfo_2g, the form output defaults to form_html.
+    In qal_3g, uses the same parameter 'form_varname' with default form_m,
+    but outputs the results in a series of variables. E.g. form_m1, form_m2,
+    form_m3. where "form_m" is the value of attribute "context" supplied
+    during form field defintion. If the context attribute is left out of any
+    field, the default form_m is used.
     
     The field <code>context</code> attribute and its value determines
     which form context the form element is added to.
@@ -64,6 +73,10 @@ ad_proc -public qal_3g {
     The first context contains open FORM tag. The last defined context includes
     the closed FORM tag.  <b>If there is no context provided, the context
     defaults to form_varname's value.
+    <br><br>
+    Each html form element (tag) can now have attributes "html_before" and
+    "html_after", which inserts that html before and after.
+
     
     <br><br>
 
@@ -336,14 +349,14 @@ ad_proc -public qal_3g {
     set rows_c "rows"
 
     set qfo_ct_blob_c {qfo_ct_[a-z][a-z][1-9]*}
-    ns_log Notice "qal_3g.338 array get fields_arr '[array get fields_arr]'"
+    ns_log Debug "qal_3g.338 array get fields_arr '[array get fields_arr]'"
 
     
     set qfo_ct_fields_list [array names fields_arr ${qfo_ct_blob_c}]
-    ns_log Notice "qal_3g.340 working on '${qfo_ct_blob_c}' qfo_ct_fields_list '${qfo_ct_fields_list}'" 
+    ns_log Debug "qal_3g.340 working on '${qfo_ct_blob_c}' qfo_ct_fields_list '${qfo_ct_fields_list}'" 
     set reset_ct_p 0
     foreach f_hash $qfo_ct_fields_list {
-        set reset_ct_p 1
+
         set f_list $fields_arr(${f_hash})
         set name_idx [lsearch -exact -nocase $f_list ${name_c}]
         incr name_idx
@@ -379,7 +392,8 @@ ad_proc -public qal_3g {
                 ### add this many ($diff) rows using the first as a reference.
 
                 ### get existing first field f_hash
-                set tgf_hash [array names fields_arr "*_${group}b1"]
+                set reset_ct_p 1
+                set tgf_hash [array names fields_arr "*_${group}a1"]
                 if { [llength $tgf_hash ] ne 1 } {
                     nslog Error "qal_3g.367. tgf_hash '${tgf_hash}'. There should be one."
                     ad_script_abort
@@ -394,6 +408,7 @@ ad_proc -public qal_3g {
                 incr row_start
                 set row_end $rows
                 incr row_end $diff
+                set f_hash_new_list [list ]
                 for {set r $row_start} {$r <= $row_end} {incr r} {
                     # make new name and f_hash
                     # do for each column
@@ -404,18 +419,31 @@ ad_proc -public qal_3g {
                         append name_new $group $col $r
                         # add to field_arr (not qfi_arr)
                         # new f_hash is same as name
+                        lappend f_hash_new_list $name_new
                         set fields_arr(${name_new}) [lreplace $fields_arr($tgf_hash) $idx $idx $name_new]
                     }
                 }
+                if { [llength $fields_ordered_list] > 0 } {
+                    ### edit the existing fields_ordered_list
+                    ### insert the new f_hash in expected sequence
+                    ### after last one in the sequence.
+                    # last one is $name_base $group $column $rows
+                    set prior $name_base
+                    append prior $group $column $rows
+                    set prior_idx [lsearch -exact $fields_ordered_list $prior]
+                    incr prior_idx
+                    set fields_ordered_list [linsert $fields_ordered_list $prior_idx $f_hash_new_list]
+                }
+
             }
         }
     }
-    ns_log Notice "qal_3g.409 qfi_fields_list '${qfi_fields_list}'"
+    ns_log Debug "qal_3g.409 qfi_fields_list '${qfi_fields_list}'"
     if { $reset_ct_p } {
         set qfi_fields_list [array names fields_arr]
         set field_ct [llength $qfi_fields_list]
     }
-    ns_log Notice "qal_3g.414 qfi_fields_list '${qfi_fields_list}'"
+    ns_log Debug "qal_3g.414 qfi_fields_list '${qfi_fields_list}'"
     ### setup any contexts
     ### upvar must be called for each form_varnameN form_mN *before*
     ### assigning values to form_mN
@@ -423,7 +451,7 @@ ad_proc -public qal_3g {
     ###  fcshtml_arr(${f_hash},${scalar_array_p_c})
 
 
-    ns_log Notice "qal_3g.426 array get fields_arr '[array get fields_arr]'"
+    ns_log Debug "qal_3g.426 array get fields_arr '[array get fields_arr]'"
     
     foreach f_hash $qfi_fields_list {
         ### extract group feature, highest priority field html tag attributes
@@ -463,7 +491,7 @@ ad_proc -public qal_3g {
         set fields_arr(${f_hash}) $field_new_nvl
     }
     
-    ns_log Notice "qal_3g.461 array get fields_arr '[array get fields_arr]'"
+    ns_log Debug "qal_3g.461 array get fields_arr '[array get fields_arr]'"
 
 
     
@@ -502,7 +530,7 @@ ad_proc -public qal_3g {
             # and maybe nothing else, or maybe a spelling
             # issue. Use the number..
             # update context_ct to the same.
-            ns_log Notice "qal_3g.1034: context '${context}' not \
+            ns_log Debug "qal_3g.1034: context '${context}' not \
                 recognized for f_hash '${f_hash}' form_id '${form_id}'"
             regexp -- {^[^0-9]*([0-9]+)$} $context context_ct
             set context_new $fvarn
@@ -519,7 +547,7 @@ ad_proc -public qal_3g {
         
         ### Create the upvar link before the context is used.
         if { ![info exists ${context_new} ] } {
-            ns_log Notice "qal_3g.512: creating context '${context_new}' for form_varname/fvarn '${fvarn}'"
+            ns_log Debug "qal_3g.512: creating context '${context_new}' for form_varname/fvarn '${fvarn}'"
             upvar 1 $context_new $context_new
             # give it a value to make sure it exists.
             # Note: context_new is not reset to "" here
@@ -582,7 +610,7 @@ ad_proc -public qal_3g {
     } else {
         set calculate_tabindex_p 1
     }
-    
+    ns_log Notice "qal_3g calculate_tabindex_p '${calculate_tabindex_p}'"
     # Make a list of available datatypes
     # Html SELECT tags, and
     # INPUT tag with attribute type=radio or type=checkbox
@@ -700,7 +728,6 @@ ad_proc -public qal_3g {
     # $f_hash is field_index not field name.
     # The following loop standardizes element input data that does not
     # depend on values of prior element.
-
     foreach f_hash $qfi_fields_list {
         ns_log Debug "qal_3g.686  f_hash: '${f_hash}'"
         
@@ -1233,7 +1260,7 @@ ad_proc -public qal_3g {
         
         set form_id [qf_form form_id $form_id hash_check $hash_check]
         set form_m_open [qf_read form_id $form_id]
-        ns_log Notice "qal_3g.944: form_m_open '${form_m_open}'"
+        ns_log Debug "qal_3g.944: form_m_open '${form_m_open}'"
         
         # Use qfi_fields_sorted_list to generate 
         # an ordered list of form elements
@@ -1301,7 +1328,7 @@ ad_proc -public qal_3g {
                         if { $v2 ne "" \
                                  || ( $v2 eq "" \
                                           && $fatts_arr(${f_hash},empty_allowed_p) ) } {
-                            #                            ns_log Notice "qal_3g.1021 n2 '${n2}' v2 '${v2}' qf# v_arr(${n2}) '$qfv_arr(${n2})'"
+                            #                            ns_log Debug "qal_3g.1021 n2 '${n2}' v2 '${v2}' qf# v_arr(${n2}) '$qfv_arr(${n2})'"
                             set fav_arr(value) $v2
                             if { ![info exists fan_arr(value) ] } {
                                 set fan_arr(value) $value_c
