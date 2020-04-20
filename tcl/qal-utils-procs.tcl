@@ -47,7 +47,7 @@ ad_proc -public qal_3g {
     The value of context is the form_varname that the associated form field
     html is assigned to.
     
-    The <code>context</code> attribute and its value determines
+    The field <code>context</code> attribute and its value determines
     which form context the form element is added to.
     Each 'context' value may be supplied as either a number or
     the form_varname with its number as a suffix.
@@ -62,8 +62,8 @@ ad_proc -public qal_3g {
     form_varname_close contains the close FORM tag. This is supplied for
     consistency, but its value is constant.
     The first context contains open FORM tag. The last defined context includes
-    the closed FORM tag.
-
+    the closed FORM tag.  <b>If there is no context provided, the context
+    defaults to form_varname's value.
     
     <br><br>
 
@@ -322,9 +322,20 @@ ad_proc -public qal_3g {
 
     ### Instead of using fcshtml_arr,
     ### reference the group directly, so another array.
-    
-    set qfo_ct_blob_c "qfo_ct_[a-z][a-z][1-9]*"
-    set target_first_gc1_c "*_${group}b1"
+
+    # set defaults, repeated use of text etc.
+    set context_c "context"
+    set scalar_array_p_c "scalar_array_p"
+    set html_before_c "html_before"
+    set html_after_c "html_after"
+    ### Following used for repeat rows of fields, e.g. items on an invoice
+    set rows_c "rows"
+    set columns_c "columns"
+    set group_c "group"
+    set f_hash_c "f_hash"
+
+    set qfo_ct_blob_c {qfo_ct_[a-z][a-z][1-9]*}
+
     set qfo_ct_fields_list [array names form_arr ${qfo_ct_blob_c}]
     set reset_ct_p 0
     foreach f_hash $qfo_ct_fields_list {
@@ -364,7 +375,7 @@ ad_proc -public qal_3g {
                 ### add this many ($diff) rows using the first as a reference.
 
                 ### get existing first field f_hash
-                set tgf_hash [array names form_arr $target_first_gc1_c]
+                set tgf_hash [array names form_arr "*_${group}b1"]
                 if { [llength $tgf_hash ] ne 1 } {
                     nslog Error "qal_3g.367. tgf_hash '${tgf_hash}'. There should be one."
                     ad_script_abort
@@ -395,33 +406,86 @@ ad_proc -public qal_3g {
             }
         }
     }
+    ns_log Notice "qal_3g.409 qfi_fields_list '${qfi_fields_list}'"
     if { $reset_ct_p } {
         set qfi_fields_list [array names fields_arr]
         set field_ct [llength $qfi_fields_list]
     }
-        
+    ns_log Notice "qal_3g.414 qfi_fields_list '${qfi_fields_list}'"
     ### setup any contexts
     ### upvar must be called for each form_varnameN form_mN *before*
     ### assigning values to form_mN
     ### get context and scalar_array_p from:
     ###  fcshtml_arr(${f_hash},${scalar_array_p_c})
 
+
+
+    foreach f_hash $qfi_fields_list {
+        ### extract group feature, highest priority field html tag attributes
+        set field_nvl $fields_arr(${f_hash})
+        set field_new_nvl [list ]
+        set fcshtml_arr(${f_hash},${context_c}) ""
+        set fcshtml_arr(${f_hash},${scalar_array_p_c}) 0
+        set fcshtml_arr(${f_hash},${html_before_c}) ""
+        set fcshtml_arr(${f_hash},${html_after_c}) ""
+        foreach {n v} $field_nvl {
+            set nlc [string tolower $n]
+            
+            ###  Extract 'context' and 'scalar_array_p'
+            ###  into a new array fcshtml_arr with same index so as to avoid
+            ###  needing to modify existing, working logic
+            ###  because these attributes were not in qfo_2g.
+            switch -exact -- $nlc {
+                $context_c {
+                    set fcshtml_arr(${f_hash},${context_c}) $v
+                }
+                $scalar_array_p_c {
+                    set fcshtml_arr(${f_hash},${scalar_array_p_c}) $v
+                }
+                $html_before_c {
+                    set fcshtml_arr(${f_hash},${html_before_c}) $v
+                }
+                $html_after_c {
+                    set fcshtml_arr(${f_hash},${html_after_c}) $v
+                }
+                default {
+                    set hfv_arr(${nlc}) $v
+                    set hfn_arr(${nlc}) $n
+                    lappend field_new_nvl $n $v
+                }
+            }
+        }
+        set fields_arr(${f_hash}) $field_new_nvl
+    }
+
+
+
+
+    
     ### count contexts, create upvar links for them.
     set context_ct 1
+
     foreach f_hash $qfi_fields_list {
         ### Every html element should have a 'context' attribute
         ### If not, add one.
-        set context $fcshtml_arr(${f_hash},${context_c})
-        set form_m_len [string length $form_m]
-
+        if { [info exists fcshtml_arr(${f_hash},${context_c}) ] } {
+            set context $fcshtml_arr(${f_hash},${context_c})
+        } else {
+            set fcshtml_arr(${f_hash},${context_c}) ""
+        }
+        
+        set fvarn_len [string length $form_varname]
+        ### avoid form_varname / form_m mixup.
+        ### Here we just want the name of form_m
+        set fvarn $form_varname
         switch -glob -- $context {
-            ${form_m}[0-9][0-9]-
-            ${form_m}[0-9] {
+            ${fvarn}[0-9][0-9] -
+            ${fvarn}[0-9] {
                 # in good form. Leave as is.
-                # Assumes there are less than 99 contexts on a page.
+                # Assumes there are less than 9999 contexts on a page.
                 # update context_ct
                 set conext_new $context
-                set context_ct [string range $context $form_m_len end]
+                set context_ct [string range $context $fvarn_len end]
             }
             *[0-9][0-9] -
             *[0-9] {
@@ -430,16 +494,16 @@ ad_proc -public qal_3g {
                 # issue. Use the number..
                 # update context_ct to the same.
                 ns_log Notice "qal_3g.1034: context '${context}' not \
-                    recognized for f_hash '${f_hash}' form_id '${form_id}'"
+                          recognized for f_hash '${f_hash}' form_id '${form_id}'"       
                 regexp -- {^[^0-9]*([0-9]+)$} $context context_ct
-                set context_new $form_m
+                set context_new $fvarn
                 append context_new $context_c
             }
             default {
                 # No recognizable context assigned.
                 # Assign the same as the last context, or the first
                 # if no previous ones.
-                set context_new $form_m
+                set context_new $fvarn
                 append context_new $context_ct
             }
         }
@@ -556,15 +620,7 @@ ad_proc -public qal_3g {
     ### to allow breaking a form up into multiple html segments
     ### at the page level via 'context', and within each segment
     ### for use in responsive page design (and traditional templating).
-    set context_c "context"
-    set scalar_array_p_c "scalar_array_p"
-    set html_before_c "html_before"
-    set html_after_c "html_after"
-    ### Following used for repeat rows of fields, e.g. items on an invoice
-    set rows_c "rows"
-    set columns_c "columns"
-    set group_c "group"
-    set f_hash_c "f_hash"
+
     # Array for holding datatype 'sets' defined by select/choice/choices:
     # fchoices_larr(element_name)
 
@@ -597,7 +653,7 @@ ad_proc -public qal_3g {
     # Parse form fields
     #
 
-   
+    
     # Build dataset validation and make a form
 
     # Make a list of datatype elements that are not made during next loop
@@ -665,42 +721,6 @@ ad_proc -public qal_3g {
         # so add an index with a logical value to speed up
         # parsing at these logical branches:  is_datatyped_p
         
-
-        ### extract group feature, highest priority field html tag attributes
-        set field_nvl $fields_arr(${f_hash})
-        set field_new_nvl [list ]
-        set fcshtml_arr(${f_hash},${context_c}) ""
-        set fcshtml_arr(${f_hash},${scalar_array_p_c}) 0
-        set fcshtml_arr(${f_hash},${html_before_c}) ""
-        set fcshtml_arr(${f_hash},${html_after_c}) ""
-        foreach {n v} $field_nvl {
-            set nlc [string tolower $n]
-
-            ###  Extract 'context' and 'scalar_array_p'
-            ###  into a new array fcshtml_arr with same index so as to avoid
-            ###  needing to modify existing, working logic
-            ###  because these attributes were not in qfo_2g.
-            switch -exact -- $nlc {
-                $context_c {
-                    set fcshtml_arr(${f_hash},${context_c}) $v
-                }
-                $scalar_array_p_c {
-                    set fcshtml_arr(${f_hash},${scalar_array_p_c}) $v
-                }
-                $html_before_c {
-                    set fcshtml_arr(${f_hash},${html_before_c}) $v
-                }
-                $html_after_c {
-                    set fcshtml_arr(${f_hash},${html_after_c}) $v
-                }
-                default {
-                    set hfv_arr(${nlc}) $v
-                    set hfn_arr(${nlc}) $n
-                    lappend field_new_nvl $n $v
-                }
-            }
-        }
-        set fields_arr(${f_hash}) $field_new_nvl
 
         ns_log Debug "qal_3g.725 array get hfv_arr '[array get hfv_arr]'"
 
@@ -1198,7 +1218,7 @@ ad_proc -public qal_3g {
         
         set form_id [qf_form form_id $form_id hash_check $hash_check]
         set form_m_open [qf_read form_id $form_id]
-        ns_log "qal_3g.944: form_m_open '${form_m_open}'"
+        ns_log Notice "qal_3g.944: form_m_open '${form_m_open}'"
         
         # Use qfi_fields_sorted_list to generate 
         # an ordered list of form elements
