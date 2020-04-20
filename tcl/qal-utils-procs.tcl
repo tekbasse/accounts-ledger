@@ -325,23 +325,27 @@ ad_proc -public qal_3g {
 
     # set defaults, repeated use of text etc.
     set context_c "context"
-    set scalar_array_p_c "scalar_array_p"
     set html_before_c "html_before"
     set html_after_c "html_after"
+    set name_c "name"
+    set scalar_array_p_c "scalar_array_p"
     ### Following used for repeat rows of fields, e.g. items on an invoice
-    set rows_c "rows"
-    set columns_c "columns"
+    set column_c "column"
     set group_c "group"
     set f_hash_c "f_hash"
+    set rows_c "rows"
 
     set qfo_ct_blob_c {qfo_ct_[a-z][a-z][1-9]*}
+    ns_log Notice "qal_3g.338 array get fields_arr '[array get fields_arr]'"
 
-    set qfo_ct_fields_list [array names form_arr ${qfo_ct_blob_c}]
+    
+    set qfo_ct_fields_list [array names fields_arr ${qfo_ct_blob_c}]
+    ns_log Notice "qal_3g.340 working on '${qfo_ct_blob_c}' qfo_ct_fields_list '${qfo_ct_fields_list}'" 
     set reset_ct_p 0
     foreach f_hash $qfo_ct_fields_list {
         set reset_ct_p 1
-        set f_list $form_arr(${f_hash})
-        set name_idx [lsearch $f_list ${name_c}]
+        set f_list $fields_arr(${f_hash})
+        set name_idx [lsearch -exact -nocase $f_list ${name_c}]
         incr name_idx
         set name [lindex $f_list $name_idx]
         if { [llength $name] > 1 } {
@@ -375,12 +379,12 @@ ad_proc -public qal_3g {
                 ### add this many ($diff) rows using the first as a reference.
 
                 ### get existing first field f_hash
-                set tgf_hash [array names form_arr "*_${group}b1"]
+                set tgf_hash [array names fields_arr "*_${group}b1"]
                 if { [llength $tgf_hash ] ne 1 } {
                     nslog Error "qal_3g.367. tgf_hash '${tgf_hash}'. There should be one."
                     ad_script_abort
                 }
-                set f_list $form_arr(${tgf_hash})
+                set f_list $fields_arr(${tgf_hash})
                 set tgf_name_idx [lsearch $tfg_list ${name_c}]
                 incr tgf_name_idx
                 set tgf_name [lindex $tgf_list $tfg_name_idx ]
@@ -400,7 +404,7 @@ ad_proc -public qal_3g {
                         append name_new $group $col $r
                         # add to field_arr (not qfi_arr)
                         # new f_hash is same as name
-                        set form_arr(${name_new}) [lreplace $form_arr($tgf_hash) $idx $idx $name_new]
+                        set fields_arr(${name_new}) [lreplace $fields_arr($tgf_hash) $idx $idx $name_new]
                     }
                 }
             }
@@ -458,15 +462,16 @@ ad_proc -public qal_3g {
         set fields_arr(${f_hash}) $field_new_nvl
     }
 
-
+    ns_log Notice "qal_3g.461 array get fields_arr '[array get fields_arr]'"
 
 
     
     ### count contexts, create upvar links for them.
     set context_ct 1
-
+    set context_prev ""
     foreach f_hash $qfi_fields_list {
         ### Every html element should have a 'context' attribute
+        ### in fcshtml_arr, but not in fields_arr.
         ### If not, add one.
         if { [info exists fcshtml_arr(${f_hash},${context_c}) ] } {
             set context $fcshtml_arr(${f_hash},${context_c})
@@ -503,17 +508,27 @@ ad_proc -public qal_3g {
                 # No recognizable context assigned.
                 # Assign the same as the last context, or the first
                 # if no previous ones.
-                set context_new $fvarn
-                append context_new $context_ct
+                if { $context_prev ne "" } {
+                    set context_new $context_prev
+                } else {
+                    set context_new $fvarn
+                    append context_new $context_ct
+                }
             }
         }
+        
         ### Create the upvar link before the context is used.
         if { ![info exists $context_new] } {
+            ns_log Notice "qal_3g.512: creating context '${context_new}' for form_varname/fvarn '${fvarn}'"
             upvar 1 $context_new $context_new
             # give it a value to make sure it exists.
+            # Note: context_new is not reset to "" here
             set $context_new ""
         }
+
         set fcshtml_larr(${f_hash},${context_c}) $context_new
+        set context_prev $context_new
+
     }
 
 
@@ -606,7 +621,7 @@ ad_proc -public qal_3g {
     set input_c "input"
     set label_c "label"
     set multiple_c "multiple"
-    set name_c "name"
+    #set name_c "name"
     set select_c "select"
     set submit_c "submit"
     set tabindex_c "tabindex"
