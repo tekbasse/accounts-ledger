@@ -815,7 +815,7 @@ ad_proc -public qal_3g {
             set hfn_arr(${nlc}) $n
             
         }
-        ns_log Notice "qal_3g.812. array get hfv_arr '[array get hfv_arr]'"
+        #ns_log Notice "qal_3g.812. array get hfv_arr '[array get hfv_arr]'"
         # Warning: Variable nomenclature near collision:
         # "datatype,tag_type"  refers to attribute 'type's value,
         # such as types of INPUT tags, 'hidden', 'text', etc.
@@ -836,7 +836,7 @@ ad_proc -public qal_3g {
                 set tag_type $default_tag_type
             }
         }
-        ns_log Notice "qal_3g.833 datatype '${datatype}' tag_type '${tag_type}'"
+        #ns_log Notice "qal_3g.833 datatype '${datatype}' tag_type '${tag_type}'"
         set multiple_names_p ""
         if { ( [string match -nocase "*input*" $tag_type ] \
                    || $tag_type eq "" ) \
