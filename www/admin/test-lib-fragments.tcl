@@ -24,7 +24,7 @@ set f2_lol [list \
                      value "\#flashcards.Pop\#" datatype text title "\#flashcards.Pop_from_stack\#" label "" style "float: right;padding: 35px;" class "btn-big" ] \
                ]
 qf_append_lol2_to_lol1 f_lol f2_lol
-ns_log Notice "test-lib-fragments.tcl f_lol '${f_lol}'"
+#ns_log Notice "test-lib-fragments.tcl f_lol '${f_lol}'"
 
 ::qfo::form_list_def_to_array \
     -list_of_lists_name f_lol \
