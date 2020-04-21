@@ -3,21 +3,26 @@ set context [list $title]
 set contents ""
 
 set f_lol [list \
-               [list type input name stack_id value stack_id_value context content_c2 ] \
-               [list type input name deck_id value deck-id_value context content_c1 ] \
-               [list type input name card_id value card_id_value context content_c3] ]
+               [list datatype date name date value "04/20/2020" context content_c2 ] \
+               [list datatype text name order_id value "o20200420" context content_c1 label "Order\#" ] \
+               [list datatype text name job_id value job_id_value context content_c3 label "JobId"] ]
 
-set html_before { <div class="grid-4 m-grid-4 s-grid-12 padded"><div class="padded-inner content-box">}
+set html_before1 { <div class="grid-2 m-grid-6 s-grid-12"><div class="content-box">}
 set html_after {</div></div>}
+set html_before2 { <div class="grid-2 m-grid-3 s-grid-6"><div class="content-box">}
+
 set c4_list  [list \
-                  [list type input name frompage value "backside" context content_c4 html_before $html_before html_after $html_after ] \
-                  [list type input name hello value "frontside" context content_c4 html_before $html_before html_after $html_after ] \
-                  [list type input name item3 value "sideside" context content_c4 html_before $html_before html_after $html_after ] ]
+                  [list datatype text name pcode value "vendor-x" context content_c4 html_before $html_before1 html_after $html_after label "Product Code" size 12] \
+                  [list datatype text name descr value "" context content_c4 html_before $html_before1 html_after $html_after label "Description" size 12 ] \
+                  [list datatype text name listprice value "10.00" context content_c4 html_before $html_before2 html_after $html_after label "List" size 6] \
+                  [list datatype text name qty value "1" context content_c4 html_before $html_before2 html_after $html_after label "Quantity" size 4 ] \
+                  [list datatype text name price value "" context content_c4 html_before $html_before2 html_after $html_after label "Price" size 8 ] \
+              [list datatype text name row_nbr value "" context content_c4 html_before $html_before2 html_after $html_after label "Row\#" size 4] ]
               
 set f4_lol [qfo::form_list_def_to_css_table_rows -list_of_lists_name f_lol -form_field_defs_to_multiply c4_list -rows_count 6 -group_letter j]
 
 set f2_lol [list \
-                [list type input name page value "frontside" context content_c5] \
+                [list datatype text name page value "frontside" context content_c5] \
                 [list type submit name keep context content_c6 \
                      value "\#flashcards.Keep\#" datatype text title "\#flashcards.Keep_in_stack\#" label "" style "float: left;padding: 35px;" class "btn-big"] \
                 [list type submit name pop context content_c7 \
