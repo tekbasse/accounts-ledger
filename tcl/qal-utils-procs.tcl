@@ -914,9 +914,16 @@ ad_proc -public qal_3g {
                 if { ![info exists hfv_arr(label)] \
                          && [lsearch -exact $ignore_list $type] == -1 } {
                     #ns_log Notice "qal_3g.910 array get hfv_arr '[array get hfv_arr]'"
-                    set hfv_arr(label) $hfv_arr(name)
-                    set hfn_arr(label) $label_c
+                    set hfv_arr(${label_c}) $hfv_arr(${name_c})
+                    set hfn_arr(${label_c}) $label_c
                 }
+            }
+
+            if { [string match {*_[a-z][a-z]*[02-9]} $hfv_arr(${name_c}) ] } {
+                ### suppress labels on rows 2 through 9
+                ### keep labels for 1 11 21 etc.
+                set hfv_arr(${label_c}) ""
+                set hfn_arr(${label_c}) $label_c
             }
 
         } elseif { [string match -nocase "*textarea*" $tag_type ] } {
