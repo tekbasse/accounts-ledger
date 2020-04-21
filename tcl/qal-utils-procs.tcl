@@ -251,7 +251,7 @@ ad_proc -public qal_3g {
     set qfi_fields_list [array names fields_arr]
     set field_ct [llength $qfi_fields_list]
     # ns_log Notice "qal_3g.253: array get fields_arr '[array get fields_arr]'"
-    ns_log Notice "qal_3g.254: qfi_fields_list '${qfi_fields_list}'"
+    #ns_log Notice "qal_3g.254: qfi_fields_list '${qfi_fields_list}'"
 
     ### qal_3g does not add rows etc.
     ### It only works with what it is given via
@@ -349,12 +349,12 @@ ad_proc -public qal_3g {
     set rows_c "rows"
 
     set qfo_ct_blob_c {qfo_ct_[a-z][a-z][1-9]*}
-    ns_log Notice "qal_3g.352 array get fields_arr '[array get fields_arr]'"
+    #ns_log Notice "qal_3g.352 array get fields_arr '[array get fields_arr]'"
 
     
     set qfo_ct_fields_list [array names fields_arr ${qfo_ct_blob_c}]
-    ns_log Notice "qal_3g.356 working on '${qfo_ct_blob_c}' qfo_ct_fields_list '${qfo_ct_fields_list}'" 
-    ns_log Notice "qal_3g.357 fields_ordered_list '${fields_ordered_list}'"
+    #ns_log Notice "qal_3g.356 working on '${qfo_ct_blob_c}' qfo_ct_fields_list '${qfo_ct_fields_list}'" 
+    #ns_log Notice "qal_3g.357 fields_ordered_list '${fields_ordered_list}'"
     set reset_ct_p 0
     foreach f_hash $qfo_ct_fields_list {
 
@@ -435,17 +435,17 @@ ad_proc -public qal_3g {
                     incr prior_idx
 
                     set fields_ordered_list [linsert $fields_ordered_list $prior_idx $f_hash_new_list]
-                    ns_log Notice "qal_3g.438 fields_ordered_list '${fields_ordered_list}'"
+                    #ns_log Notice "qal_3g.438 fields_ordered_list '${fields_ordered_list}'"
                 }
 
             }
         }
     }
-    ns_log Notice "qal_3g.444 qfi_fields_list '${qfi_fields_list}'"
+    #ns_log Notice "qal_3g.444 qfi_fields_list '${qfi_fields_list}'"
     if { $reset_ct_p } {
         set qfi_fields_list [array names fields_arr]
         set field_ct [llength $qfi_fields_list]
-        ns_log Notice "qal_3g.448 reset qfi_fields_list '${qfi_fields_list}'"
+        #ns_log Notice "qal_3g.448 reset qfi_fields_list '${qfi_fields_list}'"
     }
 
     ### setup any contexts
@@ -455,7 +455,7 @@ ad_proc -public qal_3g {
     ###  fcshtml_arr(${f_hash},${scalar_array_p_c})
 
 
-    ns_log Notice "qal_3g.458 array get fields_arr '[array get fields_arr]'"
+    #ns_log Notice "qal_3g.458 array get fields_arr '[array get fields_arr]'"
     
     foreach f_hash $qfi_fields_list {
         ### extract group feature, highest priority field html tag attributes
@@ -474,7 +474,7 @@ ad_proc -public qal_3g {
             ###  because these attributes were not in qfo_2g.
             switch -exact -- $nlc {
                 context {
-                    ns_log Notice "qal_3g.477 nlc '${nlc}' v '${v}'"
+                    #ns_log Notice "qal_3g.477 nlc '${nlc}' v '${v}'"
                     set fcshtml_arr(${f_hash},${context_c}) $v
                 }
                 scalar_array_p {
@@ -491,11 +491,11 @@ ad_proc -public qal_3g {
                 }
             }
         }
-        ns_log Notice "qal_3g.494 should have context: fcshtml_arr(${f_hash},${context_c}) '$fcshtml_arr(${f_hash},${context_c})' field_new_nvl '${field_new_nvl}'"
+        #ns_log Notice "qal_3g.494 should have context: fcshtml_arr(${f_hash},${context_c}) '$fcshtml_arr(${f_hash},${context_c})' field_new_nvl '${field_new_nvl}'"
         set fields_arr(${f_hash}) $field_new_nvl
     }
     
-    ns_log Notice "qal_3g.498 array get fields_arr '[array get fields_arr]'"
+    #ns_log Notice "qal_3g.498 array get fields_arr '[array get fields_arr]'"
 
 
     
@@ -511,7 +511,7 @@ ad_proc -public qal_3g {
         if { [info exists fcshtml_arr(${f_hash},${context_c}) ] } {
             set context $fcshtml_arr(${f_hash},${context_c})
         } else {
-            ns_log Notice "qal_3g.516 no context attr found for f_hash '${f_hash}'"
+            #ns_log Notice "qal_3g.516 no context attr found for f_hash '${f_hash}'"
             set fcshtml_arr(${f_hash},${context_c}) ""
         }
         
@@ -521,7 +521,7 @@ ad_proc -public qal_3g {
         set fvarn $form_varname
         # switch doesn't accept variables for the cases, so
         # using if statements.
-        ns_log Notice "qal_3g.524 fvarn '${fvarn}'"
+        #ns_log Notice "qal_3g.524 fvarn '${fvarn}'"
         if { [string match "${fvarn}${two_digits}" $context] || [string match "${fvarn}${one_digit}" $context] } {
             # in good form. Leave as is.
             # Assumes there are less than 9999 contexts on a page.
@@ -533,8 +533,8 @@ ad_proc -public qal_3g {
             # and maybe nothing else, or maybe a spelling
             # issue. Use the number..
             # update context_ct to the same.
-            ns_log Notice "qal_3g.540: context '${context}' not \
-                recognized for f_hash '${f_hash}' form_id '${form_id}'"
+            #ns_log Notice "qal_3g.540: context '${context}' not \
+            #    recognized for f_hash '${f_hash}' form_id '${form_id}'"
             regexp -- {^[^0-9]*([0-9]+)$} $context context_ct
             set context_new $fvarn
             append context_new $context_ct
@@ -543,22 +543,22 @@ ad_proc -public qal_3g {
             # Assign the same as the last context, or the first
             # if no previous ones.
             set context_new $context_prev
-            ns_log Notice "qal_3g.548 Using previous context."
+            #ns_log Notice "qal_3g.548 Using previous context."
         } else {
             set context_new $fvarn
             append context_new $context_ct
-            ns_log Notice "qal_3g.552 Creating new context '${context_new}'"
+            #ns_log Notice "qal_3g.552 Creating new context '${context_new}'"
         }
-        ns_log Notice "qal_3g.553 context '${context}' -> context_new '${context_new}'"
+        #ns_log Notice "qal_3g.553 context '${context}' -> context_new '${context_new}'"
         ### Create the upvar link before the context is used.
         if { ![info exists ${context_new} ] } {
-            ns_log Notice "qal_3g.557: creating context '${context_new}' for form_varname/fvarn '${fvarn}'"
+            #ns_log Notice "qal_3g.557: creating context '${context_new}' for form_varname/fvarn '${fvarn}'"
             upvar 1 $context_new $context_new
             ### give it a value to make sure it exists.
             ### Note: context_new is not reset to "" here
             ### set $context_new ""
         }
-        ns_log Notice "qal_3g.563 f_hash '${f_hash}'  context '${context_new}'"
+        #ns_log Notice "qal_3g.563 f_hash '${f_hash}'  context '${context_new}'"
         set fcshtml_larr(${f_hash},${context_c}) $context_new
         set context_prev $context_new
 
@@ -615,7 +615,7 @@ ad_proc -public qal_3g {
     } else {
         set calculate_tabindex_p 1
     }
-    ns_log Notice "qal_3g calculate_tabindex_p '${calculate_tabindex_p}'"
+    #ns_log Notice "qal_3g calculate_tabindex_p '${calculate_tabindex_p}'"
     # Make a list of available datatypes
     # Html SELECT tags, and
     # INPUT tag with attribute type=radio or type=checkbox
@@ -734,7 +734,7 @@ ad_proc -public qal_3g {
     # The following loop standardizes element input data that does not
     # depend on values of prior element.
     foreach f_hash $qfi_fields_list {
-        ns_log Notice "qal_3g.739  f_hash: '${f_hash}'"
+        #ns_log Notice "qal_3g.739  f_hash: '${f_hash}'"
         
         #
         # This loop fills fatts_arr(${f_hash},${datatype_element})
@@ -769,7 +769,7 @@ ad_proc -public qal_3g {
         # parsing at these logical branches:  is_datatyped_p
         
 
-        ns_log Notice "qal_3g.774 array get hfv_arr '[array get hfv_arr]'"
+        #ns_log Notice "qal_3g.774 array get hfv_arr '[array get hfv_arr]'"
 
         set tag_type ""
         set datatype ""
@@ -777,7 +777,7 @@ ad_proc -public qal_3g {
             # This field is partly defined by datatype
             set datatype $hfv_arr(datatype)
 
-            ns_log Notice "qal_3g.7382: qdt_types_arr(${datatype},form_tag_attrs) '$qdt_types_arr(${datatype},form_tag_attrs)' qdt_types_arr(${datatype},form_tag_type) '$qdt_types_arr(${datatype},form_tag_type)'"
+            #ns_log Notice "qal_3g.7382: qdt_types_arr(${datatype},form_tag_attrs) '$qdt_types_arr(${datatype},form_tag_attrs)' qdt_types_arr(${datatype},form_tag_type) '$qdt_types_arr(${datatype},form_tag_type)'"
 
             set dt_idx $datatype
             append dt_idx $comma_c $form_tag_type_c
@@ -790,7 +790,7 @@ ad_proc -public qal_3g {
                 set hfv_arr(${nlc}) $v
                 set hfn_arr(${nlc}) $n
             }
-            ns_log Notice "qal_3g.795. array get hfv_arr '[array get hfv_arr]' datatype '${datatype}' tag_type '${tag_type}'"
+            #ns_log Notice "qal_3g.795. array get hfv_arr '[array get hfv_arr]' datatype '${datatype}' tag_type '${tag_type}'"
         } 
 
         # tag attributes provided from field definition
@@ -807,7 +807,7 @@ ad_proc -public qal_3g {
             set hfn_arr(${nlc}) $n
             
         }
-        ns_log Notice "qal_3g.812. array get hfv_arr '[array get hfv_arr]'"
+        #ns_log Notice "qal_3g.812. array get hfv_arr '[array get hfv_arr]'"
         # Warning: Variable nomenclature near collision:
         # "datatype,tag_type"  refers to attribute 'type's value,
         # such as types of INPUT tags, 'hidden', 'text', etc.
@@ -828,7 +828,7 @@ ad_proc -public qal_3g {
                 set tag_type $default_tag_type
             }
         }
-        ns_log Notice "qal_3g.833 datatype '${datatype}' tag_type '${tag_type}'"
+        #ns_log Notice "qal_3g.833 datatype '${datatype}' tag_type '${tag_type}'"
         set multiple_names_p ""
         if { ( [string match -nocase "*input*" $tag_type ] \
                    || $tag_type eq "" ) \
@@ -905,7 +905,7 @@ ad_proc -public qal_3g {
                 # If there is no label, add one.
                 if { ![info exists hfv_arr(label)] \
                          && [lsearch -exact $ignore_list $type] == -1 } {
-                    #                    ns_log Notice "qal_3g.910 array get hfv_arr '[array get hfv_arr]'"
+                    #ns_log Notice "qal_3g.910 array get hfv_arr '[array get hfv_arr]'"
                     set hfv_arr(label) $hfv_arr(name)
                     set hfn_arr(label) $label_c
                 }
@@ -1109,7 +1109,7 @@ ad_proc -public qal_3g {
 
 
 
-    #ns_log Notice "qal_3g.1112 form_submitted_p '${form_submitted_p}' array get qfv_arr '[array get qfv_arr]'"
+    ns_log Notice "qal_3g.1112 form_submitted_p '${form_submitted_p}' array get qfv_arr '[array get qfv_arr]'"
     # validate inputs?
     set validated_p 0
     set all_valid_p 1
@@ -1139,7 +1139,7 @@ ad_proc -public qal_3g {
             # validate.
             #
             
-            ns_log Notice "qal_3g.1142: f_hash '${f_hash}', datatype '${datatype}'"
+            #ns_log Notice "qal_3g.1142: f_hash '${f_hash}', datatype '${datatype}'"
             if { $fatts_arr(${f_hash},is_datatyped_p) } {
                 # Do not set a name to exist here,
                 # because then it might validate and provide
@@ -1147,7 +1147,7 @@ ad_proc -public qal_3g {
 
                 if { [info exists fatts_arr(${f_hash},valida_proc)] } {
                     set name $fatts_arr(${f_hash},names)
-                    #                    ns_log Notice "qal_3g.1150. Validating '${name}'"
+                    # ns_log Notice "qal_3g.1150. Validating '${name}'"
                     if { [info exists qfv_arr(${name}) ] } {
                         set valid_p [qf_validate_input \
                                          -input $qfv_arr(${name}) \
@@ -1159,7 +1159,7 @@ ad_proc -public qal_3g {
                             lappend invalid_field_val_list $f_hash
                         }
                     } else {
-                        ns_log Notice "qal_3g.1162. array get fatts_arr f_hash,* '[array get fatts_arr ${f_hash},*]'"
+                        #ns_log Notice "qal_3g.1162. array get fatts_arr f_hash,* '[array get fatts_arr ${f_hash},*]'"
                         if { ![info exists fatts_arr(${f_hash},tag_type) ] || [lsearch -exact $ignore_list $fatts_arr(${f_hash},tag_type) ] == -1 } {
                             ns_log Notice "qal_3g.1164: field '${f_hash}' \
  no validation proc. found"
@@ -1255,10 +1255,10 @@ ad_proc -public qal_3g {
             foreach f_list $qfi_fields_tabindex_sorted_lists {
                 lappend qfi_fields_sorted_list [lindex $f_list 0]
             }
-            ns_log Notice "qal_3g.1258. from qfi_fields_list sorted by tabindex..: qfi_fields_sorted_list '${qfi_fields_sorted_list}'"
+            #ns_log Notice "qal_3g.1258. from qfi_fields_list sorted by tabindex..: qfi_fields_sorted_list '${qfi_fields_sorted_list}'"
         } else {
             set qfi_fields_sorted_list $fields_ordered_list
-            ns_log Notice "qal_3g.1260. from fields_ordered_list: qfi_fields_sorted_list '${qfi_fields_sorted_list}'"
+            #ns_log Notice "qal_3g.1260. from fields_ordered_list: qfi_fields_sorted_list '${qfi_fields_sorted_list}'"
         }
 
         
@@ -1268,7 +1268,7 @@ ad_proc -public qal_3g {
         
         set form_id [qf_form form_id $form_id hash_check $hash_check]
         set form_m_open [qf_read form_id $form_id]
-        ns_log Notice "qal_3g.1271: form_m_open '${form_m_open}'"
+        #ns_log Notice "qal_3g.1271: form_m_open '${form_m_open}'"
         
         # Use qfi_fields_sorted_list to generate 
         # an ordered list of form elements
@@ -1286,7 +1286,7 @@ ad_proc -public qal_3g {
 
             set selected_c "selected"
             foreach f_hash $qfi_fields_sorted_list {
-                ns_log Notice "qal_3g.1289. f_hash '${f_hash}'"
+                #ns_log Notice "qal_3g.1289. f_hash '${f_hash}'"
                 set fatts_arr_index $f_hash
                 append fatts_arr_index $comma_c $form_tag_attrs_c
 
@@ -1397,7 +1397,7 @@ ad_proc -public qal_3g {
         set tabindex $tabindex_start
         
         foreach f_hash $qfi_fields_sorted_list {
-            ns_log Notice "qal_3g.1400. f_hash '${f_hash}'"
+            #ns_log Notice "qal_3g.1400. f_hash '${f_hash}'"
             set atts_list $fatts_arr(${f_hash},form_tag_attrs)
             foreach {n v} $atts_list {
                 set nlc [string tolower $n]
@@ -1437,12 +1437,12 @@ ad_proc -public qal_3g {
                 switch -exact -- $fatts_arr(${f_hash},form_tag_type) {
                     input {
                         #ns_log Notice "qal_3g.1439: qf_input \
-                               ## fatts_arr(${f_hash},form_tag_attrs) '${atts_list}'"
+                        ## fatts_arr(${f_hash},form_tag_attrs) '${atts_list}'"
                         append $f_context [qf_input $atts_list ]
                     }
                     textarea {
                         #ns_log Notice "qal_3g.1444: qf_textarea \
-                                  # fatts_arr(${f_hash},form_tag_attrs) '${atts_list}'"
+                        # fatts_arr(${f_hash},form_tag_attrs) '${atts_list}'"
                         append $f_context [qf_textarea $atts_list ]
                     }
                     default {
