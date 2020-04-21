@@ -735,7 +735,7 @@ ad_proc -public qal_3g {
     # depend on values of prior element.
     foreach f_hash $qfi_fields_list {
         #ns_log Notice "qal_3g.739  f_hash: '${f_hash}'"
-        
+
         #
         # This loop fills fatts_arr(${f_hash},${datatype_element})
         #
@@ -773,9 +773,17 @@ ad_proc -public qal_3g {
 
         set tag_type ""
         set datatype ""
-        if { [info exists hfv_arr(datatype) ] } {
-            # This field is partly defined by datatype
-            set datatype $hfv_arr(datatype)
+
+        set field_nvl $fields_arr(${f_hash})        
+        foreach {n v} $field_nvl {
+            set nlc [string tolower $n]
+            set hfv_arr(${nlc}) $v
+            set hfn_arr(${nlc}) $n
+        }
+
+        if { [info exists hfv_arr(${datatype_c}) ] } {
+            # This field is partly defined by using datatype
+            set datatype $hfv_arr(${datatype_c})
 
             #ns_log Notice "qal_3g.7382: qdt_types_arr(${datatype},form_tag_attrs) '$qdt_types_arr(${datatype},form_tag_attrs)' qdt_types_arr(${datatype},form_tag_type) '$qdt_types_arr(${datatype},form_tag_type)'"
 
@@ -800,14 +808,14 @@ ad_proc -public qal_3g {
             array unset hfn_arr
         }
         # Overwrite anything introduced by datatype reference
-        set field_nvl $fields_arr(${f_hash})
+
         foreach {n v} $field_nvl {
             set nlc [string tolower $n]
             set hfv_arr(${nlc}) $v
             set hfn_arr(${nlc}) $n
             
         }
-        #ns_log Notice "qal_3g.812. array get hfv_arr '[array get hfv_arr]'"
+        ns_log Notice "qal_3g.812. array get hfv_arr '[array get hfv_arr]'"
         # Warning: Variable nomenclature near collision:
         # "datatype,tag_type"  refers to attribute 'type's value,
         # such as types of INPUT tags, 'hidden', 'text', etc.
@@ -828,7 +836,7 @@ ad_proc -public qal_3g {
                 set tag_type $default_tag_type
             }
         }
-        #ns_log Notice "qal_3g.833 datatype '${datatype}' tag_type '${tag_type}'"
+        ns_log Notice "qal_3g.833 datatype '${datatype}' tag_type '${tag_type}'"
         set multiple_names_p ""
         if { ( [string match -nocase "*input*" $tag_type ] \
                    || $tag_type eq "" ) \
