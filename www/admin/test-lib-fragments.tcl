@@ -3,8 +3,8 @@ set context [list $title]
 set contents ""
 
 set f_lol [list \
-               [list datatype date name date value "04/20/2020" context content_c2 ] \
-               [list datatype text name order_id value "o20200420" context content_c1 label "Order\#" ] \
+               [list name date value "04/20/2020" context content_c2 datatype date ] \
+               [list name order_id value "o20200420" context content_c1 label "Order\#" datatype text ] \
                [list datatype text name job_id value job_id_value context content_c3 label "JobId"] ]
 
 set html_before1 { <div class="grid-2 m-grid-6 s-grid-12"><div class="content-box">}
@@ -24,9 +24,9 @@ set f4_lol [qfo::form_list_def_to_css_table_rows -list_of_lists_name f_lol -form
 set f2_lol [list \
                 [list datatype text name page value "frontside" context content_c5] \
                 [list type submit name keep context content_c6 \
-                     value "\#flashcards.Keep\#" datatype text title "\#flashcards.Keep_in_stack\#" label "" style "float: left;padding: 35px;" class "btn-big"] \
-                [list type submit name pop context content_c7 \
-                     value "\#flashcards.Pop\#" datatype text title "\#flashcards.Pop_from_stack\#" label "" style "float: right;padding: 35px;" class "btn-big" ] \
+                     value "\#accounts-ledger.Post\#" datatype text title "\#accounts-ledger.Post\#" label "" class "btn-big"] \
+                [list type submit name update context content_c7 \
+                     value "\#accounts-ledger.Update\#" datatype text title "\#accounts-ledger.Update\#" label "" class "btn-big" ] \
                ]
 qf_append_lol2_to_lol1 f_lol f2_lol
 #ns_log Notice "test-lib-fragments.tcl f_lol '${f_lol}'"
