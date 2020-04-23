@@ -178,6 +178,7 @@ CREATE TABLE qal_discounts (
   instance_id integer,
   id          integer default nextval('qal_id'),
   description text,
+  -- discounts are expressed as percent units ie 100% = 100.
   discount    numeric
 );
 

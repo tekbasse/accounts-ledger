@@ -75,6 +75,7 @@ CREATE TABLE qal_customer (
        instance_id         integer,
        rev_id              integer default nextval('qal_id'),
        contact_id          integer,
+       -- expressed as percent units ie 100% = 100.
        discount            numeric,
        tax_included        varchar(1) default '0',
        credit_limit        numeric default '0',
