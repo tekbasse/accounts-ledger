@@ -19,7 +19,7 @@ set c4_list  [list \
                   [list datatype text name price value "" context content_c4 html_before $html_before2 html_after $html_after label "Price" size 8 ] \
                   [list datatype text name row_nbr value "" context content_c4 html_before $html_before2 html_after ${html_after} label "Row\#" size 4] ]
               
-set f4_lol [qfo::form_list_def_to_css_table_rows -list_of_lists_name f_lol -form_field_defs_to_multiply c4_list -rows_count 6 -group_letter j]
+set f4_lol [qfo::set_form_list_repeat -list_of_lists_name f_lol -form_field_defs_to_multiply c4_list -rows_count 6 -group_letter j]
 
 set f2_lol [list \
                 [list datatype text name page value "frontside" context content_c5] \
@@ -28,10 +28,10 @@ set f2_lol [list \
                 [list type submit name update context content_c7 \
                      value "\#accounts-ledger.Update\#" datatype text title "\#accounts-ledger.Update\#" label "" class "btn-big" ] \
                ]
-qf_append_lol2_to_lol1 f_lol f2_lol
+qf_append_lol f_lol $f2_lol
 #ns_log Notice "test-lib-fragments.tcl f_lol '${f_lol}'"
 
-::qfo::form_list_def_to_array \
+::qfo::array_set_form_list \
     -list_of_lists_name f_lol \
     -fields_ordered_list_name qf_fields_ordered_list \
     -array_name f_arr \
